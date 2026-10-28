@@ -751,7 +751,7 @@ async function scanLedger(force){
 }
 
 /* ---------- render ---------- */
-const BUILD='20261027-2300';
+const BUILD='20261027-2312';
 const LIVE_URL='https://thecreator715.github.io/USDX/';
 function sandboxNote(){
   setNet(false); if(document.getElementById('sbNote')) return;
@@ -1727,7 +1727,10 @@ $('#saveCfg').onclick=async()=>{
 (async function init(){
   if(!window.xrpl){ document.body.insertAdjacentHTML('afterbegin','<div class="note" style="position:fixed;top:10px;left:270px;z-index:99">The xrpl.js library could not load. Check your connection and reload.</div>'); return; }
   $('#buildTag').textContent='build '+BUILD;
-  fetch(location.href.split('#')[0].split('?')[0],{cache:'no-store'}).then(r=>r.text()).then(t=>{ const m=/const BUILD='([^']+)'/.exec(t); if(m&&m[1]!==BUILD&&!document.getElementById('newVer')){ const d=document.createElement('div'); d.id='newVer'; d.className='note'; d.style.cssText='position:fixed;z-index:70;right:16px;bottom:16px;max-width:360px;box-shadow:0 10px 40px #0008'; d.innerHTML='A newer version of this app is available. <a href="#" id="newVerGo" style="color:var(--brass,#d9b66c);font-weight:600">Reload now</a>'; document.body.appendChild(d); $('#newVerGo').onclick=e=>{ e.preventDefault(); location.reload(); }; } }).catch(()=>{});
+  const stale=()=>fetch(location.pathname+'?v='+Date.now(),{cache:'no-store'}).then(r=>r.text()).then(t=>{ const m=/const BUILD='([^']+)'/.exec(t); if(m&&m[1]!==BUILD){ let n=0; try{ n=+sessionStorage.getItem('usdx-rl')||0; }catch(e){}
+    if(n<2&&!BM.running&&!$('#bm').classList.contains('on')){ try{ sessionStorage.setItem('usdx-rl',n+1); }catch(e){} location.replace(location.pathname+'?v='+m[1]+location.hash); return; }
+    if(!document.getElementById('newVer')){ const d=document.createElement('div'); d.id='newVer'; d.className='note'; d.style.cssText='position:fixed;z-index:70;right:16px;bottom:16px;max-width:360px;box-shadow:0 10px 40px #0008'; d.innerHTML='A newer version is available (build '+m[1]+'). <a href="#" id="newVerGo" style="color:var(--brass,#d9b66c);font-weight:600">Reload now</a>'; document.body.appendChild(d); $('#newVerGo').onclick=e=>{ e.preventDefault(); location.replace(location.pathname+'?v='+m[1]+location.hash); }; } } else { try{ sessionStorage.removeItem('usdx-rl'); }catch(e){} } }).catch(()=>{});
+  stale(); setInterval(stale,60000);
   await loadFileCfg(); await restoreUser(); renderWalletUI(); renderQuote(); await refreshAll(); monitorStep(); setInterval(()=>{ if(!S.busy&&!document.hidden&&!BM.running) refreshAll(); },180000);
 })();
 </script>
