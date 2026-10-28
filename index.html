@@ -686,9 +686,22 @@ async function scanLedger(){
 }
 
 /* ---------- render ---------- */
+const LIVE_URL='https://thecreator715.github.io/USDX/';
+function sandboxNote(){
+  setNet(false); if(document.getElementById('sbNote')) return;
+  const onLive=/github\.io$/.test(location.hostname);
+  const d=document.createElement('div'); d.id='sbNote'; d.className='note';
+  d.style.cssText='position:fixed;z-index:60;left:max(16px,230px);right:16px;top:12px;max-width:760px;box-shadow:0 10px 40px #0008';
+  d.innerHTML= onLive
+   ? '<b>Cannot reach the XRP Ledger.</b> Your network or the public servers are blocking the connection. Try again in a minute, or add another server in Settings.'
+   : '<b>This preview is sandboxed and cannot open a connection to the XRP Ledger.</b> Artifact and preview windows block live network access, so prices, supply and balances cannot load here. Open the live app instead: <a href="'+LIVE_URL+'" target="_blank" rel="noopener" style="color:var(--brass,#d9b66c);font-weight:600">'+LIVE_URL+'</a>, or save the HTML file and open it in your browser.';
+  document.body.appendChild(d);
+}
 async function refreshAll(){
   const step=async(name,fn)=>{ try{ return await fn(); }catch(e){ console.warn(name,e); S.errs=S.errs||{}; S.errs[name]=e.message; } };
-  await step('connect',()=>connect());
+  const okc=await step('connect',async()=>{ await connect(); return true; });
+  if(!okc){ sandboxNote(); return; }
+  const sb=document.getElementById('sbNote'); if(sb) sb.remove();
   if(!cfgReady()){ renderConfigWarn(); return; }
   await Promise.all([
     step('supply',async()=>{ const [u,b]=await Promise.all([supplyOf(S.cfg.uIss,S.cfg.uCur),supplyOf(S.cfg.bIss,S.cfg.bCur)]); S.supply={u,b};
