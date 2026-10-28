@@ -68,7 +68,7 @@ async function submit1(tx, wallet) {
   const signed = wallet.sign(prep), sub = await req({ command: 'submit', tx_blob: signed.tx_blob }), er = sub.engine_result || '';
   if (/^(tem|tef|tel)/.test(er) && er !== 'tefALREADY' && er !== 'tefPAST_SEQ') throw new Error(er + ' ' + tx.TransactionType);
   for (let i = 0; i < 90; i++) {
-    await sleep(i ? 2000 : 1200); let r = null;
+    await sleep(i ? 1000 : 2500); let r = null;
     try { r = await req({ command: 'tx', transaction: signed.hash }); } catch (e) { if (!/txnNotFound|rate limit|slowDown|too much load|units quota/i.test(String(e.message || e))) throw e; if (/rate limit|slowDown|too much load|units quota/i.test(String(e.message || e))) { await sleep(8000); continue; } }
     if (r && r.validated) { const code = (r.meta || r.metaData || {}).TransactionResult; if (code !== 'tesSUCCESS') throw new Error(code + ' ' + tx.TransactionType); return signed.hash; }
     if (!r && prep.LastLedgerSequence && (await req({ command: 'ledger_current' })).ledger_current_index > prep.LastLedgerSequence + 2) throw new Error('transaction expired before validation, nothing applied');
@@ -128,6 +128,18 @@ async function poolInfo(kind) {
   } catch { return null; }
 }
 
+// right after a validated transaction the load-balanced public servers can still answer with the previous ledger, so wait until the reserves have actually moved
+async function freshPool(kind, before) {
+  let p = null;
+  for (let i = 0; i < 10; i++) {
+    p = await poolInfo(kind);
+    if (p && (!before || Math.abs(p.ru - before.ru) > 1e-9 || Math.abs(p.ro - before.ro) > 1e-9)) return p;
+    await sleep(1000);
+  }
+  return p;
+}
+const PENDING_BURN = { v: 0 };   // USDX recovered from pools, retired once every pool is back in the band
+
 const lastAlert = {};
 // log loudly and, if ALERT_WEBHOOK is set (Slack/Discord style {content}), post it. Same message is throttled to once per 15 min.
 async function alert(msg) {
@@ -152,7 +164,7 @@ async function pegStep(px, kind, depth = 0) {
   if (price < K.floor) await alert(`USDX is $${price.toFixed(4)} in the ${kind}/USDX pool, below the $${K.floor} floor`);
   if (Math.abs(price - 1) <= K.band) return 'ok';
   OFFBAND = true;
-  const cap = price < 0.99 ? Math.min(0.5, K.maxPct * 2) : K.maxPct, ls = await lines(recv.address);
+  const cap = Math.abs(price - 1) > 0.01 ? 0.9 : K.maxPct, ls = await lines(recv.address);
   const usdxInv = bal(ls, USDX), bonsaiInv = bal(ls, BONSAI), xrpInv = Math.max(0, (await xrpBal(recv.address)) - 5);
   const otherInv = kind === 'xrp' ? xrpInv : bonsaiInv, lp = pool.lpTotal > 0 ? await lpBal(pool) : 0, share = pool.lpTotal > 0 ? lp / pool.lpTotal : 0;
   const AS = { Asset: otherAsset(kind), Asset2: USDX }, memoP = o => [memo('USDX/PEG', { v: 1, price, pool: kind, ...o })];
@@ -171,7 +183,7 @@ async function pegStep(px, kind, depth = 0) {
     }
     const left = need - got;
     if (left >= MIN_ACT) {
-      const p2 = acted ? await poolInfo(kind) : pool; if (!p2) return;
+      const p2 = acted ? await freshPool(kind, pool) : pool; if (!p2) return;
       const k = p2.ro * p2.ru, ru2 = Math.sqrt(k * uu), ro2 = Math.sqrt(k / uu), full = p2.ru - ru2, du = Math.min(left, full); // pStar = 1/uu
       if (du >= MIN_ACT && full > 0) {
         const dx = (ro2 - p2.ro) * (du / full), sendMax = dx / (1 - p2.fee) * (1 + K.slip);
@@ -181,10 +193,7 @@ async function pegStep(px, kind, depth = 0) {
         } else log(`peg buy needs ${sendMax.toFixed(4)} ${nm}, treasury has ${otherInv.toFixed(4)}. Add ${nm} to the receiver or LP tokens to defend the floor.`);
       }
     }
-    if (got > 0) {   // retire what was recovered: USDX sent back to its issuer stops existing
-      const have = bal(await lines(recv.address), USDX), burn = Math.min(have, got);
-      if (burn >= 0.000001) { await submit({ TransactionType: 'Payment', Account: recv.address, Destination: UI, Amount: { ...USDX, value: fmt6(burn) }, Memos: [memo('USDX/PEGBURN', { v: 1, usdx: burn })] }, recv, 'burn recovered USDX'); log(`retired ${fmt6(burn)} USDX`); }
-    }
+    if (got > 0) PENDING_BURN.v += got;   // retired once the pools are back in the band, so corrections are not slowed by an extra transaction each
   } else {
     const need = Math.min(pool.ru * (price - 1), pool.ru * cap);   // USDX to add so the price returns to $1
     if (need < MIN_ACT) return log(`correction of ${need.toFixed(6)} USDX is below the ${MIN_ACT} minimum action`);
@@ -211,7 +220,7 @@ async function pegStep(px, kind, depth = 0) {
       }
     }
     if (left >= MIN_ACT && share > 0) {
-      const p2 = acted ? await poolInfo(kind) : pool; if (!p2) return;
+      const p2 = acted ? await freshPool(kind, pool) : pool; if (!p2) return;
       const y = Math.min(p2.ro - p2.ru / uu, p2.ro * cap, share * p2.ro * 0.9);   // other asset to remove so the price returns to $1
       if (y > 0) {
         const amt = kind === 'xrp' ? String(Math.floor(y * 1e6)) : { ...BONSAI, value: fmt6(y) };
@@ -222,7 +231,7 @@ async function pegStep(px, kind, depth = 0) {
       }
     } else if (left >= MIN_ACT && !acted) log(`USDX above $1 by ${((price - 1) * 1e4).toFixed(0)} bps but the treasury has no USDX, no BONSAI to burn and no LP tokens. Fund the receiver to defend the ceiling.`);
   }
-  if (acted) { const p3 = await poolInfo(kind); if (p3) { const pr3 = p3.ro / p3.ru * uu; log(`after rebalancing: USDX $${pr3.toFixed(5)} in the ${kind} pool`); return Math.abs(pr3 - 1) > K.band ? 'again' : 'fixed'; } }
+  if (acted) { const p3 = await freshPool(kind, pool); if (p3) { const pr3 = p3.ro / p3.ru * uu; log(`after rebalancing: USDX $${pr3.toFixed(5)} in the ${kind} pool`); return Math.abs(pr3 - 1) > K.band ? 'again' : 'fixed'; } }
   return acted ? 'fixed' : 'stuck';
 }
 
@@ -340,9 +349,14 @@ async function repeg(px) {
     let r = '', n = 0;
     do {
       try { r = await pegStep(px, kind); } catch (e) { log(`peg ${kind}:`, e.message); await alert(`peg defence failed in the ${kind} pool: ${e.message}`); r = 'stuck'; }
-      if (r === 'again') { n++; await sleep(1500); px = await prices().catch(() => px); }
+      if (r === 'again') { n++; px = await prices().catch(() => px); }
     } while (r === 'again' && n < 8);
     if (r === 'again') { again = true; log(`${kind}: still outside the band after ${n} corrections, continuing`); }
+  }
+  if (!again && PENDING_BURN.v > 0.000001) {
+    try { const have = bal(await lines(recv.address), USDX), burn = Math.min(have, PENDING_BURN.v); PENDING_BURN.v = 0;
+      if (burn >= 0.000001) { await submit({ TransactionType: 'Payment', Account: recv.address, Destination: UI, Amount: { ...USDX, value: fmt6(burn) }, Memos: [memo('USDX/PEGBURN', { v: 1, usdx: burn })] }, recv, 'burn recovered USDX'); log(`retired ${fmt6(burn)} USDX`); } }
+    catch (e) { log('retire failed:', e.message); }
   }
   OFFBAND = again;   // fast loop only while corrections are actually moving the price; a pool that cannot be corrected falls back to the normal cycle
 }
