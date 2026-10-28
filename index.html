@@ -586,10 +586,21 @@ const sleep = ms => new Promise(r=>setTimeout(r,ms));
 /* All ledger reads go through one queue: at most 3 at a time, account_tx spaced out, and a rate-limit reply
    waits the time the server asks for, then retries (rotating to the next server after repeated limits). */
 const Q={active:0,waiters:[],lastTx:0};
+const COST={account_tx:1200,gateway_balances:500,book_offers:150,amm_info:120,account_lines:120,account_offers:120,ledger_data:2000,ledger_entry:80};
+const FREE=new Set(['submit','tx','ledger_current','server_info','fee','subscribe']);   // never queued behind background reads
+const BUDGET=6500, SPENT=[];   // units per rolling 60 s, deliberately well under the public 10,000 quota
 async function slot(cmd){
   while(Q.active>=3) await new Promise(r=>Q.waiters.push(r));
   Q.active++;
-  if(cmd==='account_tx'){ const at=Math.max(Date.now(),Q.lastTx+650); Q.lastTx=at; if(at>Date.now()) await sleep(at-Date.now()); }
+  if(FREE.has(cmd)||(typeof BM!=='undefined'&&($('#bm')&&$('#bm').classList.contains('on')))) return;
+  const cost=COST[cmd]||60;
+  for(;;){
+    const now=Date.now(); while(SPENT.length&&now-SPENT[0].t>60000) SPENT.shift();
+    const used=SPENT.reduce((a,x)=>a+x.c,0);
+    if(used+cost<=BUDGET||!SPENT.length){ SPENT.push({t:now,c:cost}); break; }
+    await sleep(Math.max(300,SPENT[0].t+60000-now));
+  }
+  if(cmd==='account_tx'){ const at=Math.max(Date.now(),Q.lastTx+1500); Q.lastTx=at; if(at>Date.now()) await sleep(at-Date.now()); }
 }
 function release(){ Q.active--; const w=Q.waiters.shift(); if(w) w(); }
 const isBusy=m=>/rate limit|slowDown|too much load|units quota|noNetwork|Not connected|timeout|WebSocket|disconnect/i.test(m);
@@ -688,7 +699,7 @@ async function getPrice(force){
 async function lines(addr){ return cached('lines:'+addr,async()=>(await req({command:'account_lines',account:addr,ledger_index:'validated',limit:400})).lines); }
 async function xrpBal(addr){ try{ const r=await cached('xrp:'+addr,()=>req({command:'account_info',account:addr,ledger_index:'validated'})); return Number(r.account_data.Balance)/1e6; }catch(e){ return null; } }
 async function supplyOf(issuer,cur){
-  const r = await req({command:'gateway_balances',account:issuer,ledger_index:'validated'});
+  const r = await cached('sup:'+issuer,()=>req({command:'gateway_balances',account:issuer,ledger_index:'validated'}),30000);
   const o = r.obligations||{}; const k = Object.keys(o).find(x=>cc(x)===cc(cur));
   return k? Number(o[k]) : 0;
 }
@@ -715,7 +726,9 @@ function parseTx(e){
   let mm=null,mt=null; (t.Memos||[]).forEach(m=>{ try{ const ty=X.convertHexToString(m.Memo.MemoType); if(ty.startsWith('USDX/')){ mt=ty; mm=JSON.parse(X.convertHexToString(m.Memo.MemoData)); } }catch(_){} });
   return {t,meta,hash,time,ok:e.validated!==false && meta.TransactionResult==='tesSUCCESS',mt,mm,delivered:meta.delivered_amount||t.Amount};
 }
-async function scanLedger(){
+async function scanLedger(force){
+  if(!force&&S.ledger&&!S.ledgerDirty&&Date.now()-(S.scanAt||0)<90000) return S.ledger;
+  S.ledgerDirty=false; S.scanAt=Date.now();
   const [rt,it] = await Promise.all([acctTx(S.cfg.recv,200),acctTx(S.cfg.uIss,200)]);
   const bc=cc(S.cfg.bCur), uc=cc(S.cfg.uCur);
   const deposits=[], burns={}, receipts={}, burnList=[];
@@ -738,7 +751,7 @@ async function scanLedger(){
 }
 
 /* ---------- render ---------- */
-const BUILD='20261027-2229';
+const BUILD='20261027-2251';
 const LIVE_URL='https://thecreator715.github.io/USDX/';
 function sandboxNote(){
   setNet(false); if(document.getElementById('sbNote')) return;
@@ -764,6 +777,7 @@ async function doRefresh(){
     step('bal',()=>loadUserBal())]);
   paintPrice();
   await step('scan',()=>scanLedger());
+  watchStream();
   try{ renderAll(); }catch(e){ console.warn('render',e); }
 }
 let refP=null, refAt=0;
@@ -961,6 +975,9 @@ async function bmReview(v){
   BM.phase='review'; BM.rev=null; bmShow('review');
   $('#bmHead').textContent='Review your burn'; $('#bmBody').innerHTML='<div class="s" style="color:var(--mute)">Reading the ledger: fresh price, your balances, trust lines and the issuer flags…</div>'; $('#bmGo').disabled=true; $('#bmAck').hidden=true;
   const w=S.w.user, block=[], warn=[]; let px;
+  const myRun=(BM.reviewId=(BM.reviewId||0)+1); const stale=()=>BM.reviewId!==myRun;
+  const prog=m=>{ if(!stale()&&BM.phase==='review'&&!BM.rev) $('#bmBody').innerHTML='<div class="s" style="color:var(--mute)">Reading the ledger: fresh price, your balances, trust lines and the issuer flags…</div><div class="s mono" style="color:var(--brass);margin-top:8px">'+m+'</div>'; };
+  S.note=prog; const slow=setTimeout(()=>{ if(!stale()&&!BM.rev) prog('Still waiting on the public XRPL servers. They may be rate limiting. This retries on its own; you can also press Cancel and try again in a minute.'); },12000);
   try{
     px=await getPrice(true); renderQuote();
     const [xb,rl,ul,ii]=await Promise.all([xrpBal(w.address),lines(S.cfg.recv).catch(()=>[]),lines(w.address).catch(()=>[]),req({command:'account_info',account:S.cfg.bIss,ledger_index:'validated'}).catch(()=>null)]);
@@ -1005,11 +1022,12 @@ async function bmReview(v){
     if($('#bmManClr')) $('#bmManClr').onclick=()=>setMan('');
     const need=warn.some(x=>x.ack); $('#bmAck').hidden=!need; $('#bmAckBox').checked=false;
     const upd=()=>{ $('#bmGo').disabled=block.length>0||(need&&!$('#bmAckBox').checked); }; $('#bmAckBox').onchange=upd; upd();
-  }catch(e){ $('#bmBody').innerHTML=`<div class="note err-note">${e.message}</div>`; }
+  }catch(e){ $('#bmBody').innerHTML=`<div class="note err-note">${e.message}<br><button class="btn ghost sm" id="bmRetry" style="margin-top:8px">Try again</button></div>`; const rb=$('#bmRetry'); if(rb) rb.onclick=()=>bmReview(v); }
+  clearTimeout(slow); S.note=null;
 }
 async function bmRun(){
   const R=BM.rev; if(!R||BM.running) return; const w=S.w.user, v=R.v;
-  BM.running=true; BM.abort=false; BM.t0=Date.now(); BM.st=[]; BM.log=[]; BM.dep=null; BM.self=false; bmShow('run');
+  BM.running=true; BM.abort=false; BM.t0=Date.now(); BM.st=[]; BM.log=[]; BM.dep=null; BM.self=false; BM.burnHash=null; bmShow('run');
   $('#bmHead').textContent='Burning BONSAI for USDX'; $('#bmDone').hidden=true; $('#bmStop').hidden=false; $('#bmClose').textContent='Keep running in the background'; $('#bmSum').innerHTML='';
   clearInterval(BM.timer); BM.timer=setInterval(bmTick,500); bmDraw();
   S.note=m=>bmLog(m); let cur=0; const at=(i,s,m,h)=>{ cur=i; bmStage(i,s,m,h); };
@@ -1027,6 +1045,7 @@ async function bmRun(){
     if(R.self){ at(2,'skip','Treasury wallet: the BONSAI is already in the receiver, no deposit needed'); at(3,'skip','Not needed'); }
     else at(2,'act','Signing the payment in this browser, nothing leaves it unsigned');
     let dep; if(R.self){ dep='TREASURY-'+Date.now(); BM.dep=null; BM.self=true; } else {
+    if(w.address===S.cfg.recv) throw new Error('Refusing receiver-to-receiver payment. Reload the page (hard refresh) to get the treasury-wallet flow, which burns straight to the BONSAI issuer.');
     const val=v.toFixed(6), usdx=Math.floor(v*px.usd*100/ratio()*1e6)/1e6;
     const tx={TransactionType:'Payment',Account:w.address,Destination:S.cfg.recv,Amount:{...bAsset(),value:val},Memos:[memo('USDX/MINT',{v:1,bonsai:+val,quote:usdx})]};
     if(R.tr>1) tx.SendMax={...bAsset(),value:(v*R.tr*1.000001).toFixed(6)};
@@ -1039,12 +1058,12 @@ async function bmRun(){
     at(4,'act','Looking for the treasury burn');
     let minted=null, n=0; const canProcess=!!(S.w.recv&&S.w.iss);
     if(R.self){
-      await scanLedger(); await mintForDeposit({hash:dep,from:w.address,value:v},(k,m,h)=>at(k,m.s,m.t,h));
-      for(let q=0;q<12&&!minted;q++){ await scanLedger(); minted=S.ledger.mints.find(x=>x.dep===dep); if(!minted) await sleep(2500); }
+      const rr=await mintForDeposit({hash:dep,from:w.address,value:v},(k,m,h)=>at(k,m.s,m.t,h));
+      BM.burnHash=rr.burnHash; minted={hash:rr.mintHash,usdx:rr.usdx,bonsai:v,rate:rr.px.usd,dep,burn:rr.burnHash};
     }
     if(canProcess){ bmLog('Both operator keys are loaded in this tab, so this tab is the treasury processor.'); }
     for(; !minted&&n<100&&!BM.abort; n++){
-      await scanLedger(); const d=S.ledger.deposits.find(x=>x.hash===dep);
+      await scanLedger(S.ledgerDirty||n%3===0); const d=S.ledger.deposits.find(x=>x.hash===dep);
       if(d&&!d.minted&&canProcess&&!S.busy){
         try{ at(4,'act','Burning '+fmt(d.value,4)+' BONSAI from the receiver'); await mintForDeposit(d,(k,m,h)=>at(k,m.s,m.t,h)); await scanLedger(); }catch(e){ throw e; }
       }
@@ -1074,7 +1093,7 @@ async function bmRun(){
       <div class="row" style="justify-content:space-between"><span style="color:var(--mute)">Rate used</span><b class="mono">$${fp(minted.rate||px.usd,6)} per BONSAI</b></div>
       <div class="row" style="justify-content:space-between"><span style="color:var(--mute)">USDX outstanding now</span><b class="mono">${fmt(S.supply.u,2)}</b></div>
       <div class="row" style="justify-content:space-between"><span style="color:var(--mute)">Your BONSAI now</span><b class="mono">${fmt(S.userBonsai,4)}</b></div>
-      <div class="row" style="justify-content:space-between"><span style="color:var(--mute)">Receipts</span><span>${R.self?'':exTx(dep)+' · '}${S.ledger.burns[dep]?exTx(S.ledger.burns[dep].hash)+' · ':''}${exTx(minted.hash)}</span></div></div>`;
+      <div class="row" style="justify-content:space-between"><span style="color:var(--mute)">Receipts</span><span>${R.self?'':exTx(dep)+' · '}${(BM.burnHash||(S.ledger.burns[dep]&&S.ledger.burns[dep].hash))?exTx(BM.burnHash||S.ledger.burns[dep].hash)+' · ':''}${exTx(minted.hash)}</span></div></div>`;
     toast('USDX minted: '+fmt(minted.usdx,4));
   }catch(e){
     BM.running=false; clearInterval(BM.timer); const o=BM.st[cur]||(BM.st[cur]={}); o.s='err'; o.m=e.message; bmLog('FAILED: '+e.message); bmDraw();
@@ -1135,6 +1154,15 @@ async function processPending(){
   S.busy=false; refreshAll();
 }
 let watching=false;
+let streamOn=false;
+async function watchStream(){
+  if(streamOn||!cfgReady()) return; streamOn=true;
+  try{
+    const c=await clientFor(serverList()[0]); await c.request({command:'subscribe',accounts:[S.cfg.recv,S.cfg.uIss]});
+    let t=null; c.on('transaction',()=>{ S.ledgerDirty=true; clearTimeout(t); t=setTimeout(async()=>{ try{ await scanLedger(true); renderAll(); }catch(e){} },2500); });
+    c.on('disconnected',()=>{ streamOn=false; });
+  }catch(e){ streamOn=false; }
+}
 async function updateWatch(){
   if(watching||!(S.w.recv&&S.w.iss)) return; watching=true;
   try{
@@ -1166,7 +1194,7 @@ function klog(t,m,s='done'){ K.log.unshift({t,m,s}); K.log=K.log.slice(0,40); re
 function renderKLog(){ $('#kLog').innerHTML=K.log.slice(0,8).map(l=>`<li class="${l.s}"><i>${l.s==='done'?'✓':l.s==='err'?'!':'…'}</i><div><b>${l.t}</b><span>${l.m}</span></div></li>`).join(''); }
 async function poolInfo(kind){
   try{
-    const r=await req({command:'amm_info',asset:PAIRS[kind].other(),asset2:uAsset(),ledger_index:'validated'}); const a=r.amm;
+    const r=await cached('amm:'+kind,()=>req({command:'amm_info',asset:PAIRS[kind].other(),asset2:uAsset(),ledger_index:'validated'}),20000); const a=r.amm;
     const uIsFirst=isUsdx(a.amount), u=uIsFirst?a.amount:a.amount2, o=uIsFirst?a.amount2:a.amount;
     return {kind,ro:aval(o),ru:aval(u),fee:a.trading_fee/100000,lp:a.lp_token,acct:a.account,auction:a.auction_slot,vote:a.vote_slots};
   }catch(e){ return null; }
@@ -1394,7 +1422,7 @@ async function scanBurns(deeper){
       if(p.ok&&p.t.TransactionType==='Payment'&&p.t.Destination===S.cfg.bIss){ const d=p.delivered; if(d&&typeof d==='object'&&cc(d.currency)===bc&&d.issuer===S.cfg.bIss) BS.rows.push({hash:p.hash,from:p.t.Account,value:Number(d.value),time:p.time,mt:p.mt}); }
       return true;
     };
-    if(!BS.init){ let m,n=0; while(n<400){ const r=await page(m); r.transactions.forEach(e=>{take(e);n++;}); m=r.marker; if(!m){BS.done=true;break;} } BS.marker=m; BS.init=true; }
+    if(!BS.init){ let m,n=0; while(n<200){ const r=await page(m); r.transactions.forEach(e=>{take(e);n++;}); m=r.marker; if(!m){BS.done=true;break;} } BS.marker=m; BS.init=true; }
     else if(deeper){ if(!BS.done){ let m=BS.marker,n=0; while(m&&n<800){ const r=await page(m); r.transactions.forEach(e=>{take(e);n++;}); m=r.marker; } BS.marker=m; if(!m) BS.done=true; } }
     else { if(Date.now()-(BS.last||0)<90000) { BS.busy=false; return; } BS.last=Date.now(); let m; for(let i=0;i<3;i++){ const r=await page(m,25); let fresh=0; r.transactions.forEach(e=>{ if(take(e)) fresh++; }); if(fresh<r.transactions.length||!r.marker) break; m=r.marker; } }
   }catch(e){ toast('Burn history: '+e.message); }
@@ -1402,7 +1430,7 @@ async function scanBurns(deeper){
 }
 const burnSource=r=> r.from===S.cfg.recv?(r.mt==='USDX/COVER'?'Coverage burn':'USDX mint burn'): r.from===S.cfg.bTrack?'BONSAI receiver':'Holder';
 async function renderBurns(){
-  if($('#p-burns').classList.contains('on')||$('#p-overview').classList.contains('on')||!BS.init) await scanBurns(false);
+  if($('#p-burns').classList.contains('on')||$('#p-overview').classList.contains('on')) await scanBurns(false);
   const rows=BS.rows.slice().sort((a,b)=>(b.time||0)-(a.time||0));
   const tot=rows.reduce((s,r)=>s+r.value,0), tre=rows.filter(r=>r.from===S.cfg.recv).reduce((s,r)=>s+r.value,0), oth=tot-tre;
   $('#bOut').textContent=fmt(S.supply.b,2); $('#bTot').textContent=fmt(tot,2); $('#bTre').textContent=fmt(tre,2); $('#bOth').textContent=fmt(oth,2);
