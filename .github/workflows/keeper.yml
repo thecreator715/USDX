@@ -1,0 +1,34 @@
+name: USDX keeper
+# Runs the peg keeper on GitHub's servers, around the clock, with the app closed.
+# It mints USDX for BONSAI deposits, defends both AMM pools and keeps the DEX quotes at the $1.00 peg.
+# Seeds live only in encrypted repository secrets: Settings > Secrets and variables > Actions.
+on:
+  schedule:
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+concurrency:
+  group: usdx-keeper
+  cancel-in-progress: false
+permissions:
+  contents: read
+jobs:
+  keep:
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install
+        working-directory: keeper
+        run: npm ci --omit=dev
+      - name: Run keeper (about 4.5 minutes, then the next run takes over)
+        working-directory: keeper
+        env:
+          RECEIVER_SEED: ${{ secrets.RECEIVER_SEED }}
+          ISSUER_SEED: ${{ secrets.ISSUER_SEED }}
+          ALERT_WEBHOOK: ${{ secrets.ALERT_WEBHOOK }}
+          LIVE: '1'
+          INTERVAL_SEC: '30'
+        run: timeout 270 node keeper.mjs || [ $? -eq 124 ]

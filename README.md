@@ -22,3 +22,9 @@ The Peg & Pools page keeps USDX at $1.00 with the BONSAI/USDX and XRP/USDX AMM p
 ## Keeper
 
 `keeper/` is a Node script that defends the peg and keeps DEX quotes from the receiver wallet without a browser. See `keeper/README.md`. It starts in dry-run mode.
+
+## Always-on keeper (GitHub Actions)
+
+`.github/workflows/keeper.yml` runs the keeper every 5 minutes on GitHub, so peg defence, DEX quotes and USDX minting
+for BONSAI deposits keep running with every browser closed. Add these in **Settings > Secrets and variables > Actions**:
+`RECEIVER_SEED`, `ISSUER_SEED` (and optionally `ALERT_WEBHOOK`). Secrets are encrypted and never appear in the repo or the page.
