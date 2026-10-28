@@ -544,7 +544,7 @@ async function connect(){
   if(S.client && S.client.isConnected()) return S.client;
   let list=[S.cfg.server,...(S.cfg.servers||[])].filter((v,i,a)=>v&&a.indexOf(v)===i); const k=(S.skip||0)%Math.max(1,list.length); list=list.slice(k).concat(list.slice(0,k)); let last;
   for(const u of list){
-    try{ const c=new X.Client(u); c.on('disconnected',()=>setNet(false)); await c.connect(); S.client=c; setNet(true); return c; }catch(e){ last=e; }
+    try{ const c=new X.Client(u); c.on('disconnected',()=>{ if(S.client===c||!S.client) setNet(false); }); await c.connect(); S.client=c; setNet(true); return c; }catch(e){ last=e; }
   }
   throw last||new Error('No XRPL server reachable');
 }
@@ -562,7 +562,7 @@ function release(){ Q.active--; const w=Q.waiters.shift(); if(w) w(); }
 async function req(r){
   for(let attempt=0;;attempt++){
     await slot(r.command);
-    try{ const c=await connect(); return (await c.request(r)).result; }
+    try{ const c=await connect(); const res=(await c.request(r)).result; if($('#nettxt').textContent!=='Mainnet connected') setNet(true); return res; }
     catch(e){
       const msg=String(e&&e.message||e)+' '+JSON.stringify(e&&e.data||{});
       if(/rate limit|slowDown|too much load|units quota/i.test(msg)&&attempt<8){
@@ -597,36 +597,37 @@ async function xrpUsd(){
 async function bonsaiXrp(){
   const a = bAsset(), xrp={currency:'XRP'};
   const [ask,bid,amm] = await Promise.all([
-    req({command:'book_offers',taker_gets:a,taker_pays:xrp,limit:20}).catch(()=>null),
-    req({command:'book_offers',taker_gets:xrp,taker_pays:a,limit:20}).catch(()=>null),
+    req({command:'book_offers',taker_gets:a,taker_pays:xrp,limit:30}).catch(()=>null),
+    req({command:'book_offers',taker_gets:xrp,taker_pays:a,limit:30}).catch(()=>null),
     req({command:'amm_info',asset:xrp,asset2:a}).catch(()=>null)]);
-  const src = {}, info = {};
-  const MIN_XRP = 5;   // ignore dust offers worth under 5 XRP so a stray offer cannot set the price
-  // asks: someone sells BONSAI for XRP. TakerGets = BONSAI, TakerPays = XRP
-  for(const o of (ask&&ask.offers)||[]){
-    const gets = Number((o.taker_gets_funded&&o.taker_gets_funded.value)||o.TakerGets.value), pays = Number(typeof o.taker_pays_funded==='string'?o.taker_pays_funded:o.TakerPays)/1e6;
-    if(gets>0 && pays>=MIN_XRP){ src.ask = pays/gets; info.askXrp=pays; break; }
+  // every offer as {price XRP per BONSAI, xrp notional}
+  const asks=[], bids=[];
+  for(const o of (ask&&ask.offers)||[]){ const g=Number((o.taker_gets_funded&&o.taker_gets_funded.value)||o.TakerGets.value), x=Number(typeof o.taker_pays_funded==='string'?o.taker_pays_funded:o.TakerPays)/1e6; if(g>0&&x>0) asks.push({p:x/g,x}); }
+  for(const o of (bid&&bid.offers)||[]){ const x=Number(typeof o.taker_gets_funded==='string'?o.taker_gets_funded:o.TakerGets)/1e6, g=Number(o.TakerPays.value); if(g>0&&x>0) bids.push({p:x/g,x}); }
+  asks.sort((m,n)=>m.p-n.p); bids.sort((m,n)=>n.p-m.p);
+  let pool=null; if(amm&&amm.amm){ const {amount,amount2}=amm.amm; const x=typeof amount==='string'?amount:amount2, t=typeof amount==='string'?amount2:amount; if(x&&t&&+t.value>0) pool={p:(Number(x)/1e6)/Number(t.value), x:Number(x)/1e6, b:Number(t.value)}; }
+  const best=(list,minX)=>list.find(o=>o.x>=minX);
+  const info={ammXrp:pool&&pool.x, ammBonsai:pool&&pool.b, asks:asks.length, bids:bids.length, bestAsk:asks[0]&&asks[0].p, bestBid:bids[0]&&bids[0].p};
+  const src={}; if(pool) src.amm=pool.p; if(asks[0]) src.ask=asks[0].p; if(bids[0]) src.bid=bids[0].p;
+  const ov=Number(S.cfg.priceXrp); let price,how;
+  if(ov>0){ price=ov; how='manual price'; }
+  else{
+    const strictAmm=pool&&pool.x>=5?pool.p:null, sa=best(asks,5), sb=best(bids,5);
+    if(strictAmm){ price=strictAmm; how='AMM pool spot'; }
+    else if(sa&&sb){ price=(sa.p+sb.p)/2; how='order book mid'; }
+    else if(sa||sb){ price=(sa||sb).p; how='order book '+(sa?'ask':'bid'); }
+    else if(pool){ price=pool.p; how='thin AMM pool ('+fmt(pool.x,2)+' XRP deep)'; info.thin=true; }
+    else if(asks[0]&&bids[0]){ price=(asks[0].p+bids[0].p)/2; how='thin order book mid'; info.thin=true; }
+    else if(asks[0]||bids[0]){ price=(asks[0]||bids[0]).p; how='thin order book '+(asks[0]?'ask':'bid'); info.thin=true; }
+    else throw new Error('No BONSAI/XRP market found on the ledger: no AMM pool and no offers for '+S.cfg.bCur+' from '+short(S.cfg.bIss)+'. Create a BONSAI/XRP pool or order, or set a manual price in Settings.');
   }
-  // bids: someone buys BONSAI with XRP. TakerGets = XRP, TakerPays = BONSAI
-  for(const o of (bid&&bid.offers)||[]){
-    const gets = Number(typeof o.taker_gets_funded==='string'?o.taker_gets_funded:o.TakerGets)/1e6, pays = Number(o.TakerPays.value);
-    if(pays>0 && gets>=MIN_XRP){ src.bid = gets/pays; info.bidXrp=gets; break; }
-  }
-  if(amm&&amm.amm){ const {amount,amount2}=amm.amm; const x=typeof amount==='string'?amount:amount2, t=typeof amount==='string'?amount2:amount;
-    if(x&&t&&+t.value>0&&Number(x)/1e6>=MIN_XRP){ src.amm=(Number(x)/1e6)/Number(t.value); info.ammXrp=Number(x)/1e6; info.ammBonsai=Number(t.value); } }
-  const ov = Number(S.cfg.priceXrp);   // optional manual override from Settings
-  let price, how;
-  if(ov>0){ price=ov; how='manual override'; }
-  else if(src.amm){ price=src.amm; how='AMM pool spot'; }
-  else if(src.ask&&src.bid){ price=(src.ask+src.bid)/2; how='order book mid'; }
-  else if(src.ask||src.bid){ price=src.ask||src.bid; how='order book '+(src.ask?'ask':'bid'); }
-  else throw new Error('No BONSAI/XRP market with at least '+MIN_XRP+' XRP of depth was found. Check the BONSAI issuer in Settings, or set a manual price there.');
-  // warn when the sources disagree by more than 3x
-  const vals=Object.values(src); info.spread = vals.length>1? Math.max(...vals)/Math.min(...vals) : 1;
+  const deep=[pool&&pool.x>=5?pool.p:null,(best(asks,5)||{}).p,(best(bids,5)||{}).p].filter(v=>v>0); info.spread = deep.length>1? Math.max(...deep)/Math.min(...deep) : 1;
   return {xrp:price, src, how, info};
 }
 async function getPrice(){
-  const [bx,xu] = await Promise.all([bonsaiXrp(), xrpUsd()]);
+  const xuP = xrpUsd().then(v=>{ S.xu=v; $('#priceChip').textContent='XRP $'+fmt(v,4); return v; });
+  let bx; try{ bx = await bonsaiXrp(); }catch(e){ S.px=null; S.pxErr=e.message; await xuP.catch(()=>{}); throw e; }
+  const xu = await xuP; S.pxErr=null;
   S.px = {xrpUsd:xu, bonsaiXrp:bx.xrp, usd:bx.xrp*xu, src:bx.src, how:bx.how, info:bx.info, t:Date.now()};
   return S.px;
 }
@@ -686,18 +687,21 @@ async function scanLedger(){
 
 /* ---------- render ---------- */
 async function refreshAll(){
-  try{
-    await connect();
-    if(!cfgReady()){ renderConfigWarn(); return; }
-    const [u,b] = await Promise.all([supplyOf(S.cfg.uIss,S.cfg.uCur),supplyOf(S.cfg.bIss,S.cfg.bCur)]);
-    S.supply={u,b};
-    await getPrice().catch(e=>{ S.px=null; S.pxErr=e.message; });
-    $('#sUsdx').textContent=fmt(u,2); $('#hUsdx').textContent=fmt(u,2); $('#sBonsai').textContent=fmt(b,0);
-    if(S.px){ $('#hPrice').textContent=''; $('#pUsd').textContent='$'+S.fp(px.usd,6); $('#priceChip').textContent='XRP $'+fmt(S.px.xrpUsd,4); $('#bChip').textContent='BONSAI $'+fp(S.px.usd,4); renderQuote(); }
-    loadUserBal();
-    await scanLedger();
-    renderAll();
-  }catch(e){ toast(e.message); }
+  const step=async(name,fn)=>{ try{ return await fn(); }catch(e){ console.warn(name,e); S.errs=S.errs||{}; S.errs[name]=e.message; } };
+  await step('connect',()=>connect());
+  if(!cfgReady()){ renderConfigWarn(); return; }
+  await Promise.all([
+    step('supply',async()=>{ const [u,b]=await Promise.all([supplyOf(S.cfg.uIss,S.cfg.uCur),supplyOf(S.cfg.bIss,S.cfg.bCur)]); S.supply={u,b};
+      for(const q of ['#sUsdx','#hUsdx','#fUsdx']) $(q).textContent=fmt(u,2); for(const q of ['#sBonsai','#fBonsai']) $(q).textContent=fmt(b,0); }),
+    step('price',async()=>{ await getPrice(); }),
+    step('bal',()=>loadUserBal())]);
+  paintPrice();
+  await step('scan',()=>scanLedger());
+  try{ renderAll(); }catch(e){ console.warn('render',e); }
+}
+function paintPrice(){
+  const px=S.px; if(!px) { if(S.xu) $('#priceChip').textContent='XRP $'+fmt(S.xu,4); renderQuote(); return; }
+  $('#hPrice').textContent=''; $('#pUsd').textContent='$'+fp(px.usd,6); $('#priceChip').textContent='XRP $'+fmt(px.xrpUsd,4); $('#bChip').textContent='BONSAI $'+fp(px.usd,4); renderQuote();
 }
 function renderConfigWarn(){
   $('#forgeWarn').innerHTML = `<div class="note">Set the BONSAI issuer address in Settings to go live. Currency code, USDX issuer and receiver are already filled in.</div>`;
@@ -738,10 +742,11 @@ function renderQuote(){
   const v=parseFloat($('#amt').value)||0, px=S.px;
   $('#ratioTxt').textContent = ratio()+'%';
   $('#burnbox').style.setProperty('--heat', Math.min(1,.2+v/(S.userBonsai||1000)*.8));
-  if(!px){ ['#pxUsd','#pxXrp','#pxXrpUsd'].forEach(q=>$(q).textContent='—'); $('#pxHow').textContent=S.pxErr||'Loading prices from the ledger'; $('#rateTxt').textContent='—'; $('#outUsdx').textContent='0.00'; $('#amtUsd').textContent='≈ $0.00'; return; }
+  const b0=$('#burnBtn'); b0.textContent = !S.w.user? 'Connect a wallet to burn' : !px? 'Waiting for a BONSAI price' : v>0? 'Burn '+fmt(v,2)+' BONSAI':'Enter an amount'; b0.disabled=!!(S.w.user&&!px);
+  if(!px){ $('#pxUsd').textContent='—'; $('#pxXrp').textContent='—'; $('#pxXrpUsd').textContent=S.xu?'$'+fmt(S.xu,4):'—'; $('#pxHow').textContent=S.pxErr||'Loading prices from the ledger'; $('#rateTxt').textContent='—'; $('#outUsdx').textContent='0.00'; $('#amtUsd').textContent='≈ $0.00'; return; }
   const usd=v*px.usd; $('#amtUsd').textContent='≈ $'+(usd<0.01&&usd>0?fp(usd,3):fmt(usd,2));
   $('#pxUsd').textContent='$'+fp(px.usd,6); $('#pxXrp').textContent=fp(px.bonsaiXrp,6)+' XRP'; $('#pxXrpUsd').textContent='$'+fmt(px.xrpUsd,4);
-  const i=px.info||{}; $('#pxHow').textContent='Source: '+(px.how||'ledger')+(i.ammXrp?' · pool holds '+fmt(i.ammXrp,0)+' XRP':'')+(i.spread>3?' · sources disagree '+i.spread.toFixed(1)+'x, check Peg & Pools':'');
+  const i=px.info||{}; $('#pxHow').textContent='Source: '+(px.how||'ledger')+(i.ammXrp?' · pool holds '+fmt(i.ammXrp,0)+' XRP':'')+(i.thin?' · THIN MARKET, treat this price with care':'')+(i.spread>3?' · sources disagree '+i.spread.toFixed(1)+'x, check Peg & Pools':'');
   $('#rateTxt').textContent = `1 BONSAI = $${fp(px.usd)}`;
   { const o=Math.floor(usd*100/ratio()*1e6)/1e6; $('#outUsdx').textContent = o>0&&o<0.01? fp(o,3): fmt(o,2); }
   const b=$('#burnBtn'); b.disabled = false;
