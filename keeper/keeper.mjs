@@ -142,6 +142,7 @@ async function alert(msg) {
 const MINT_ON = E.PEG_MINT !== '0';
 const lpBal = async (pool) => { const ls = await lines(recv.address); const l = ls.find(z => z.account === pool.acct); return l ? Number(l.balance) : 0; };
 const fmt6 = n => Number(n).toFixed(6);
+const MIN_ACT = +E.PEG_MIN_USDX || 0.0005;   // pools are small, so corrections of a fraction of a cent matter
 async function pegStep(px, kind, depth = 0) {
   const uu = kind === 'xrp' ? px.xrpUsd : px.bonsaiUsd, pool = await poolInfo(kind), nm = kind === 'xrp' ? 'XRP' : 'BONSAI';
   if (!pool) return log(`no ${kind}/USDX pool yet`);
@@ -158,20 +159,20 @@ async function pegStep(px, kind, depth = 0) {
   if (price < 1) {
     // need = USDX to remove so that other/USDX x unitUsd = 1
     const need = Math.min(pool.ru * (1 - price), pool.ru * cap);
-    if (need < 0.01) return;
+    if (need < MIN_ACT) return log(`correction of ${need.toFixed(6)} USDX is below the ${MIN_ACT} minimum action`);
     let got = 0;
     const out = Math.min(need, share * pool.ru * 0.9);
-    if (out >= 0.01) {
+    if (out >= MIN_ACT) {
       try {
         log(`USDX below $1: withdrawing ${fmt6(out)} USDX from the pool with the treasury's LP tokens (${(share * 100).toFixed(2)}% of the pool)`);
         await submit({ TransactionType: 'AMMWithdraw', Account: recv.address, ...AS, Amount: { ...USDX, value: fmt6(out) }, Flags: 524288 }, recv, 'AMMWithdraw USDX'); got += out; acted = true;
       } catch (e) { log(`LP withdraw failed: ${e.message}`); }
     }
     const left = need - got;
-    if (left >= 0.01) {
+    if (left >= MIN_ACT) {
       const p2 = acted ? await poolInfo(kind) : pool; if (!p2) return;
       const k = p2.ro * p2.ru, ru2 = Math.sqrt(k * uu), ro2 = Math.sqrt(k / uu), full = p2.ru - ru2, du = Math.min(left, full); // pStar = 1/uu
-      if (du >= 0.01 && full > 0) {
+      if (du >= MIN_ACT && full > 0) {
         const dx = (ro2 - p2.ro) * (du / full), sendMax = dx / (1 - p2.fee) * (1 + K.slip);
         if (otherInv >= sendMax) {
           try { log(`USDX below $1: buying ${fmt6(du)} USDX with up to ${sendMax.toFixed(4)} ${nm}`); await submit({ TransactionType: 'Payment', Account: recv.address, Destination: recv.address, Amount: { ...USDX, value: fmt6(du) }, SendMax: other(kind, sendMax), Memos: memoP({ side: 'buy', usdx: du }) }, recv, 'peg buy'); got += du; acted = true; }
@@ -185,19 +186,19 @@ async function pegStep(px, kind, depth = 0) {
     }
   } else {
     const need = Math.min(pool.ru * (price - 1), pool.ru * cap);   // USDX to add so the price returns to $1
-    if (need < 0.01) return;
+    if (need < MIN_ACT) return log(`correction of ${need.toFixed(6)} USDX is below the ${MIN_ACT} minimum action`);
     let added = 0;
-    const have = Math.max(0, usdxInv - 0.5);
-    if (have >= 0.01) {
+    const have = Math.max(0, usdxInv - Math.min(0.5, usdxInv * 0.1));
+    if (have >= MIN_ACT) {
       const x = Math.min(need, have);
       try { log(`USDX above $1: depositing ${fmt6(x)} treasury USDX into the pool`); await submit({ TransactionType: 'AMMDeposit', Account: recv.address, ...AS, Amount: { ...USDX, value: fmt6(x) }, Flags: 524288 }, recv, 'AMMDeposit USDX'); added += x; acted = true; }
       catch (e) { log(`USDX deposit failed: ${e.message}`); }
     }
     let left = need - added;
-    if (left >= 0.01 && MINT_ON && iss && bonsaiInv > 0 && px.bonsaiUsd > 0) {
+    if (left >= MIN_ACT && MINT_ON && iss && bonsaiInv > 0 && px.bonsaiUsd > 0) {
       // collateralised mint: burn BONSAI worth the USDX, issue exactly that much USDX, put it in the pool
       const x = Math.min(left, bonsaiInv * px.bonsaiUsd * 100 / K.ratio * 0.98), bonsaiBurn = x * K.ratio / 100 / px.bonsaiUsd;
-      if (x >= 0.01 && bonsaiBurn <= bonsaiInv) {
+      if (x >= MIN_ACT && bonsaiBurn <= bonsaiInv) {
         try {
           const dep = 'PEGMINT-' + Date.now();
           log(`USDX above $1 and the pool is short of USDX: burning ${bonsaiBurn.toFixed(4)} BONSAI to mint ${fmt6(x)} USDX`);
@@ -208,7 +209,7 @@ async function pegStep(px, kind, depth = 0) {
         } catch (e) { log(`mint-and-deposit failed: ${e.message}`); }
       }
     }
-    if (left >= 0.01 && share > 0) {
+    if (left >= MIN_ACT && share > 0) {
       const p2 = acted ? await poolInfo(kind) : pool; if (!p2) return;
       const y = Math.min(p2.ro - p2.ru / uu, p2.ro * cap, share * p2.ro * 0.9);   // other asset to remove so the price returns to $1
       if (y > 0) {
@@ -218,7 +219,7 @@ async function pegStep(px, kind, depth = 0) {
           catch (e) { log(`LP withdraw failed: ${e.message}`); }
         }
       }
-    } else if (left >= 0.01 && !acted) log(`USDX above $1 by ${((price - 1) * 1e4).toFixed(0)} bps but the treasury has no USDX, no BONSAI to burn and no LP tokens. Fund the receiver to defend the ceiling.`);
+    } else if (left >= MIN_ACT && !acted) log(`USDX above $1 by ${((price - 1) * 1e4).toFixed(0)} bps but the treasury has no USDX, no BONSAI to burn and no LP tokens. Fund the receiver to defend the ceiling.`);
   }
   if (acted) { const p3 = await poolInfo(kind); if (p3) log(`after rebalancing: USDX $${(p3.ro / p3.ru * uu).toFixed(5)} in the ${kind} pool`); }
 }
