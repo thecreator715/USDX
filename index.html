@@ -173,6 +173,26 @@ td{padding:11px 10px;border-bottom:1px solid #132a20;font-size:13px;white-space:
 /* public build: operator and treasury controls are not shown; the keeper runs them automatically */
 #genesisCard,#launchCard,#aCreate,#coverBtn,#coverBtn+span,#tmAmt,#tmBtn,#kOn,#kPool,#kNow,#dCancel,#kLast,#dOffers,#dOn,#dSize,#dSpread{display:none!important}
 .op-hide{display:none!important}
+
+/* phones: bottom tab bar instead of a side rail, no blur or heavy shadows, lighter gradients */
+@media(max-width:700px){
+  body{background:var(--bg)}
+  aside{position:fixed;left:0;right:0;bottom:0;top:auto;width:100%;height:auto;flex-direction:row;padding:6px 6px calc(6px + env(safe-area-inset-bottom,0px));z-index:40;border-right:0;border-top:1px solid var(--line);gap:0;overflow-x:auto;overflow-y:hidden;background:#07110d}
+  .brand,.side-foot{display:none!important}
+  nav{flex-direction:row;gap:2px;width:max-content;min-width:100%;justify-content:space-between}
+  nav button{padding:10px 13px;flex:none;border-radius:12px}
+  nav button.on{box-shadow:none;background:var(--panel2)}
+  main{padding-bottom:76px;-webkit-overflow-scrolling:touch}
+  .top{padding:14px 16px 8px;background:var(--bg);gap:8px}
+  .top h1{font-size:24px}
+  .wrap{padding:0 14px 40px;gap:16px}
+  .page{gap:16px}
+  *,*::before,*::after{backdrop-filter:none!important;-webkit-backdrop-filter:none!important;text-shadow:none!important}
+  .card,.pd-card,.pd-tile{box-shadow:none!important}
+  .pd-hero{grid-template-columns:1fr 1fr!important}
+  .pd-grid{grid-template-columns:1fr 1fr!important}
+  .modal{backdrop-filter:none}
+}
 </style>
 </head>
 <body>
@@ -787,7 +807,7 @@ function parseTx(e){
 async function scanLedger(force){
   if(!force&&S.ledger&&!S.ledgerDirty&&Date.now()-(S.scanAt||0)<90000) return S.ledger;
   S.ledgerDirty=false; S.scanAt=Date.now();
-  const [rt,it] = await Promise.all([acctTx(S.cfg.recv,200),acctTx(S.cfg.uIss,200)]);
+  const [rt,it] = await Promise.all([acctTx(S.cfg.recv,IS_MOB?100:200),acctTx(S.cfg.uIss,IS_MOB?100:200)]);
   const bc=cc(S.cfg.bCur), uc=cc(S.cfg.uCur);
   const deposits=[], burns={}, receipts={}, burnList=[];
   rt.map(parseTx).forEach(p=>{
@@ -810,7 +830,7 @@ async function scanLedger(force){
 }
 
 /* ---------- render ---------- */
-const BUILD='20261028-1332';
+const BUILD='20261028-1558';
 const LIVE_URL='https://thecreator715.github.io/USDX/';
 function sandboxNote(){
   setNet(false); if(document.getElementById('sbNote')) return;
@@ -822,6 +842,7 @@ function sandboxNote(){
    : '<b>This preview is sandboxed and cannot open a connection to the XRP Ledger.</b> Artifact and preview windows block live network access, so prices, supply and balances cannot load here. Open the live app instead: <a href="'+LIVE_URL+'" target="_blank" rel="noopener" style="color:var(--brass,#d9b66c);font-weight:600">'+LIVE_URL+'</a>, or save the HTML file and open it in your browser.';
   document.body.appendChild(d);
 }
+const IS_MOB=matchMedia('(max-width:700px)').matches||/iPhone|Android.*Mobile/i.test(navigator.userAgent);
 async function doRefresh(){
   const step=async(name,fn)=>{ try{ return await fn(); }catch(e){ console.warn(name,e); S.errs=S.errs||{}; S.errs[name]=e.message; } };
   const okc=await step('connect',async()=>{ await connect(); return true; });
@@ -835,6 +856,8 @@ async function doRefresh(){
     step('price',async()=>{ await getPrice(true); }),
     step('bal',()=>loadUserBal())]);
   paintPrice();
+  try{ renderAll(); }catch(e){}
+  if(IS_MOB) await sleep(1500);
   await step('scan',()=>scanLedger());
   watchStream();
   try{ renderAll(); }catch(e){ console.warn('render',e); }
@@ -1500,8 +1523,10 @@ async function monitorStep(){
   }catch(e){ MON.err=e.message; if(isLimit(String(e.message))){ MON.pause=Date.now()+90000; mlog('Rate limited','Paused the monitor for 90 s, then it resumes on another server','bad'); } else mlog('Error',e.message,'bad'); }
   MON.busy=false; MON.t0=0; renderMonitor();
 }
-setInterval(()=>{ if(!document.hidden&&!BM.running) monitorStep(); },60000);
-setInterval(renderMonitor,15000);
+const onPg=n=>{ const e=document.getElementById('p-'+n); return !!(e&&e.classList.contains('on')); };
+let monAt=Date.now();
+setInterval(()=>{ if(document.hidden||BM.running) return; if(onPg('peg')||onPg('pools')||Date.now()-monAt>(IS_MOB?300000:180000)){ monAt=Date.now(); monitorStep(); } },IS_MOB?90000:60000);
+setInterval(()=>{ if(!document.hidden&&onPg('peg')) renderMonitor(); },15000);
 
 /* ---------- BONSAI supply and burn tracking ---------- */
 const BS={rows:[],seen:new Set(),marker:undefined,done:false,init:false,busy:false};
@@ -1908,7 +1933,7 @@ vaultState();
 
 /* ---------- nav / settings / init ---------- */
 const TITLES={home:'USDX <em>Treasury</em>',overview:'<em>Dashboard</em>',burns:'Supply <em>&amp; Burns</em>',pools:'Pool <em>Data</em>',peg:'Peg <em>&amp; Pools</em>',forge:'Burn <em>&amp; Mint</em>',ledger:'Treasury <em>Ledger</em>',operator:'<em>Operator</em>',wallets:'<em>Wallets</em>',settings:'<em>Settings</em>'};
-function go(p){ if(p==='operator'||p==='settings') p='home'; document.querySelectorAll('.page').forEach(x=>x.classList.toggle('on',x.id==='p-'+p)); document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('on',b.dataset.p===p)); $('#title').innerHTML=TITLES[p]; if(p==='wallets') renderWalletUI(); if(p==='burns') renderTracker(); if(p==='pools') renderPoolData(); }
+function go(p){ if(p==='operator'||p==='settings') p='home'; if(p==='peg') setTimeout(()=>{ try{ loadGhLog(); renderMonitor(); }catch(e){} },50); document.querySelectorAll('.page').forEach(x=>x.classList.toggle('on',x.id==='p-'+p)); document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('on',b.dataset.p===p)); $('#title').innerHTML=TITLES[p]; if(p==='wallets') renderWalletUI(); if(p==='burns') renderTracker(); if(p==='pools') renderPoolData(); }
 document.querySelectorAll('#nav button').forEach(b=>b.onclick=()=>go(b.dataset.p));
 $('#amt').oninput=renderQuote;
 $('#maxBtn').onclick=()=>{ if(S.userBonsai) $('#amt').value=S.userBonsai; else loadUserBal(); renderQuote(); };
@@ -1937,14 +1962,14 @@ async function loadGhLog(){
     $('#ghLog').innerHTML=rows.slice(-120).reverse().map(r=>`<tr><td style="white-space:nowrap">${r.t?r.t.toLocaleTimeString():''}</td><td style="font-size:12px;${bad(r.m)?'color:var(--brass,#d9b66c)':''}">${r.m.replace(/[<>&]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]))}</td></tr>`).join('')||'<tr><td colspan="2" style="color:var(--mute)">Empty.</td></tr>';
   }catch(e){ $('#ghState').textContent='unavailable'; }
 }
-setInterval(()=>{ if(!document.hidden) loadGhLog(); },60000); setTimeout(loadGhLog,1500);
+setInterval(()=>{ if(!document.hidden&&onPg('peg')) loadGhLog(); },60000); setTimeout(loadGhLog,1500);
 (async function init(){
-  if(!window.xrpl){ document.body.insertAdjacentHTML('afterbegin','<div class="note" style="position:fixed;top:10px;left:270px;z-index:99">The xrpl.js library could not load. Check your connection and reload.</div>'); return; }
+  if(!window.xrpl){ document.body.insertAdjacentHTML('afterbegin','<div class="note" style="position:fixed;top:10px;left:12px;right:12px;z-index:99">The xrpl.js library could not load. Check your connection and reload.</div>'); return; }
   $('#buildTag').textContent='build '+BUILD;
   const stale=()=>fetch(location.pathname+'?v='+Date.now(),{cache:'no-store'}).then(r=>r.text()).then(t=>{ const m=/const BUILD='([^']+)'/.exec(t); if(m&&m[1]!==BUILD){ let n=0; try{ n=+sessionStorage.getItem('usdx-rl')||0; }catch(e){}
     if(n<2&&!BM.running&&!$('#bm').classList.contains('on')){ try{ sessionStorage.setItem('usdx-rl',n+1); }catch(e){} location.replace(location.pathname+'?v='+m[1]+location.hash); return; }
     if(!document.getElementById('newVer')){ const d=document.createElement('div'); d.id='newVer'; d.className='note'; d.style.cssText='position:fixed;z-index:70;right:16px;bottom:16px;max-width:360px;box-shadow:0 10px 40px #0008'; d.innerHTML='A newer version is available (build '+m[1]+'). <a href="#" id="newVerGo" style="color:var(--brass,#d9b66c);font-weight:600">Reload now</a>'; document.body.appendChild(d); $('#newVerGo').onclick=e=>{ e.preventDefault(); location.replace(location.pathname+'?v='+m[1]+location.hash); }; } } else { try{ sessionStorage.removeItem('usdx-rl'); }catch(e){} } }).catch(()=>{});
-  stale(); setInterval(stale,60000);
+  stale(); setInterval(()=>{ if(!document.hidden) stale(); },300000);
   await loadFileCfg(); await restoreUser(); renderWalletUI(); renderQuote(); await refreshAll(); setTimeout(monitorStep,8000); setInterval(()=>{ if(!S.busy&&!document.hidden&&!BM.running) refreshAll(); },180000);
 })();
 </script>
