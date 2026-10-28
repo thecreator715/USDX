@@ -1,0 +1,18 @@
+{
+  "network": "mainnet",
+  "servers": [
+    "wss://xrplcluster.com",
+    "wss://s1.ripple.com",
+    "wss://s2.ripple.com"
+  ],
+  "bonsai": {
+    "currency": "BONSAI",
+    "issuer": "r3TWS5XpLUTSA2zeXzRZoQshzc26CwjUyu"
+  },
+  "usdx": {
+    "currency": "USDX",
+    "issuer": "rKxBBMmY969Ph1y63ddVfYyN7xmxwDfVq6"
+  },
+  "receiver": "rphatRpwXcPAo7CVm46dC78JAQ6kLMqb2M",
+  "collateralRatioPercent": 100
+}

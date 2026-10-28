@@ -1,0 +1,861 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>USDX Treasury</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Manrope:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/xrpl@4.2.5/build/xrpl-latest-min.js"></script>
+<script>if(!window.xrpl){document.write('<script src="https://unpkg.com/xrpl@4.2.5/build/xrpl-latest-min.js"><\/script>')}</script>
+<style>
+/* Layout: fixed left sidebar (USDX TREASURY), content column with live ledger panels. Dark jade + brass. */
+:root{
+  --bg:#06100c; --bg2:#0a1913; --panel:#0e1f18; --panel2:#12281f; --line:#1d3a2e;
+  --fg:#e8f1ec; --mute:#86a094; --jade:#4fd1a1; --jade-d:#2a8f6d; --brass:#e0b867; --red:#ef6a5b; --amber:#f0a93e;
+  --display:'Fraunces',Georgia,serif; --body:'Manrope',system-ui,sans-serif; --mono:'JetBrains Mono',ui-monospace,monospace;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:radial-gradient(1200px 600px at 80% -10%,#0f2a20 0%,transparent 60%),var(--bg);color:var(--fg);font:14px/1.5 var(--body);display:flex}
+button{font:inherit;cursor:pointer}
+input,select{font:inherit;color:var(--fg);background:var(--bg2);border:1px solid var(--line);border-radius:10px;padding:11px 13px;width:100%;outline:none}
+input:focus{border-color:var(--jade)}
+a{color:var(--jade)}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+aside{width:248px;flex:none;background:linear-gradient(180deg,#081510,#050c09);border-right:1px solid var(--line);padding:26px 16px;display:flex;flex-direction:column;gap:24px;height:100%;position:sticky;top:0;overflow-y:auto}
+.brand{display:flex;gap:12px;align-items:center;padding:0 8px}
+.brand svg{flex:none}
+.brand b{font:600 19px/1.1 var(--display);letter-spacing:.04em;display:block}
+.brand small{color:var(--brass);letter-spacing:.22em;font-size:10px;text-transform:uppercase}
+nav{display:flex;flex-direction:column;gap:4px}
+nav button{display:flex;align-items:center;gap:12px;background:none;border:0;color:var(--mute);padding:11px 12px;border-radius:10px;text-align:left;font-weight:600}
+nav button:hover{background:var(--panel);color:var(--fg)}
+nav button.on{background:var(--panel2);color:var(--fg);box-shadow:inset 2px 0 0 var(--brass)}
+nav svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.6}
+.side-foot{margin-top:auto;font-size:12px;color:var(--mute);display:flex;flex-direction:column;gap:8px}
+.pill{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:99px;padding:6px 12px;font-size:12px;background:var(--bg2)}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--red)}
+.dot.ok{background:var(--jade);box-shadow:0 0 10px var(--jade)}
+main{flex:1;min-width:0;height:100%;overflow-y:auto}
+.top{display:flex;gap:14px;align-items:center;justify-content:space-between;padding:22px 34px;position:sticky;top:0;background:linear-gradient(180deg,var(--bg) 60%,transparent);z-index:5;flex-wrap:wrap}
+.top h1{margin:0;font:400 30px/1.1 var(--display)}
+.top h1 em{color:var(--brass);font-style:normal}
+.wrap{padding:0 34px 60px;display:flex;flex-direction:column;gap:22px;max-width:1280px}
+.page{display:none;flex-direction:column;gap:22px}.page.on{display:flex}
+.grid{display:grid;gap:18px}
+.g4{grid-template-columns:repeat(auto-fit,minmax(210px,1fr))}
+.g2{grid-template-columns:repeat(auto-fit,minmax(340px,1fr))}
+.card{background:linear-gradient(180deg,var(--panel),#0b1914);border:1px solid var(--line);border-radius:18px;padding:22px;min-width:0}
+.card h3{margin:0 0 14px;font:600 12px/1 var(--body);letter-spacing:.16em;text-transform:uppercase;color:var(--mute)}
+.stat .v{font:400 34px/1.1 var(--display);margin:2px 0 6px;overflow-wrap:anywhere}
+.stat .s{color:var(--mute);font-size:12px}
+.brass{color:var(--brass)}.jade{color:var(--jade)}
+.btn{background:var(--jade);color:#04120c;border:0;border-radius:12px;padding:13px 20px;font-weight:700;letter-spacing:.02em}
+.btn:hover{filter:brightness(1.08)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn.ghost{background:transparent;color:var(--fg);border:1px solid var(--line)}
+.btn.brass{background:var(--brass)}
+.btn.sm{padding:8px 13px;font-size:12px;border-radius:9px}
+label{display:block;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);margin:0 0 7px}
+.row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.col{display:flex;flex-direction:column;gap:14px}
+.addr{font-family:var(--mono);font-size:12px;color:var(--mute);overflow-wrap:anywhere}
+table{width:100%;border-collapse:collapse}
+.tw{overflow-x:auto}
+th{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--mute);text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:11px 10px;border-bottom:1px solid #132a20;font-size:13px;white-space:nowrap}
+.tag{display:inline-block;padding:2px 9px;border-radius:99px;font-size:11px;font-weight:700}
+.tag.ok{background:#12372a;color:var(--jade)}.tag.wait{background:#3b2f12;color:var(--amber)}.tag.bad{background:#3d1a16;color:var(--red)}
+/* burn forge */
+.forge{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:18px}
+@media(max-width:1000px){.forge{grid-template-columns:1fr}aside{width:72px;padding:18px 8px}.brand div,nav button span,.side-foot{display:none}nav button{justify-content:center}.wrap,.top{padding-left:18px;padding-right:18px}}
+.burnbox{position:relative;overflow:hidden}
+.burnbox .glow{position:absolute;inset:auto -20% -60% -20%;height:70%;background:radial-gradient(closest-side,rgba(224,184,103,.28),transparent);transition:opacity .5s;opacity:var(--heat,.2);pointer-events:none}
+.amt{font:400 46px/1.1 var(--display);background:transparent;border:0;padding:0;border-radius:0;color:var(--fg)}
+.amt:focus{border:0}
+.swap{display:flex;flex-direction:column;gap:10px}
+.leg{background:var(--bg2);border:1px solid var(--line);border-radius:14px;padding:16px 18px}
+.leg .u{color:var(--mute);font-size:12px;letter-spacing:.12em;text-transform:uppercase}
+.arrow{align-self:center;width:38px;height:38px;border-radius:50%;border:1px solid var(--line);display:grid;place-items:center;background:var(--panel2);margin:-22px 0;z-index:1;color:var(--brass)}
+.steps{display:flex;flex-direction:column;gap:12px;margin:0;padding:0;list-style:none}
+.steps li{display:flex;gap:14px;align-items:flex-start;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:var(--bg2)}
+.steps i{flex:none;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font:600 12px var(--mono);border:1px solid var(--line);color:var(--mute);font-style:normal}
+.steps li.act{border-color:var(--brass)}.steps li.act i{border-color:var(--brass);color:var(--brass);animation:pulse 1.2s infinite}
+.steps li.done i{background:var(--jade);color:#04120c;border-color:var(--jade)}
+.steps li.err{border-color:var(--red)}.steps li.err i{background:var(--red);color:#fff;border-color:var(--red)}
+.steps b{display:block}.steps span{color:var(--mute);font-size:12px;overflow-wrap:anywhere}
+@keyframes pulse{50%{box-shadow:0 0 0 6px rgba(224,184,103,.15)}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important}}
+.note{border:1px solid #4a3d18;background:#1b1707;color:#e6cf93;border-radius:12px;padding:12px 14px;font-size:12.5px}
+.err-note{border-color:#5a2420;background:#1e0e0c;color:#f3b3ab}
+.modal{position:fixed;inset:0;background:rgba(2,8,5,.8);display:none;align-items:center;justify-content:center;z-index:50;padding:16px;backdrop-filter:blur(6px)}
+.modal.on{display:flex}
+.sheet{background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:26px;width:min(520px,100%);max-height:92vh;overflow-y:auto;display:flex;flex-direction:column;gap:16px}
+.sheet h2{margin:0;font:400 24px var(--display)}
+.tabs{display:flex;gap:6px;background:var(--bg2);border-radius:12px;padding:4px}
+.tabs button{flex:1;border:0;background:none;color:var(--mute);padding:9px;border-radius:9px;font-weight:600}
+.tabs button.on{background:var(--panel2);color:var(--fg)}
+.bar{height:8px;border-radius:99px;background:var(--bg2);overflow:hidden;border:1px solid var(--line)}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--jade-d),var(--brass))}
+.toast{position:fixed;right:20px;bottom:20px;background:var(--panel2);border:1px solid var(--brass);border-radius:12px;padding:12px 16px;z-index:60;max-width:380px;display:none}
+</style>
+</head>
+<body>
+<aside>
+  <div class="brand">
+    <svg width="38" height="38" viewBox="0 0 40 40" fill="none"><circle cx="20" cy="20" r="19" stroke="#e0b867" stroke-width="1.2"/><path d="M20 31V19m0 0c0-5 4-8 9-8-1 5-4 8-9 8Zm0 4c0-4-3-6-7-6 .6 4 3 6 7 6Z" stroke="#4fd1a1" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M13 31h14" stroke="#e0b867" stroke-width="1.6" stroke-linecap="round"/></svg>
+    <div><b>USDX Treasury</b><small>on the XRP Ledger</small></div>
+  </div>
+  <nav id="nav">
+    <button data-p="overview" class="on"><svg viewBox="0 0 24 24"><path d="M4 13h6V4H4zM14 20h6V4h-6zM4 20h6v-3H4z"/></svg><span>Overview</span></button>
+    <button data-p="forge"><svg viewBox="0 0 24 24"><path d="M12 3c1 4 5 5 5 10a5 5 0 0 1-10 0c0-2 1-3 2-4 0 2 1 3 2 3 0-3-1-5 1-9Z"/></svg><span>Burn &amp; Mint</span></button>
+    <button data-p="ledger"><svg viewBox="0 0 24 24"><path d="M5 4h14v16H5zM9 9h6M9 13h6M9 17h3"/></svg><span>Treasury Ledger</span></button>
+    <button data-p="peg"><svg viewBox="0 0 24 24"><path d="M3 12h18M3 8h18M3 16h18" stroke-dasharray="2 3"/><path d="M12 4v16"/></svg><span>Peg &amp; Pools</span></button>
+    <button data-p="operator"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/></svg><span>Operator</span></button>
+    <button data-p="wallets"><svg viewBox="0 0 24 24"><path d="M3 7h16a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2zM3 7l12-3v3M17 14h2"/></svg><span>Wallets</span></button>
+    <button data-p="settings"><svg viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg><span>Settings</span></button>
+  </nav>
+  <div class="side-foot">
+    <div class="pill"><i class="dot" id="netdot"></i><span id="nettxt">Connecting…</span></div>
+    <div>XRPL Mainnet · real funds</div>
+  </div>
+</aside>
+
+<main>
+  <div class="top">
+    <h1 id="title">USDX <em>Treasury</em></h1>
+    <div class="row">
+      <span class="pill mono" id="priceChip">XRP —</span>
+      <button class="btn ghost sm" id="walletBtn">Connect wallet</button>
+    </div>
+  </div>
+  <div class="wrap">
+
+  <!-- OVERVIEW -->
+  <section class="page on" id="p-overview">
+    <div class="grid g4">
+      <div class="card stat"><h3>USDX in circulation</h3><div class="v jade mono" id="sUsdx">—</div><div class="s">Issuer obligations on ledger</div></div>
+      <div class="card stat"><h3>BONSAI supply</h3><div class="v mono" id="sBonsai">—</div><div class="s" id="sBonsaiSub">Issuer obligations on ledger</div></div>
+      <div class="card stat"><h3>BONSAI burned</h3><div class="v brass mono" id="sBurned">—</div><div class="s" id="sBurnedSub">Via this treasury</div></div>
+      <div class="card stat"><h3>Backing</h3><div class="v mono" id="sBack">—</div><div class="s" id="sBackSub">Burned collateral ÷ USDX minted</div></div>
+    </div>
+    <div class="grid g2">
+      <div class="card">
+        <h3>BONSAI reference price</h3>
+        <div class="v mono" style="font:400 38px var(--display)" id="pUsd">—</div>
+        <div class="s" style="color:var(--mute);margin-bottom:14px" id="pXrp">—</div>
+        <div class="col" id="pSources"></div>
+        <p class="s" style="color:var(--mute);font-size:12px;margin:14px 0 0">The treasury prices every mint at the lowest of the live order-book and AMM prices, so USDX is never over-issued against thin or manipulated quotes.</p>
+      </div>
+      <div class="card">
+        <h3>How a mint works</h3>
+        <ol class="steps">
+          <li class="done"><i>1</i><div><b>Send BONSAI to the receiver wallet</b><span>Your connected wallet pays the receiver with a mint memo.</span></div></li>
+          <li class="done"><i>2</i><div><b>Receiver burns the collateral</b><span>BONSAI goes back to its issuer, removing it from supply.</span></div></li>
+          <li class="done"><i>3</i><div><b>Issuer mints USDX</b><span>USD value of the burned BONSAI, paid to your wallet with a receipt memo.</span></div></li>
+        </ol>
+        <p style="margin:14px 0 0"><button class="btn" data-go="forge">Start a burn</button></p>
+      </div>
+    </div>
+    <div class="card"><h3>Latest mints</h3><div class="tw"><table><thead><tr><th>Time</th><th>Recipient</th><th>BONSAI burned</th><th>USD rate</th><th>USDX minted</th><th>Tx</th></tr></thead><tbody id="recentMints"><tr><td colspan="6" style="color:var(--mute)">Loading from ledger…</td></tr></tbody></table></div></div>
+  </section>
+
+  <!-- FORGE -->
+  <section class="page" id="p-forge">
+    <div id="forgeWarn"></div>
+    <div class="forge">
+      <div class="card burnbox" id="burnbox">
+        <div class="glow"></div>
+        <h3>Burn BONSAI → mint USDX</h3>
+        <div class="swap">
+          <div class="leg">
+            <div class="u">You burn</div>
+            <div class="row" style="flex-wrap:nowrap"><input class="amt mono" id="amt" inputmode="decimal" placeholder="0.00" autocomplete="off"><b class="brass" style="font:600 18px var(--display)">BONSAI</b></div>
+            <div class="row" style="justify-content:space-between"><span class="s mono" style="color:var(--mute)" id="amtUsd">≈ $0.00</span><span class="s" style="color:var(--mute)">Balance <button class="btn ghost sm" id="maxBtn" style="padding:3px 9px">—</button></span></div>
+          </div>
+          <div class="arrow">↓</div>
+          <div class="leg">
+            <div class="u">You receive</div>
+            <div class="row" style="flex-wrap:nowrap"><div class="amt mono jade" id="outUsdx">0.00</div><b style="font:600 18px var(--display)">USDX</b></div>
+            <div class="s" style="color:var(--mute)" id="outNote">Dollar value of the BONSAI at the reference price</div>
+          </div>
+        </div>
+        <div class="col" style="margin-top:18px">
+          <div class="row" style="justify-content:space-between"><span style="color:var(--mute)">Rate</span><span class="mono" id="rateTxt">—</span></div>
+          <div class="row" style="justify-content:space-between"><span style="color:var(--mute)">Collateral ratio</span><span class="mono" id="ratioTxt">—</span></div>
+          <div class="row" style="justify-content:space-between"><span style="color:var(--mute)">Treasury fee</span><span class="mono">0 · network fee only</span></div>
+          <button class="btn brass" id="burnBtn" style="padding:16px;font-size:15px">Connect a wallet to burn</button>
+        </div>
+      </div>
+      <div class="col">
+        <div class="card"><h3>Progress</h3><ol class="steps" id="forgeSteps"></ol></div>
+        <div class="card"><h3>Supply</h3>
+          <div class="row" style="justify-content:space-between"><span style="color:var(--mute)">USDX in circulation</span><b class="mono jade" id="fUsdx">—</b></div>
+          <div class="row" style="justify-content:space-between;margin-top:8px"><span style="color:var(--mute)">BONSAI supply</span><b class="mono" id="fBonsai">—</b></div>
+          <div class="bar" style="margin-top:14px"><i id="fBar" style="width:0"></i></div>
+          <div class="s" style="color:var(--mute);margin-top:6px;font-size:12px">Share of BONSAI burned into USDX</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- LEDGER -->
+  <section class="page" id="p-ledger">
+    <div class="card"><h3>Mint receipts · issuer wallet</h3><div class="tw"><table><thead><tr><th>Time</th><th>Recipient</th><th>BONSAI burned</th><th>USD rate</th><th>USDX minted</th><th>Deposit</th><th>Burn</th><th>Mint</th></tr></thead><tbody id="mintRows"></tbody></table></div></div>
+    <div class="card"><h3>Deposits · receiver wallet</h3><div class="tw"><table><thead><tr><th>Time</th><th>From</th><th>BONSAI</th><th>Status</th><th>Tx</th></tr></thead><tbody id="depRows"></tbody></table></div></div>
+    <div class="row"><button class="btn ghost sm" id="refreshLedger">Refresh from ledger</button><span class="s" id="ledgerMeta" style="color:var(--mute)"></span></div>
+  </section>
+
+  <!-- PEG -->
+  <section class="page" id="p-peg">
+    <div id="pegAlert"></div>
+    <div class="grid g4">
+      <div class="card stat"><h3>USDX price</h3><div class="v mono" id="gPrice">—</div><div class="s" id="gPriceSub">From the USDX/XRP pool</div></div>
+      <div class="card stat"><h3>Peg band</h3><div class="v mono" id="gBand">—</div><div class="s">Keeper acts outside this band. Hard floor $0.99</div></div>
+      <div class="card stat"><h3>Backing shortfall</h3><div class="v mono" id="gShort">—</div><div class="s" id="gShortSub">BONSAI still to burn</div></div>
+      <div class="card stat"><h3>Treasury inventory</h3><div class="v mono" style="font-size:24px" id="gInv">—</div><div class="s">Receiver wallet: XRP · USDX · BONSAI</div></div>
+    </div>
+    <div class="grid g2">
+      <div class="card col">
+        <h3>Backing coverage</h3>
+        <div class="row" style="justify-content:space-between"><span style="color:var(--mute)">USDX outstanding</span><b class="mono" id="cOut">—</b></div>
+        <div class="row" style="justify-content:space-between"><span style="color:var(--mute)">USD that must be covered</span><b class="mono" id="cReq">—</b></div>
+        <div class="row" style="justify-content:space-between"><span style="color:var(--mute)">BONSAI burned (all time in history)</span><b class="mono" id="cBurn">—</b></div>
+        <div class="row" style="justify-content:space-between"><span style="color:var(--mute)">Burned value at today&rsquo;s price</span><b class="mono jade" id="cCov">—</b></div>
+        <div class="bar"><i id="cBar" style="width:0"></i></div>
+        <div class="row"><button class="btn brass sm" id="coverBtn">Burn the shortfall</button><span class="s" style="color:var(--mute);font-size:12px">Burns BONSAI from the receiver wallet. No new USDX is minted.</span></div>
+        <hr style="border:0;border-top:1px solid var(--line);width:100%">
+        <div><label>Mint USDX to the treasury (burns BONSAI the receiver holds)</label><div class="row" style="flex-wrap:nowrap"><input id="tmAmt" inputmode="decimal" placeholder="BONSAI to burn"><button class="btn sm" id="tmBtn" style="white-space:nowrap">Burn &amp; mint</button></div></div>
+        <p class="s" style="color:var(--mute);font-size:12px;margin:0">Same rule as a user mint: every USDX is created only after its BONSAI is burned. Treasury USDX is the stock the keeper sells when the price rises above $1.</p>
+      </div>
+      <div class="card col">
+        <h3>Peg keeper</h3>
+        <div class="row" style="justify-content:space-between"><label class="row" style="margin:0;gap:8px;text-transform:none;letter-spacing:0;font-size:13px;color:var(--fg)"><input type="checkbox" id="kOn" style="width:auto" checked> Keeper on (runs every 30 s while the receiver key is loaded)</label></div>
+        <div><label>Peg pool the keeper defends</label><select id="kPool"><option value="bonsai">BONSAI / USDX</option><option value="xrp">XRP / USDX</option></select></div>
+        <div class="grid" style="grid-template-columns:repeat(3,1fr);gap:10px">
+          <div><label>Band (bps)</label><input id="kTol" value="50" inputmode="numeric"></div>
+          <div><label>Max trade % of pool</label><input id="kMax" value="20" inputmode="numeric"></div>
+          <div><label>Slippage (bps)</label><input id="kSlip" value="100" inputmode="numeric"></div>
+        </div>
+        <div class="row"><button class="btn sm" id="kNow">Rebalance now</button><span class="s" style="color:var(--mute);font-size:12px" id="kLast">Not run yet</span></div>
+        <p class="s" style="color:var(--mute);font-size:12px;margin:0">Price below $1: the treasury buys USDX from the pool with XRP and sends it back to the issuer, which retires it. Price above $1: the treasury sells its USDX into the pool for XRP. Each trade is sized with constant-product math to land the pool on $1.00 and carries an on-chain memo.</p>
+        <ol class="steps" id="kLog"></ol>
+      </div>
+    </div>
+    <div class="card col">
+      <h3>Liquidity pools (XLS-30 AMM) · treasury balances</h3>
+      <div class="grid g2" id="poolCards"></div>
+      <div class="grid g4" style="gap:12px;align-items:end">
+        <div><label>Pool</label><select id="aKind"><option value="bonsai">BONSAI / USDX</option><option value="xrp">XRP / USDX</option></select></div>
+        <div><label>USDX amount</label><input id="aUsdx" inputmode="decimal" placeholder="e.g. 1000"></div>
+        <div><button class="btn sm" id="aCreate" style="width:100%">Create pool</button></div>
+        <div><button class="btn ghost sm" id="aDeposit" style="width:100%">Deposit (matches pool ratio)</button></div>
+      </div>
+      <div class="row"><input id="aPct" value="25" inputmode="numeric" style="width:90px"><button class="btn ghost sm" id="aWithdraw">Withdraw % of the treasury&rsquo;s LP</button></div>
+      <p class="s" style="color:var(--mute);font-size:12px;margin:0">Create sizes the two sides from live prices so USDX opens at exactly $1.00. All pool actions are signed by the receiver wallet, which must hold the USDX and the other asset first. Mint USDX to the treasury above if it holds none.</p>
+    </div>
+  </section>
+
+  <!-- OPERATOR -->
+  <section class="page" id="p-operator">
+    <div class="note">Operator keys sign the burn (receiver wallet) and the mint (issuer wallet). They live only in this tab&rsquo;s memory and vanish when you close or reload it. Never publish this page with keys inside it.</div>
+    <div class="grid g2">
+      <div class="card"><h3>Receiver wallet</h3><div class="addr" id="opRecvAddr"></div><div class="mono" id="opRecvBal" style="margin:8px 0 14px"></div><button class="btn ghost sm" data-slot="recv">Import receiver key</button> <button class="btn ghost sm" id="prepRecv">Set up receiver trust lines</button></div>
+      <div class="card"><h3>Issuer wallet</h3><div class="addr" id="opIssAddr"></div><div class="mono" id="opIssBal" style="margin:8px 0 14px"></div><button class="btn ghost sm" data-slot="iss">Import issuer key</button> <button class="btn ghost sm" id="setupIssuer">Enable DefaultRipple</button></div>
+    </div>
+    <div class="card">
+      <h3>Processor</h3>
+      <div class="row" style="justify-content:space-between">
+        <div><b id="pendCount">0 pending deposits</b><div class="s" style="color:var(--mute)" id="pendSub">Deposits are burned and minted automatically while this page is open and both keys are loaded.</div></div>
+        <div class="row"><label class="row" style="margin:0;gap:8px;text-transform:none;letter-spacing:0;font-size:13px;color:var(--fg)"><input type="checkbox" id="autoProc" style="width:auto" checked> Auto-process</label><button class="btn" id="procNow">Process pending now</button></div>
+      </div>
+      <ol class="steps" id="procLog" style="margin-top:16px"></ol>
+    </div>
+  </section>
+
+  <!-- WALLETS -->
+  <section class="page" id="p-wallets">
+    <div class="grid g2" id="walletCards"></div>
+  </section>
+
+  <!-- SETTINGS -->
+  <section class="page" id="p-settings">
+    <div class="card col">
+      <h3>Network &amp; tokens</h3>
+      <div><label>XRPL websocket</label><input id="cServer"></div>
+      <div class="grid g2">
+        <div><label>BONSAI currency code</label><input id="cBCur"></div>
+        <div><label>BONSAI issuer address</label><input id="cBIss" placeholder="r…"></div>
+        <div><label>USDX currency code</label><input id="cUCur"></div>
+        <div><label>USDX issuer wallet</label><input id="cUIss"></div>
+        <div><label>Receiver wallet</label><input id="cRecv"></div>
+        <div><label>Collateral ratio %</label><input id="cRatio" inputmode="decimal"></div>
+      </div>
+      <p class="s" style="color:var(--mute);margin:0">A ratio of 100 means $1 of burned BONSAI mints 1 USDX. Use a higher number to over-collateralize. Codes longer than 3 characters are converted to the 40-character hex form XRPL requires (USDX = 5553445800000000000000000000000000000000).</p>
+      <div class="row"><button class="btn" id="saveCfg">Save &amp; reconnect</button><button class="btn ghost" id="verifyBtn">Verify setup on the ledger</button></div>
+      <ol class="steps" id="verifyOut"></ol>
+    </div>
+  </section>
+  </div>
+</main>
+
+<!-- wallet modal -->
+<div class="modal" id="wm"><div class="sheet">
+  <h2 id="wmTitle">Connect wallet</h2>
+  <div class="tabs"><button class="on" data-t="imp">Import</button><button data-t="gen" id="genTab">Generate</button></div>
+  <div id="wmImp" class="col"><div><label>Family seed (starts with s)</label><input id="seedIn" type="password" autocomplete="off" placeholder="sEd…"></div><div class="s" style="color:var(--mute);font-size:12px">The seed stays in this tab&rsquo;s memory. It is never saved or sent anywhere except to sign transactions locally.</div><button class="btn" id="seedGo">Import wallet</button></div>
+  <div id="wmGen" class="col" hidden><div class="note">A new wallet needs at least 1 XRP (base reserve) plus 0.2 XRP per trust line before it can transact. Write the seed down now. It will not be shown again.</div><button class="btn" id="genGo">Generate wallet</button><div id="genOut" class="col" hidden><div><label>Address</label><div class="addr" id="gAddr"></div></div><div><label>Seed</label><div class="addr" id="gSeed" style="color:var(--brass)"></div></div><button class="btn ghost sm" id="gCopy">Copy seed</button></div></div>
+  <div class="err-note note" id="wmErr" hidden></div>
+  <button class="btn ghost sm" id="wmClose">Close</button>
+</div></div>
+<!-- confirm modal -->
+<div class="modal" id="cm"><div class="sheet"><h2>Confirm on Mainnet</h2><div id="cmBody" class="col"></div><div class="row"><button class="btn" id="cmYes">Confirm</button><button class="btn ghost" id="cmNo">Cancel</button></div></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+const X = window.xrpl;
+const $ = s => document.querySelector(s);
+const DEF = { server:'wss://xrplcluster.com', bCur:'BONSAI', bIss:'r3TWS5XpLUTSA2zeXzRZoQshzc26CwjUyu', uCur:'USDX', uIss:'rKxBBMmY969Ph1y63ddVfYyN7xmxwDfVq6', recv:'rphatRpwXcPAo7CVm46dC78JAQ6kLMqb2M', ratio:'100' };
+const S = { cfg:{...DEF}, client:null, w:{user:null,recv:null,iss:null}, px:null, ledger:null, busy:false, supply:{u:null,b:null}, slot:null };
+S.saved={}; try{ S.saved=JSON.parse(localStorage.getItem('usdx-cfg')||'{}'); }catch(e){}
+Object.assign(S.cfg,S.saved); if(!S.cfg.bIss) S.cfg.bIss=DEF.bIss;
+/* config.json (next to index.html) sets the defaults for everyone who opens the site; Settings saved in this browser win over it */
+async function loadFileCfg(){
+  try{
+    const j=await (await fetch('config.json',{cache:'no-store'})).json(); const f={};
+    if(j.servers&&j.servers.length){ f.server=j.servers[0]; f.servers=j.servers; }
+    if(j.bonsai){ f.bCur=j.bonsai.currency; f.bIss=j.bonsai.issuer; }
+    if(j.usdx){ f.uCur=j.usdx.currency; f.uIss=j.usdx.issuer; }
+    if(j.receiver) f.recv=j.receiver;
+    if(j.collateralRatioPercent) f.ratio=String(j.collateralRatioPercent);
+    S.cfg={...DEF,...f,...S.saved};
+    Object.entries(F).forEach(([id,k])=>$('#'+id).value=S.cfg[k]);
+  }catch(e){ /* no config.json (for example opened from disk): built-in defaults are used */ }
+}
+
+/* ---------- helpers ---------- */
+const cc = s => { s=String(s).trim(); if(/^[0-9A-Fa-f]{40}$/.test(s)) return s.toUpperCase(); if(s.length===3) return s; return Array.from(new TextEncoder().encode(s)).map(b=>b.toString(16).padStart(2,'0')).join('').toUpperCase().padEnd(40,'0'); };
+const dc = c => { if(c.length!==40) return c; let s=''; for(let i=0;i<40;i+=2){const n=parseInt(c.substr(i,2),16); if(n) s+=String.fromCharCode(n);} return s; };
+const fmt = (n,d=2) => (n==null||isNaN(n))?'—':Number(n).toLocaleString(undefined,{minimumFractionDigits:d,maximumFractionDigits:d});
+const short = a => a? a.slice(0,6)+'…'+a.slice(-5):'';
+const floor6 = n => (Math.floor(n*1e6+1e-9)/1e6).toFixed(6);
+const hex = s => X.convertStringToHex(s);
+const memo = (type,obj) => ({Memo:{MemoType:hex(type),MemoData:hex(JSON.stringify(obj))}});
+const txl = h => `<a href="https://livenet.xrpl.org/transactions/${h}" target="_blank" rel="noopener" class="mono">${h.slice(0,8)}…</a>`;
+const toast = (m) => { const t=$('#toast'); t.textContent=m; t.style.display='block'; clearTimeout(toast.t); toast.t=setTimeout(()=>t.style.display='none',5000); };
+const bAsset = () => ({currency:cc(S.cfg.bCur), issuer:S.cfg.bIss});
+const uAsset = () => ({currency:cc(S.cfg.uCur), issuer:S.cfg.uIss});
+const ratio = () => Math.max(1, parseFloat(S.cfg.ratio)||100);
+const cfgReady = () => X.isValidClassicAddress(S.cfg.bIss||'') && X.isValidClassicAddress(S.cfg.uIss) && X.isValidClassicAddress(S.cfg.recv);
+
+/* ---------- network ---------- */
+async function connect(){
+  if(S.client && S.client.isConnected()) return S.client;
+  const list=[S.cfg.server,...(S.cfg.servers||[])].filter((v,i,a)=>v&&a.indexOf(v)===i); let last;
+  for(const u of list){
+    try{ const c=new X.Client(u); c.on('disconnected',()=>setNet(false)); await c.connect(); S.client=c; setNet(true); return c; }catch(e){ last=e; }
+  }
+  throw last||new Error('No XRPL server reachable');
+}
+function setNet(ok){ $('#netdot').className='dot'+(ok?' ok':''); $('#nettxt').textContent = ok?'Mainnet connected':'Disconnected'; }
+const req = async r => (await (await connect()).request(r)).result;
+async function submit(tx,wallet){
+  const c = await connect();
+  const r = await c.submitAndWait(tx,{wallet,autofill:true});
+  const code = r.result.meta.TransactionResult;
+  if(code!=='tesSUCCESS') throw new Error(code+' · '+tx.TransactionType);
+  return r.result.hash;
+}
+
+/* ---------- prices ---------- */
+async function xrpUsd(){
+  try{ const j=await (await fetch('https://api.coinbase.com/v2/prices/XRP-USD/spot')).json(); const v=+j.data.amount; if(v>0) return v; }catch(e){}
+  try{ const j=await (await fetch('https://api.kraken.com/0/public/Ticker?pair=XRPUSD')).json(); const k=Object.keys(j.result)[0]; const v=+j.result[k].c[0]; if(v>0) return v; }catch(e){}
+  throw new Error('XRP/USD price feed unreachable');
+}
+async function bonsaiXrp(){
+  const a = bAsset(), xrp={currency:'XRP'};
+  const [ask,bid,amm] = await Promise.all([
+    req({command:'book_offers',taker_gets:a,taker_pays:xrp,limit:5}).catch(()=>null),
+    req({command:'book_offers',taker_gets:xrp,taker_pays:a,limit:5}).catch(()=>null),
+    req({command:'amm_info',asset:xrp,asset2:a}).catch(()=>null)]);
+  const src = {};
+  const o1 = ask&&ask.offers&&ask.offers[0]; if(o1) src.ask = (Number(o1.TakerPays)/1e6)/Number(o1.TakerGets.value);
+  const o2 = bid&&bid.offers&&bid.offers[0]; if(o2) src.bid = (Number(o2.TakerGets)/1e6)/Number(o2.TakerPays.value);
+  if(amm&&amm.amm){ const {amount,amount2}=amm.amm; const x=typeof amount==='string'?amount:amount2, t=typeof amount==='string'?amount2:amount; if(x&&t&&+t.value>0) src.amm=(Number(x)/1e6)/Number(t.value); }
+  const vals = Object.values(src).filter(v=>v>0&&isFinite(v));
+  if(!vals.length) throw new Error('No BONSAI/XRP market found on the ledger. Check the BONSAI issuer in Settings.');
+  return {xrp:Math.min(...vals), src};
+}
+async function getPrice(){
+  const [bx,xu] = await Promise.all([bonsaiXrp(), xrpUsd()]);
+  S.px = {xrpUsd:xu, bonsaiXrp:bx.xrp, usd:bx.xrp*xu, src:bx.src, t:Date.now()};
+  return S.px;
+}
+
+/* ---------- ledger reads ---------- */
+async function lines(addr){ const r=await req({command:'account_lines',account:addr,ledger_index:'validated',limit:400}); return r.lines; }
+async function xrpBal(addr){ try{ const r=await req({command:'account_info',account:addr,ledger_index:'validated'}); return Number(r.account_data.Balance)/1e6; }catch(e){ return null; } }
+async function supplyOf(issuer,cur){
+  const r = await req({command:'gateway_balances',account:issuer,ledger_index:'validated'});
+  const o = r.obligations||{}; const k = Object.keys(o).find(x=>cc(x)===cc(cur));
+  return k? Number(o[k]) : 0;
+}
+async function acctTx(addr,max=1200){
+  const out=[]; let marker;
+  while(out.length<max){
+    const r = await req({command:'account_tx',account:addr,limit:200,marker,ledger_index_min:-1,ledger_index_max:-1});
+    out.push(...r.transactions); marker=r.marker; if(!marker) break;
+  }
+  out.truncated=!!marker;
+  return out;
+}
+function parseTx(e){
+  const t = e.tx_json||e.tx||{}; const meta=e.meta||e.metadata||{};
+  const hash = e.hash||t.hash;
+  let time=null; if(e.close_time_iso) time=new Date(e.close_time_iso); else if(t.date) time=new Date((t.date+946684800)*1000);
+  let mm=null,mt=null; (t.Memos||[]).forEach(m=>{ try{ const ty=X.convertHexToString(m.Memo.MemoType); if(ty.startsWith('USDX/')){ mt=ty; mm=JSON.parse(X.convertHexToString(m.Memo.MemoData)); } }catch(_){} });
+  return {t,meta,hash,time,ok:e.validated!==false && meta.TransactionResult==='tesSUCCESS',mt,mm,delivered:meta.delivered_amount||t.Amount};
+}
+async function scanLedger(){
+  const [rt,it] = await Promise.all([acctTx(S.cfg.recv,2000),acctTx(S.cfg.uIss,1200)]);
+  const bc=cc(S.cfg.bCur), uc=cc(S.cfg.uCur);
+  const deposits=[], burns={}, receipts={}, burnList=[];
+  rt.map(parseTx).forEach(p=>{
+    if(!p.ok||p.t.TransactionType!=='Payment') return;
+    const d=p.delivered;
+    if(p.t.Destination===S.cfg.recv && p.mt==='USDX/MINT' && d&&typeof d==='object'&&cc(d.currency)===bc&&d.issuer===S.cfg.bIss) deposits.push({hash:p.hash,from:p.t.Account,value:Number(d.value),time:p.time});
+    if(p.t.Account===S.cfg.recv && p.t.Destination===S.cfg.bIss && (p.mt==='USDX/BURN'||p.mt==='USDX/COVER') && p.mm){ const dv=(d&&typeof d==='object')?Number(d.value):Number(p.mm.bonsai||0); burnList.push({hash:p.hash,value:dv,kind:p.mt,time:p.time}); if(p.mt==='USDX/BURN') burns[p.mm.dep]={hash:p.hash,value:dv}; }
+  });
+  const mints=[];
+  it.map(parseTx).forEach(p=>{
+    if(!p.ok||p.t.TransactionType!=='Payment'||p.t.Account!==S.cfg.uIss||p.mt!=='USDX/RECEIPT'||!p.mm) return;
+    const d=p.delivered; if(!(d&&typeof d==='object'&&cc(d.currency)===uc)) return;
+    receipts[p.mm.dep]=p.hash;
+    mints.push({hash:p.hash,to:p.t.Destination,usdx:Number(d.value),bonsai:p.mm.bonsai,rate:p.mm.rateUsd,dep:p.mm.dep,burn:p.mm.burn,time:p.time});
+  });
+  deposits.forEach(d=>{ d.minted=!!receipts[d.hash]; d.burned=!!burns[d.hash]; });
+  S.ledger={deposits,burns,burnList,receipts,mints,truncated:!!(rt.truncated||it.truncated),at:new Date()};
+  return S.ledger;
+}
+
+/* ---------- render ---------- */
+async function refreshAll(){
+  try{
+    await connect();
+    if(!cfgReady()){ renderConfigWarn(); return; }
+    const [u,b] = await Promise.all([supplyOf(S.cfg.uIss,S.cfg.uCur),supplyOf(S.cfg.bIss,S.cfg.bCur)]);
+    S.supply={u,b};
+    await getPrice().catch(e=>{ S.px=null; S.pxErr=e.message; });
+    await scanLedger();
+    renderAll();
+  }catch(e){ toast(e.message); }
+}
+function renderConfigWarn(){
+  $('#forgeWarn').innerHTML = `<div class="note">Set the BONSAI issuer address in Settings to go live. Currency code, USDX issuer and receiver are already filled in.</div>`;
+}
+function renderAll(){
+  const {u,b}=S.supply, L=S.ledger, px=S.px;
+  $('#sUsdx').textContent = fmt(u,2);
+  $('#sBonsai').textContent = fmt(b,0);
+  const burned = L? L.burnList.reduce((s,x)=>s+x.value,0):0;
+  const minted = L? L.mints.reduce((s,m)=>s+m.usdx,0):0;
+  const burnedUsd = L? L.mints.reduce((s,m)=>s+(m.bonsai*m.rate||0),0):0;
+  $('#sBurned').textContent = fmt(burned,2);
+  $('#sBurnedSub').textContent = `${L?L.mints.length:0} mints in loaded history`;
+  const cv = coverage(); const back = cv? cv.coveredUsd/Math.max(cv.outstanding,1e-9)*100:null;
+  $('#sBack').textContent = back==null||!(cv.outstanding>0)?'—':fmt(back,1)+'%';
+  $('#sBackSub').textContent = 'Burned BONSAI at today\'s price ÷ USDX outstanding';
+  $('#fUsdx').textContent = fmt(u,2); $('#fBonsai').textContent = fmt(b,0);
+  const preBurn = b+burned; $('#fBar').style.width = preBurn>0? Math.min(100,burned/preBurn*100)+'%':'0';
+  if(px){
+    $('#pUsd').textContent = '$'+px.usd.toLocaleString(undefined,{maximumFractionDigits:8});
+    $('#pXrp').textContent = `${px.bonsaiXrp.toPrecision(6)} XRP per BONSAI · XRP $${fmt(px.xrpUsd,4)}`;
+    $('#priceChip').textContent = 'XRP $'+fmt(px.xrpUsd,4);
+    $('#pSources').innerHTML = ['amm','ask','bid'].map(k=>`<div class="row" style="justify-content:space-between"><span style="color:var(--mute)">${{amm:'AMM pool',ask:'Order book ask',bid:'Order book bid'}[k]}</span><span class="mono">${px.src[k]?px.src[k].toPrecision(6)+' XRP':'—'}</span></div>`).join('');
+  } else { $('#pUsd').textContent='—'; $('#pXrp').textContent=S.pxErr||''; }
+  const rows = (L?L.mints:[]).slice(0,8).map(m=>`<tr><td>${m.time?m.time.toLocaleString():''}</td><td class="mono">${short(m.to)}</td><td class="mono">${fmt(m.bonsai,2)}</td><td class="mono">$${(m.rate||0).toPrecision(5)}</td><td class="mono jade">${fmt(m.usdx,2)}</td><td>${txl(m.hash)}</td></tr>`).join('');
+  $('#recentMints').innerHTML = rows||'<tr><td colspan="6" style="color:var(--mute)">No mints recorded yet.</td></tr>';
+  $('#mintRows').innerHTML = (L?L.mints:[]).map(m=>`<tr><td>${m.time?m.time.toLocaleString():''}</td><td class="mono">${short(m.to)}</td><td class="mono">${fmt(m.bonsai,4)}</td><td class="mono">$${(m.rate||0).toPrecision(5)}</td><td class="mono jade">${fmt(m.usdx,2)}</td><td>${m.dep?txl(m.dep):''}</td><td>${m.burn?txl(m.burn):''}</td><td>${txl(m.hash)}</td></tr>`).join('')||'<tr><td colspan="8" style="color:var(--mute)">No mints recorded yet.</td></tr>';
+  $('#depRows').innerHTML = (L?L.deposits:[]).map(d=>`<tr><td>${d.time?d.time.toLocaleString():''}</td><td class="mono">${short(d.from)}</td><td class="mono">${fmt(d.value,4)}</td><td><span class="tag ${d.minted?'ok':'wait'}">${d.minted?'Minted':d.burned?'Burned, minting':'Pending'}</span></td><td>${txl(d.hash)}</td></tr>`).join('')||'<tr><td colspan="5" style="color:var(--mute)">No deposits yet.</td></tr>';
+  $('#ledgerMeta').textContent = L? (L.truncated?'History capped at the most recent transactions, so older burns may be missing. ':'Full history loaded. ')+L.at.toLocaleTimeString():'';
+  const pend = L? L.deposits.filter(d=>!d.minted):[];
+  $('#pendCount').textContent = pend.length+' pending deposit'+(pend.length===1?'':'s');
+  renderQuote(); renderWalletUI(); renderPeg().catch(()=>{}); $('#forgeWarn').innerHTML = cfgReady()?'':'<div class="note">Set the BONSAI issuer address in Settings to go live.</div>';
+}
+function renderQuote(){
+  const v=parseFloat($('#amt').value)||0, px=S.px;
+  $('#ratioTxt').textContent = ratio()+'%';
+  $('#burnbox').style.setProperty('--heat', Math.min(1,.2+v/(S.userBonsai||1000)*.8));
+  if(!px){ $('#rateTxt').textContent='—'; $('#outUsdx').textContent='0.00'; $('#amtUsd').textContent='≈ $0.00'; return; }
+  const usd=v*px.usd; $('#amtUsd').textContent='≈ $'+fmt(usd,2);
+  $('#rateTxt').textContent = `1 BONSAI = $${px.usd.toPrecision(5)}`;
+  $('#outUsdx').textContent = fmt(Math.floor(usd*100/ratio()*1e6)/1e6,2);
+  const b=$('#burnBtn'); b.disabled = false;
+  b.textContent = !S.w.user? 'Connect a wallet to burn' : v>0? 'Burn '+fmt(v,2)+' BONSAI': 'Enter an amount';
+}
+async function renderWalletUI(){
+  const w=S.w.user;
+  $('#walletBtn').textContent = w? short(w.address):'Connect wallet';
+  const cards=[['user','Connected wallet',w&&w.address],['recv','Receiver wallet',S.cfg.recv],['iss','Issuer wallet',S.cfg.uIss]];
+  $('#opRecvAddr').textContent=S.cfg.recv+(S.w.recv?'  · key loaded':''); $('#opIssAddr').textContent=S.cfg.uIss+(S.w.iss?'  · key loaded':'');
+  if(!X.isValidClassicAddress(S.cfg.recv)) return;
+  const html=[];
+  for(const [slot,name,addr] of cards){
+    if(!addr){ html.push(`<div class="card"><h3>${name}</h3><p style="color:var(--mute)">Not connected.</p><button class="btn sm" data-slot="user">Connect</button></div>`); continue; }
+    const [x,ls]=await Promise.all([xrpBal(addr),lines(addr).catch(()=>[])]);
+    if(slot==='user'){ const bl=ls.find(l=>cc(l.currency)===cc(S.cfg.bCur)&&l.account===S.cfg.bIss); S.userBonsai=bl?Number(bl.balance):0; $('#maxBtn').textContent=fmt(S.userBonsai,2); }
+    if(slot==='recv') $('#opRecvBal').textContent=fmt(x,2)+' XRP';
+    if(slot==='iss') $('#opIssBal').textContent=fmt(x,2)+' XRP';
+    const rows=ls.filter(l=>Number(l.balance)!==0||l.account===S.cfg.bIss||l.account===S.cfg.uIss).map(l=>`<div class="row" style="justify-content:space-between"><span>${dc(l.currency)}</span><span class="mono">${fmt(Number(l.balance),4)}</span></div>`).join('');
+    html.push(`<div class="card"><h3>${name}</h3><div class="addr">${addr}</div><div class="v mono" style="font:400 28px var(--display);margin:8px 0">${fmt(x,2)} XRP</div><div class="col" style="gap:6px">${rows}</div></div>`);
+  }
+  $('#walletCards').innerHTML=html.join('');
+}
+
+/* ---------- wallet modal ---------- */
+function openWallet(slot){
+  S.slot=slot; $('#wmTitle').textContent = {user:'Connect wallet',recv:'Import receiver key',iss:'Import issuer key'}[slot];
+  $('#genTab').style.display = slot==='user'?'':'none'; $('#wmErr').hidden=true; $('#seedIn').value=''; setTab('imp'); $('#genOut').hidden=true; $('#wm').classList.add('on');
+}
+function setTab(t){ document.querySelectorAll('.tabs button').forEach(b=>b.classList.toggle('on',b.dataset.t===t)); $('#wmImp').hidden=t!=='imp'; $('#wmGen').hidden=t!=='gen'; }
+function wmErr(m){ const e=$('#wmErr'); e.textContent=m; e.hidden=false; }
+function attach(slot,wallet){
+  S.w[slot]=wallet; $('#wm').classList.remove('on'); renderWalletUI(); renderQuote(); updateWatch();
+  toast((slot==='user'?'Wallet connected: ':slot==='recv'?'Receiver key loaded: ':'Issuer key loaded: ')+short(wallet.address));
+}
+$('#seedGo').onclick=()=>{
+  try{
+    const w = X.Wallet.fromSeed($('#seedIn').value.trim()); $('#seedIn').value='';
+    if(S.slot==='recv'&&w.address!==S.cfg.recv) return wmErr('That seed belongs to '+w.address+', not the receiver wallet '+S.cfg.recv+'.');
+    if(S.slot==='iss'&&w.address!==S.cfg.uIss) return wmErr('That seed belongs to '+w.address+', not the issuer wallet '+S.cfg.uIss+'.');
+    attach(S.slot,w);
+  }catch(e){ wmErr('That is not a valid family seed.'); }
+};
+$('#genGo').onclick=()=>{ const w=X.Wallet.generate(); S.gen=w; $('#gAddr').textContent=w.address; $('#gSeed').textContent=w.seed; $('#genOut').hidden=false; $('#genGo').textContent='Use this wallet'; $('#genGo').onclick=()=>attach('user',S.gen); };
+$('#gCopy').onclick=()=>navigator.clipboard.writeText(S.gen.seed).then(()=>toast('Seed copied'));
+$('#wmClose').onclick=()=>$('#wm').classList.remove('on');
+document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>setTab(b.dataset.t));
+$('#walletBtn').onclick=()=>openWallet('user');
+document.addEventListener('click',e=>{ const b=e.target.closest('[data-slot]'); if(b) openWallet(b.dataset.slot); const g=e.target.closest('[data-go]'); if(g) go(g.dataset.go); });
+
+function confirmBox(html){ return new Promise(res=>{ $('#cmBody').innerHTML=html; $('#cm').classList.add('on'); $('#cmYes').onclick=()=>{$('#cm').classList.remove('on');res(true)}; $('#cmNo').onclick=()=>{$('#cm').classList.remove('on');res(false)}; }); }
+
+/* ---------- burn & mint (user side) ---------- */
+const FORGE_STEPS=[['Check trust lines','BONSAI and USDX lines on your wallet and the receiver'],['Send BONSAI to receiver','Signed by your wallet, memo marks it as a USDX mint'],['Treasury burns collateral','Receiver returns the BONSAI to its issuer'],['USDX minted','Issuer pays USDX to your wallet with a receipt']];
+function renderSteps(state,msgs={}){ $('#forgeSteps').innerHTML=FORGE_STEPS.map((s,i)=>`<li class="${state[i]||''}"><i>${state[i]==='done'?'✓':i+1}</i><div><b>${s[0]}</b><span>${msgs[i]||s[1]}</span></div></li>`).join(''); }
+renderSteps([]);
+async function trustline(wallet,asset,label){
+  const ls = await lines(wallet.address);
+  if(ls.some(l=>cc(l.currency)===cc(asset.currency)&&l.account===asset.issuer)) return;
+  await submit({TransactionType:'TrustSet',Account:wallet.address,LimitAmount:{currency:asset.currency,issuer:asset.issuer,value:'1000000000'}},wallet);
+  toast(label+' trust line created');
+}
+async function burnFlow(){
+  const w=S.w.user, v=parseFloat($('#amt').value);
+  if(!w) return openWallet('user');
+  if(!cfgReady()) return go('settings');
+  if(!(v>0)) return;
+  if(v>(S.userBonsai||0)) return toast('Amount is more than your BONSAI balance.');
+  const px = await getPrice(); renderQuote();
+  const usdx = Math.floor(v*px.usd*100/ratio()*1e6)/1e6;
+  const ok = await confirmBox(`<div>You are about to burn <b class="brass mono">${fmt(v,4)} BONSAI</b> on XRPL mainnet.</div><div>Estimated mint: <b class="jade mono">${fmt(usdx,4)} USDX</b> at $${px.usd.toPrecision(5)} per BONSAI. The final rate is set when the treasury processes your deposit.</div><div class="addr">${short(w.address)} → ${S.cfg.recv}</div><div class="note">The burn cannot be reversed.</div>`);
+  if(!ok) return;
+  const st=[],ms={}; const set=(i,s,m)=>{st[i]=s; if(m) ms[i]=m; renderSteps(st,ms);};
+  $('#burnBtn').disabled=true;
+  try{
+    set(0,'act');
+    const rl0=await lines(S.cfg.recv);
+    if(!rl0.some(l=>cc(l.currency)===cc(S.cfg.bCur)&&l.account===S.cfg.bIss)) throw new Error('The receiver wallet has no BONSAI trust line yet. The operator must press "Set up receiver trust lines" on the Operator page.');
+    await trustline(w,uAsset(),'USDX'); set(0,'done');
+    set(1,'act');
+    const issInfo = await req({command:'account_info',account:S.cfg.bIss,ledger_index:'validated'});
+    const tr = issInfo.account_data.TransferRate? issInfo.account_data.TransferRate/1e9 : 1;
+    const val = v.toFixed(6);
+    const tx={TransactionType:'Payment',Account:w.address,Destination:S.cfg.recv,Amount:{...bAsset(),value:val},Memos:[memo('USDX/MINT',{v:1,bonsai:+val,quote:usdx})]};
+    if(tr>1) tx.SendMax={...bAsset(),value:(v*tr*1.000001).toFixed(6)};
+    const dep = await submit(tx,w); set(1,'done','Deposited · '+dep.slice(0,12)+'…');
+    set(2,'act','Waiting for the treasury processor');
+    S.watchDep=dep;
+    if(S.w.recv&&S.w.iss){ await processPending(); }
+    await waitReceipt(dep,st,ms);
+  }catch(e){ const i=st.findIndex(x=>x==='act'); st[i<0?0:i]='err'; ms[i<0?0:i]=e.message; renderSteps(st,ms); }
+  $('#burnBtn').disabled=false; refreshAll();
+}
+async function waitReceipt(dep,st,ms){
+  for(let n=0;n<40;n++){
+    await scanLedger(); const d=S.ledger.deposits.find(x=>x.hash===dep);
+    if(d&&d.burned&&st[2]!=='done'){ st[2]='done'; ms[2]='Burned'; renderSteps(st,ms); }
+    if(d&&d.minted){ const m=S.ledger.mints.find(x=>x.dep===dep); st[2]='done'; st[3]='done'; ms[3]=m?`Minted ${fmt(m.usdx,4)} USDX · ${m.hash.slice(0,12)}…`:'Minted'; renderSteps(st,ms); toast('USDX minted'); return; }
+    await new Promise(r=>setTimeout(r,6000));
+  }
+  ms[2]='Still pending. The treasury operator will process it when their processor is online.'; renderSteps(st,ms);
+}
+
+/* ---------- operator processor ---------- */
+async function processPending(){
+  if(S.busy) return; if(!(S.w.recv&&S.w.iss)) return toast('Load both operator keys first.');
+  S.busy=true; const log=[];
+  const draw=()=>{ $('#procLog').innerHTML=log.map(l=>`<li class="${l.s}"><i>${l.s==='done'?'✓':l.s==='err'?'!':'…'}</i><div><b>${l.t}</b><span>${l.m||''}</span></div></li>`).join(''); };
+  try{
+    await scanLedger();
+    const pend=S.ledger.deposits.filter(d=>!d.minted);
+    if(!pend.length){ log.push({s:'done',t:'Nothing pending',m:'All deposits are minted.'}); draw(); return; }
+    for(const d of pend){
+      const row={s:'act',t:`Deposit ${d.hash.slice(0,10)}…`,m:`${fmt(d.value,4)} BONSAI from ${short(d.from)}`}; log.push(row); draw();
+      try{
+        const px = await getPrice();
+        const usdx = Number(floor6(d.value*px.usd*100/ratio()));
+        if(!(usdx>0)) throw new Error('Mint amount rounds to zero');
+        let burnHash = S.ledger.burns[d.hash]&&S.ledger.burns[d.hash].hash;
+        if(!burnHash){
+          row.m='Burning '+fmt(d.value,4)+' BONSAI'; draw();
+          burnHash = await submit({TransactionType:'Payment',Account:S.cfg.recv,Destination:S.cfg.bIss,Amount:{...bAsset(),value:d.value.toFixed(6)},Memos:[memo('USDX/BURN',{v:1,dep:d.hash,bonsai:d.value})]},S.w.recv);
+        }
+        row.m='Minting '+fmt(usdx,4)+' USDX'; draw();
+        const mh = await submit({TransactionType:'Payment',Account:S.cfg.uIss,Destination:d.from,Amount:{...uAsset(),value:usdx.toFixed(6)},Memos:[memo('USDX/RECEIPT',{v:1,dep:d.hash,burn:burnHash,bonsai:d.value,rateUsd:px.usd,ratio:ratio(),usdx})]},S.w.iss);
+        row.s='done'; row.m=`Minted ${fmt(usdx,4)} USDX to ${short(d.from)} · ${mh.slice(0,10)}…`;
+      }catch(e){ row.s='err'; row.m=e.message+(/tecPATH|tecNO_LINE|tecNO_AUTH/.test(e.message)?' · recipient needs a USDX trust line':''); }
+      draw();
+    }
+  }catch(e){ log.push({s:'err',t:'Processor error',m:e.message}); draw(); }
+  S.busy=false; refreshAll();
+}
+let watching=false;
+async function updateWatch(){
+  if(watching||!(S.w.recv&&S.w.iss)) return; watching=true;
+  const c=await connect(); await c.request({command:'subscribe',accounts:[S.cfg.recv]});
+  c.on('transaction',t=>{ if($('#autoProc').checked && (t.transaction||t.tx_json||{}).Destination===S.cfg.recv) setTimeout(processPending,3500); });
+}
+$('#procNow').onclick=processPending;
+$('#setupIssuer').onclick=async()=>{
+  if(!S.w.iss) return openWallet('iss');
+  try{ await submit({TransactionType:'AccountSet',Account:S.cfg.uIss,SetFlag:8},S.w.iss); toast('DefaultRipple enabled on issuer'); }catch(e){ toast(e.message); }
+};
+
+/* ---------- coverage, treasury mint, peg keeper, pools ---------- */
+const K={log:[],busy:false};
+const isUsdx = a => typeof a==='object' && cc(a.currency)===cc(S.cfg.uCur) && a.issuer===S.cfg.uIss;
+const aval = a => typeof a==='string'? Number(a)/1e6 : Number(a.value);
+const PAIRS={ bonsai:{label:'BONSAI / USDX',other:()=>bAsset(),name:'BONSAI'}, xrp:{label:'XRP / USDX',other:()=>({currency:'XRP'}),name:'XRP'} };
+const otherAmt=(kind,v)=> kind==='xrp'? String(Math.round(v*1e6)) : {...bAsset(),value:Number(v).toFixed(6)};
+const unitUsd=(kind)=> kind==='xrp'? S.px.xrpUsd : S.px.usd;   // USD value of one unit of the non-USDX asset
+function coverage(){
+  if(!S.ledger||!S.px||S.supply.u==null) return null;
+  const outstanding=S.supply.u, burnedBonsai=S.ledger.burnList.reduce((s,x)=>s+x.value,0);
+  const requiredUsd=outstanding*ratio()/100, coveredUsd=burnedBonsai*S.px.usd;
+  const shortUsd=Math.max(0,requiredUsd-coveredUsd);
+  return {outstanding,burnedBonsai,requiredUsd,coveredUsd,shortUsd,shortBonsai:shortUsd/S.px.usd};
+}
+function klog(t,m,s='done'){ K.log.unshift({t,m,s}); K.log=K.log.slice(0,40); renderKLog(); }
+function renderKLog(){ $('#kLog').innerHTML=K.log.slice(0,8).map(l=>`<li class="${l.s}"><i>${l.s==='done'?'✓':l.s==='err'?'!':'…'}</i><div><b>${l.t}</b><span>${l.m}</span></div></li>`).join(''); }
+async function poolInfo(kind){
+  try{
+    const r=await req({command:'amm_info',asset:PAIRS[kind].other(),asset2:uAsset(),ledger_index:'validated'}); const a=r.amm;
+    const uIsFirst=isUsdx(a.amount), u=uIsFirst?a.amount:a.amount2, o=uIsFirst?a.amount2:a.amount;
+    return {kind,ro:aval(o),ru:aval(u),fee:a.trading_fee/100000,lp:a.lp_token,acct:a.account};
+  }catch(e){ return null; }
+}
+function poolPrice(p){ return p.ro/p.ru*unitUsd(p.kind); }   // USD per USDX implied by the pool
+async function renderPeg(){
+  if(!cfgReady()) return;
+  const [pb,px_,rl,rx]=await Promise.all([poolInfo('bonsai'),poolInfo('xrp'),lines(S.cfg.recv).catch(()=>[]),xrpBal(S.cfg.recv)]);
+  S.pools={bonsai:pb,xrp:px_};
+  const inv=(cur,iss)=>{const x=rl.find(z=>cc(z.currency)===cc(cur)&&z.account===iss); return x?Number(x.balance):0;};
+  S.recvInv={xrp:rx,usdx:inv(S.cfg.uCur,S.cfg.uIss),bonsai:inv(S.cfg.bCur,S.cfg.bIss)};
+  $('#gInv').textContent=`${fmt(rx,1)} · ${fmt(S.recvInv.usdx,0)} · ${fmt(S.recvInv.bonsai,0)}`;
+  const tol=(+$('#kTol').value||50)/1e4;
+  $('#gBand').textContent=`$${(1-tol).toFixed(4)} – $${(1+tol).toFixed(4)}`;
+  const kind=$('#kPool').value, kp=S.pools[kind];
+  if(kp&&S.px){
+    const price=poolPrice(kp); S.peg={price,kind};
+    $('#gPrice').textContent='$'+price.toFixed(4);
+    $('#gPrice').className='v mono '+(Math.abs(price-1)<=tol?'jade':'brass');
+    $('#gPriceSub').textContent=(price>=1?'+':'')+((price-1)*1e4).toFixed(0)+' bps from $1.00 · '+PAIRS[kind].label+' pool';
+    $('#pegAlert').innerHTML= price<0.99? '<div class="note err-note">USDX is below the $0.99 floor. The keeper buys back and retires USDX as fast as its trade limit allows. Check that the treasury holds enough '+PAIRS[kind].name+'.</div>':'';
+  } else { $('#gPrice').textContent='—'; $('#gPriceSub').textContent=S.px?('No '+PAIRS[kind].label+' pool yet. Create one below.'):'Waiting for prices'; $('#pegAlert').innerHTML=''; }
+  const cv=coverage();
+  if(cv){
+    $('#cOut').textContent=fmt(cv.outstanding,2)+' USDX'; $('#cReq').textContent='$'+fmt(cv.requiredUsd,2); $('#cBurn').textContent=fmt(cv.burnedBonsai,4)+' BONSAI'; $('#cCov').textContent='$'+fmt(cv.coveredUsd,2);
+    $('#cBar').style.width=Math.min(100,cv.requiredUsd>0?cv.coveredUsd/cv.requiredUsd*100:100)+'%';
+    $('#gShort').textContent=cv.shortBonsai>1e-6?fmt(cv.shortBonsai,2):'None'; $('#gShort').className='v mono '+(cv.shortBonsai>1e-6?'brass':'jade');
+    $('#gShortSub').textContent=cv.shortBonsai>1e-6?'BONSAI still to burn ($'+fmt(cv.shortUsd,2)+')':'Every USDX is covered';
+    $('#coverBtn').disabled=!(cv.shortBonsai>1e-6);
+  }
+  // pool cards with treasury LP balances
+  const cards=[];
+  for(const k of ['bonsai','xrp']){
+    const p=S.pools[k];
+    if(!p){ cards.push(`<div class="leg"><div class="u">${PAIRS[k].label}</div><p style="color:var(--mute);margin:8px 0 0">No pool yet.</p></div>`); continue; }
+    const lp=rl.find(l=>l.currency===p.lp.currency&&l.account===p.acct), mine=lp?Number(lp.balance):0, total=Number(p.lp.value), share=total>0?mine/total:0;
+    const tvl=S.px? p.ro*unitUsd(k)+p.ru*1 : null;
+    cards.push(`<div class="leg"><div class="u">${PAIRS[k].label}${$('#kPool').value===k?' · peg pool':''}</div>
+      <div class="row" style="justify-content:space-between;margin-top:8px"><span style="color:var(--mute)">${PAIRS[k].name} reserve</span><b class="mono">${fmt(p.ro,k==='xrp'?2:2)}</b></div>
+      <div class="row" style="justify-content:space-between"><span style="color:var(--mute)">USDX reserve</span><b class="mono">${fmt(p.ru,2)}</b></div>
+      <div class="row" style="justify-content:space-between"><span style="color:var(--mute)">USDX price</span><b class="mono ${Math.abs(poolPrice(p)-1)<=tol?'jade':'brass'}">$${S.px?poolPrice(p).toFixed(4):'—'}</b></div>
+      <div class="row" style="justify-content:space-between"><span style="color:var(--mute)">Pool value</span><b class="mono">${tvl==null?'—':'$'+fmt(tvl,2)}</b></div>
+      <div class="row" style="justify-content:space-between"><span style="color:var(--mute)">Fee</span><b class="mono">${(p.fee*100).toFixed(2)}%</b></div>
+      <div class="row" style="justify-content:space-between"><span style="color:var(--mute)">Treasury LP</span><b class="mono">${mine.toPrecision(8)}</b></div>
+      <div class="row" style="justify-content:space-between"><span style="color:var(--mute)">Treasury share</span><b class="mono">${(share*100).toFixed(3)}% · ${fmt(p.ro*share,2)} ${PAIRS[k].name} + ${fmt(p.ru*share,2)} USDX</b></div>
+      <div class="addr" style="margin-top:6px">${p.acct}</div></div>`);
+  }
+  $('#poolCards').innerHTML=cards.join('');
+}
+async function coverFlow(){
+  const cv=coverage(); if(!cv||!(cv.shortBonsai>1e-6)) return;
+  if(!S.w.recv) return openWallet('recv');
+  const inv=S.recvInv?S.recvInv.bonsai:0;
+  if(inv+1e-9<cv.shortBonsai) return toast(`Receiver holds ${fmt(inv,2)} BONSAI, ${fmt(cv.shortBonsai,2)} is needed. Send more BONSAI to the receiver first.`);
+  const amt=Math.ceil(cv.shortBonsai*1e6)/1e6;
+  if(!await confirmBox(`<div>Burn <b class="brass mono">${fmt(amt,4)} BONSAI</b> from the receiver wallet to cover the shortfall of $${fmt(cv.shortUsd,2)}.</div><div class="note">No USDX is minted. This cannot be reversed.</div>`)) return;
+  try{ const h=await submit({TransactionType:'Payment',Account:S.cfg.recv,Destination:S.cfg.bIss,Amount:{...bAsset(),value:amt.toFixed(6)},Memos:[memo('USDX/COVER',{v:1,bonsai:amt,rateUsd:S.px.usd})]},S.w.recv); toast('Shortfall burned · '+h.slice(0,10)+'…'); refreshAll(); }catch(e){ toast(e.message); }
+}
+async function treasuryMint(){
+  const v=parseFloat($('#tmAmt').value);
+  if(!(v>0)) return toast('Enter the BONSAI amount to burn.');
+  if(!(S.w.recv&&S.w.iss)) return toast('Load both operator keys first (Operator page).');
+  if(!cfgReady()) return go('settings');
+  const px=await getPrice(), usdx=Number(floor6(v*px.usd*100/ratio()));
+  if(v>(S.recvInv?S.recvInv.bonsai:0)+1e-9) return toast('The receiver wallet does not hold that much BONSAI.');
+  if(!await confirmBox(`<div>Burn <b class="brass mono">${fmt(v,4)} BONSAI</b> from the receiver and mint <b class="jade mono">${fmt(usdx,4)} USDX</b> to the same wallet at $${px.usd.toPrecision(5)} per BONSAI.</div><div class="note">The burn cannot be reversed.</div>`)) return;
+  try{
+    await trustline(S.w.recv,uAsset(),'USDX');
+    const dep='TREASURY-'+Date.now();
+    const bh=await submit({TransactionType:'Payment',Account:S.cfg.recv,Destination:S.cfg.bIss,Amount:{...bAsset(),value:v.toFixed(6)},Memos:[memo('USDX/BURN',{v:1,dep,bonsai:v})]},S.w.recv);
+    const mh=await submit({TransactionType:'Payment',Account:S.cfg.uIss,Destination:S.cfg.recv,Amount:{...uAsset(),value:usdx.toFixed(6)},Memos:[memo('USDX/RECEIPT',{v:1,dep,burn:bh,bonsai:v,rateUsd:px.usd,ratio:ratio(),usdx})]},S.w.iss);
+    toast('Treasury minted '+fmt(usdx,2)+' USDX · '+mh.slice(0,10)+'…'); $('#tmAmt').value=''; refreshAll();
+  }catch(e){ toast(e.message); }
+}
+async function keeperStep(manual){
+  if(K.busy||!S.w.recv||!cfgReady()) { if(manual&&!S.w.recv) openWallet('recv'); return; }
+  K.busy=true; const w=S.w.recv, kind=$('#kPool').value, nm=PAIRS[kind].name;
+  try{
+    await getPrice();
+    const pool=await poolInfo(kind); if(!pool){ if(manual) toast('No '+PAIRS[kind].label+' pool yet.'); return; }
+    const uu=unitUsd(kind), price=pool.ro/pool.ru*uu;
+    const tol=(+$('#kTol').value||50)/1e4, maxPct=(+$('#kMax').value||20)/100, slip=(+$('#kSlip').value||100)/1e4;
+    $('#kLast').textContent='Checked '+new Date().toLocaleTimeString()+' · $'+price.toFixed(4);
+    if(Math.abs(price-1)<=tol){ if(manual) klog('In band','USDX is $'+price.toFixed(4)+'. Nothing to do.'); return; }
+    const pStar=1/uu, k=pool.ro*pool.ru, ru2=Math.sqrt(k/pStar), ro2=Math.sqrt(k*pStar);
+    const cap=price<0.99?Math.min(.5,maxPct*2):maxPct, rl=await lines(w.address);
+    const bal=x=>Number((rl.find(z=>cc(z.currency)===cc(x.currency)&&z.account===x.issuer)||{balance:0}).balance);
+    const usdxInv=bal(uAsset());
+    const otherInv= kind==='xrp'? ((await xrpBal(w.address))||0)-3 : bal(bAsset());
+    if(price<1){
+      const full=pool.ru-ru2; const du=Math.min(full,pool.ru*cap); if(du<1) return;
+      const dx=(ro2-pool.ro)*(du/full), sendMax=dx/(1-pool.fee)*(1+slip);
+      if(otherInv<sendMax) throw new Error(`Treasury needs about ${fmt(sendMax,2)} ${nm} to defend the peg and holds ${fmt(Math.max(0,otherInv),2)}.`);
+      klog('USDX below $1','Buying '+fmt(du,2)+' USDX with up to '+fmt(sendMax,2)+' '+nm,'act');
+      const h=await submit({TransactionType:'Payment',Account:w.address,Destination:w.address,Amount:{...uAsset(),value:du.toFixed(6)},SendMax:otherAmt(kind,sendMax),Memos:[memo('USDX/PEG',{v:1,side:'buy',usdx:du,price,pool:kind})]},w);
+      const b=await submit({TransactionType:'Payment',Account:w.address,Destination:S.cfg.uIss,Amount:{...uAsset(),value:du.toFixed(6)},Memos:[memo('USDX/PEGBURN',{v:1,usdx:du})]},w);
+      K.log.shift(); klog('Bought and retired '+fmt(du,2)+' USDX','Was $'+price.toFixed(4)+' · buy '+h.slice(0,8)+'… · retire '+b.slice(0,8)+'…');
+    } else {
+      const full=ru2-pool.ru; const dux=Math.min(full,pool.ru*cap); if(dux<1) return;
+      const out=(pool.ro-ro2)*(dux/full)*(1-slip), sendMax=dux/(1-pool.fee)*(1+slip);
+      if(usdxInv<sendMax) throw new Error(`USDX is above $1 but the treasury holds ${fmt(usdxInv,2)} USDX and needs ${fmt(sendMax,2)}. Use Burn & mint to stock it.`);
+      klog('USDX above $1','Selling up to '+fmt(sendMax,2)+' USDX for '+fmt(out,2)+' '+nm,'act');
+      const h=await submit({TransactionType:'Payment',Account:w.address,Destination:w.address,Amount:otherAmt(kind,out),SendMax:{...uAsset(),value:sendMax.toFixed(6)},Memos:[memo('USDX/PEG',{v:1,side:'sell',usdx:dux,price,pool:kind})]},w);
+      K.log.shift(); klog('Sold USDX into the pool','Was $'+price.toFixed(4)+' · '+h.slice(0,8)+'…');
+    }
+  }catch(e){ if(K.log[0]&&K.log[0].s==='act') K.log.shift(); klog('Keeper',e.message||String(e),'err'); }
+  K.busy=false; refreshAll();
+}
+async function poolAction(act){
+  const w=S.w.recv; if(!w) return openWallet('recv');
+  const kind=$('#aKind').value, nm=PAIRS[kind].name;
+  try{
+    await getPrice();
+    const u=parseFloat($('#aUsdx').value), pool=await poolInfo(kind), uu=unitUsd(kind);
+    const rl=await lines(w.address), bal=x=>Number((rl.find(z=>cc(z.currency)===cc(x.currency)&&z.account===x.issuer)||{balance:0}).balance);
+    if(act==='create'){
+      if(pool) return toast('A '+PAIRS[kind].label+' pool already exists. Use Deposit.');
+      if(!(u>0)) return toast('Enter a USDX amount.');
+      const o=u/uu;
+      if(bal(uAsset())<u) return toast(`The receiver holds ${fmt(bal(uAsset()),2)} USDX. Mint USDX to the treasury first.`);
+      if(kind==='bonsai'&&bal(bAsset())<o) return toast(`The receiver holds ${fmt(bal(bAsset()),2)} BONSAI but needs ${fmt(o,2)}.`);
+      if(!await confirmBox(`<div>Create the ${PAIRS[kind].label} pool with <b class="mono">${fmt(u,2)} USDX</b> and <b class="mono">${fmt(o,kind==='xrp'?4:2)} ${nm}</b>, which prices USDX at exactly $1.00 (${nm} at $${uu.toPrecision(6)}). Creating a pool costs a network fee of about one owner reserve in XRP.</div><div class="note">Pool tokens go to the receiver wallet.</div>`)) return;
+      await submit({TransactionType:'AMMCreate',Account:w.address,Amount:otherAmt(kind,o),Amount2:{...uAsset(),value:u.toFixed(6)},TradingFee:300},w);
+    } else if(act==='deposit'){
+      if(!pool) return toast('No pool yet. Create it first.'); if(!(u>0)) return toast('Enter a USDX amount.');
+      const o=u*pool.ro/pool.ru;
+      if(!await confirmBox(`<div>Deposit <b class="mono">${fmt(u,2)} USDX</b> and <b class="mono">${fmt(o,4)} ${nm}</b> into the ${PAIRS[kind].label} pool, matching its current ratio.</div>`)) return;
+      await submit({TransactionType:'AMMDeposit',Account:w.address,Asset:PAIRS[kind].other(),Asset2:uAsset(),Amount:otherAmt(kind,o),Amount2:{...uAsset(),value:u.toFixed(6)},Flags:1048576},w);
+    } else {
+      if(!pool) return toast('No pool yet.');
+      const pct=Math.min(100,Math.max(0.01,parseFloat($('#aPct').value)||0));
+      const lp=rl.find(l=>l.currency===pool.lp.currency&&l.account===pool.acct); if(!lp||!(+lp.balance>0)) return toast('The receiver holds no LP tokens for this pool.');
+      const val=pct>=100? lp.balance : (+lp.balance*pct/100).toPrecision(15);
+      if(!await confirmBox(`<div>Withdraw ${pct}% of the treasury&rsquo;s liquidity from the ${PAIRS[kind].label} pool.</div><div class="note">Withdrawing moves the pool price until the keeper next runs.</div>`)) return;
+      await submit({TransactionType:'AMMWithdraw',Account:w.address,Asset:PAIRS[kind].other(),Asset2:uAsset(),LPTokenIn:{currency:pool.lp.currency,issuer:pool.acct,value:String(val)},Flags:65536},w);
+    }
+    toast('Done'); refreshAll();
+  }catch(e){ toast(e.message); }
+}
+async function prepReceiver(){
+  if(!S.w.recv) return openWallet('recv');
+  try{ await trustline(S.w.recv,bAsset(),'BONSAI'); await trustline(S.w.recv,uAsset(),'USDX'); toast('Receiver trust lines are ready'); renderPeg(); }catch(e){ toast(e.message); }
+}
+async function verifySetup(){
+  const out=[], add=(ok,t,m)=>out.push({ok,t,m}); const box=$('#verifyOut'); box.innerHTML='<li class="act"><i>…</i><div><b>Checking the ledger</b></div></li>';
+  const F={DefaultRipple:0x00800000,RequireAuth:0x00040000,GlobalFreeze:0x00400000};
+  try{
+    await connect();
+    if(!X.isValidClassicAddress(S.cfg.bIss||'')) add(false,'BONSAI issuer address','Not a valid classic address.');
+    else{
+      let bi=null; try{ bi=(await req({command:'account_info',account:S.cfg.bIss,ledger_index:'validated'})).account_data; }catch(e){}
+      if(!bi) add(false,'BONSAI issuer account','Not found on mainnet.');
+      else{
+        add(true,'BONSAI issuer account','Funded with '+fmt(Number(bi.Balance)/1e6,2)+' XRP');
+        add(!(bi.Flags&F.GlobalFreeze),'BONSAI global freeze',bi.Flags&F.GlobalFreeze?'Issuer has frozen all BONSAI. Burns and mints will fail.':'Off');
+        add(!(bi.Flags&F.RequireAuth),'BONSAI trust-line authorization',bi.Flags&F.RequireAuth?'Issuer requires authorization. The receiver wallet must be authorized by the issuer before it can hold BONSAI.':'Not required');
+        add(true,'BONSAI transfer fee',bi.TransferRate?((bi.TransferRate/1e9-1)*100).toFixed(4)+'% on transfers. Deposits send a little extra to cover it, and burns return exactly what the receiver holds.':'None');
+      }
+      const sup=await supplyOf(S.cfg.bIss,S.cfg.bCur); add(sup>0,'BONSAI currency '+S.cfg.bCur+' ('+cc(S.cfg.bCur)+')',sup>0?'Supply on ledger: '+fmt(sup,2):'This issuer has no '+S.cfg.bCur+' outstanding. The currency code may be wrong.');
+      try{ const px=await getPrice(); add(true,'BONSAI price','$'+px.usd.toPrecision(6)+' from '+Object.keys(px.src).join(', ')+'; XRP $'+fmt(px.xrpUsd,4)); }catch(e){ add(false,'BONSAI price',e.message); }
+    }
+    let ui=null; try{ ui=(await req({command:'account_info',account:S.cfg.uIss,ledger_index:'validated'})).account_data; }catch(e){}
+    if(!ui) add(false,'USDX issuer account','Not found on mainnet. Send at least 1 XRP to '+S.cfg.uIss+' to activate it.');
+    else{ add(true,'USDX issuer account','Funded with '+fmt(Number(ui.Balance)/1e6,2)+' XRP');
+      add(!!(ui.Flags&F.DefaultRipple),'USDX issuer DefaultRipple',ui.Flags&F.DefaultRipple?'On. USDX can move between holders and pools.':'Off. Press "Enable DefaultRipple" on the Operator page before minting, otherwise holders cannot trade USDX.');
+      add(!(ui.Flags&F.RequireAuth),'USDX trust-line authorization',ui.Flags&F.RequireAuth?'Issuer requires authorization, so every holder needs approval.':'Not required'); }
+    let ri=null; try{ ri=(await req({command:'account_info',account:S.cfg.recv,ledger_index:'validated'})).account_data; }catch(e){}
+    if(!ri) add(false,'Receiver wallet','Not activated. Fund '+S.cfg.recv+' with XRP.');
+    else{ add(true,'Receiver wallet','Funded with '+fmt(Number(ri.Balance)/1e6,2)+' XRP');
+      const rl=await lines(S.cfg.recv).catch(()=>[]);
+      add(rl.some(l=>cc(l.currency)===cc(S.cfg.bCur)&&l.account===S.cfg.bIss),'Receiver BONSAI trust line','Needed so users can send BONSAI to the receiver. Use "Set up receiver trust lines" on the Operator page if missing.');
+      add(rl.some(l=>cc(l.currency)===cc(S.cfg.uCur)&&l.account===S.cfg.uIss),'Receiver USDX trust line','Needed for the treasury to hold USDX and trade in pools.'); }
+    const u=await supplyOf(S.cfg.uIss,S.cfg.uCur).catch(()=>0); add(true,'USDX outstanding',fmt(u,2)+' USDX');
+  }catch(e){ add(false,'Check failed',e.message); }
+  box.innerHTML=out.map(o=>`<li class="${o.ok?'done':'err'}"><i>${o.ok?'✓':'!'}</i><div><b>${o.t}</b><span>${o.m||''}</span></div></li>`).join('');
+}
+$('#coverBtn').onclick=coverFlow; $('#tmBtn').onclick=treasuryMint; $('#kNow').onclick=()=>keeperStep(true);
+$('#aCreate').onclick=()=>poolAction('create'); $('#aDeposit').onclick=()=>poolAction('deposit'); $('#aWithdraw').onclick=()=>poolAction('withdraw');
+$('#kPool').onchange=()=>renderPeg().catch(()=>{}); $('#prepRecv').onclick=prepReceiver; $('#verifyBtn').onclick=verifySetup;
+setInterval(()=>{ if($('#kOn').checked&&S.w.recv&&!S.busy) keeperStep(false); },30000);
+
+/* ---------- nav / settings / init ---------- */
+const TITLES={overview:'USDX <em>Treasury</em>',peg:'Peg <em>&amp; Pools</em>',forge:'Burn <em>&amp; Mint</em>',ledger:'Treasury <em>Ledger</em>',operator:'<em>Operator</em>',wallets:'<em>Wallets</em>',settings:'<em>Settings</em>'};
+function go(p){ document.querySelectorAll('.page').forEach(x=>x.classList.toggle('on',x.id==='p-'+p)); document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('on',b.dataset.p===p)); $('#title').innerHTML=TITLES[p]; if(p==='wallets') renderWalletUI(); }
+document.querySelectorAll('#nav button').forEach(b=>b.onclick=()=>go(b.dataset.p));
+$('#amt').oninput=renderQuote;
+$('#maxBtn').onclick=()=>{ $('#amt').value=S.userBonsai||''; renderQuote(); };
+$('#burnBtn').onclick=burnFlow;
+$('#refreshLedger').onclick=refreshAll;
+const F={cServer:'server',cBCur:'bCur',cBIss:'bIss',cUCur:'uCur',cUIss:'uIss',cRecv:'recv',cRatio:'ratio'};
+Object.entries(F).forEach(([id,k])=>$('#'+id).value=S.cfg[k]);
+$('#saveCfg').onclick=async()=>{
+  Object.entries(F).forEach(([id,k])=>S.cfg[k]=$('#'+id).value.trim());
+  try{ localStorage.setItem('usdx-cfg',JSON.stringify(S.cfg)); }catch(e){}
+  try{ if(S.client) await S.client.disconnect(); }catch(e){} S.client=null; watching=false;
+  toast('Saved'); refreshAll();
+};
+(async function init(){
+  if(!window.xrpl){ document.body.insertAdjacentHTML('afterbegin','<div class="note" style="position:fixed;top:10px;left:270px;z-index:99">The xrpl.js library could not load. Check your connection and reload.</div>'); return; }
+  await loadFileCfg(); await refreshAll(); setInterval(()=>{ if(!S.busy) refreshAll(); },60000);
+})();
+</script>
+</body>
+</html>
