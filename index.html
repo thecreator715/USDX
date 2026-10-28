@@ -7,6 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Manrope:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<meta http-equiv="Cache-Control" content="no-cache, must-revalidate">
 <script src="https://cdn.jsdelivr.net/npm/xrpl@4.2.5/build/xrpl-latest-min.js"></script>
 <script>if(!window.xrpl){document.write('<script src="https://unpkg.com/xrpl@4.2.5/build/xrpl-latest-min.js"><\/script>')}</script>
 <style>
@@ -368,7 +369,7 @@ td{padding:11px 10px;border-bottom:1px solid #132a20;font-size:13px;white-space:
       <p class="s" style="color:var(--mute);font-size:12px;margin:0">This creates the first USDX in the treasury. It runs once. The BONSAI is burned first at today&rsquo;s price, then the issuer mints to the receiver wallet. After this the app only tracks supply, and new USDX appears only when someone burns BONSAI for it.</p>
     </div>
     <div class="card col" id="monCard">
-      <h3>Peg monitor · both pools watched every 30 s</h3>
+      <h3>Peg monitor · both pools watched every minute</h3>
       <div id="monAlert"></div>
       <div class="grid g2" id="monRows"></div>
       <div class="s" id="monMeta" style="color:var(--mute);font-size:12px"></div>
@@ -399,7 +400,7 @@ td{padding:11px 10px;border-bottom:1px solid #132a20;font-size:13px;white-space:
       </div>
       <div class="card col">
         <h3>Peg keeper · signs from the receiver wallet</h3>
-        <div class="row" style="justify-content:space-between"><label class="row" style="margin:0;gap:8px;text-transform:none;letter-spacing:0;font-size:13px;color:var(--fg)"><input type="checkbox" id="kOn" style="width:auto" checked> Auto-rebalance both pools every 30 s</label><span class="pill" id="kArmed"><i class="dot"></i><span>Key not loaded</span></span></div>
+        <div class="row" style="justify-content:space-between"><label class="row" style="margin:0;gap:8px;text-transform:none;letter-spacing:0;font-size:13px;color:var(--fg)"><input type="checkbox" id="kOn" style="width:auto" checked> Auto-rebalance both pools every 45 s</label><span class="pill" id="kArmed"><i class="dot"></i><span>Key not loaded</span></span></div>
         <div class="row"><button class="btn ghost sm" data-slot="recv">Load receiver key</button><span class="s" style="color:var(--mute);font-size:12px">The keeper trades from the receiver wallet and only runs while its key is loaded in this tab. The Node keeper in the repo runs without a browser.</span></div>
         <div><label>Headline pool (DEX quotes and the big price). The keeper defends both pools.</label><select id="kPool"><option value="bonsai">BONSAI / USDX</option><option value="xrp">XRP / USDX</option></select></div>
         <div class="grid" style="grid-template-columns:repeat(3,1fr);gap:10px">
@@ -556,18 +557,34 @@ const ratio = () => Math.max(1, parseFloat(S.cfg.ratio)||100);
 const cfgReady = () => X.isValidClassicAddress(S.cfg.bIss||'') && X.isValidClassicAddress(S.cfg.uIss) && X.isValidClassicAddress(S.cfg.recv);
 
 /* ---------- network ---------- */
+const POOL={clients:{},cool:{},rr:0};
+const serverList=()=>[S.cfg.server,...(S.cfg.servers||[])].filter((v,i,a)=>v&&a.indexOf(v)===i);
+function refreshNet(){ setNet(Object.values(POOL.clients).some(c=>c.isConnected())); }
+async function clientFor(u){
+  let c=POOL.clients[u]; if(c&&c.isConnected()) return c;
+  c=new X.Client(u,{timeout:20000}); c._url=u;
+  c.on('disconnected',()=>{ if(POOL.clients[u]===c) delete POOL.clients[u]; refreshNet(); });
+  await c.connect(); POOL.clients[u]=c; refreshNet(); return c;
+}
+// each call picks the next server that is not cooling down, so load spreads across all of them
 async function connect(){
-  if(S.client && S.client.isConnected()) return S.client;
-  let list=[S.cfg.server,...(S.cfg.servers||[])].filter((v,i,a)=>v&&a.indexOf(v)===i); const k=(S.skip||0)%Math.max(1,list.length); list=list.slice(k).concat(list.slice(0,k)); let last;
-  for(const u of list){
-    try{ const c=new X.Client(u); c.on('disconnected',()=>{ if(S.client===c||!S.client) setNet(false); }); await c.connect(); S.client=c; setNet(true); return c; }catch(e){ last=e; }
+  const list=serverList(); if(!list.length) throw new Error('No XRPL server configured');
+  let lastErr;
+  for(let round=0;round<3;round++){
+    const now=Date.now(), k=POOL.rr++%list.length, order=list.slice(k).concat(list.slice(0,k));
+    for(const u of order){
+      if((POOL.cool[u]||0)>now) continue;
+      try{ const c=await clientFor(u); S.client=c; return c; }catch(e){ lastErr=e; POOL.cool[u]=Date.now()+15000; }
+    }
+    const soon=Math.min(...list.map(u=>POOL.cool[u]||0)), d=soon-Date.now();
+    if(d>0&&d<65000){ $('#nettxt').textContent='All servers busy, waiting '+Math.ceil(d/1000)+' s'; await sleep(d+150); } else if(lastErr) break;
   }
-  throw last||new Error('No XRPL server reachable');
+  throw lastErr||new Error('No XRPL server reachable');
 }
 function setNet(ok){ $('#netdot').className='dot'+(ok?' ok':''); $('#nettxt').textContent = ok?'Mainnet connected':'Disconnected'; }
+const sleep = ms => new Promise(r=>setTimeout(r,ms));
 /* All ledger reads go through one queue: at most 3 at a time, account_tx spaced out, and a rate-limit reply
    waits the time the server asks for, then retries (rotating to the next server after repeated limits). */
-const sleep = ms => new Promise(r=>setTimeout(r,ms));
 const Q={active:0,waiters:[],lastTx:0};
 async function slot(cmd){
   while(Q.active>=3) await new Promise(r=>Q.waiters.push(r));
@@ -575,46 +592,35 @@ async function slot(cmd){
   if(cmd==='account_tx'){ const at=Math.max(Date.now(),Q.lastTx+650); Q.lastTx=at; if(at>Date.now()) await sleep(at-Date.now()); }
 }
 function release(){ Q.active--; const w=Q.waiters.shift(); if(w) w(); }
-async function req(r){
-  for(let attempt=0;;attempt++){
-    await slot(r.command);
-    try{ const c=await connect(); const res=(await c.request(r)).result; if($('#nettxt').textContent!=='Mainnet connected') setNet(true); return res; }
+const isBusy=m=>/rate limit|slowDown|too much load|units quota|noNetwork|Not connected|timeout|WebSocket|disconnect/i.test(m);
+const isLimit=m=>/rate limit|slowDown|too much load|units quota/i.test(m);
+async function onClient(fn,label,cmd){
+  for(let a=0;;a++){
+    if(cmd) await slot(cmd);
+    let c=null;
+    try{ c=await connect(); const res=await fn(c); if($('#nettxt').textContent!=='Mainnet connected') refreshNet(); return res; }
     catch(e){
       const msg=String(e&&e.message||e)+' '+JSON.stringify(e&&e.data||{});
-      if(/rate limit|slowDown|too much load|units quota/i.test(msg)&&attempt<8){
-        const m=/retry in ~?(\d+)\s*ms/i.exec(msg), wait=(m?+m[1]:3000)+400+Math.random()*600;
-        $('#nettxt').textContent='Rate limited, retrying';
-        if(attempt>=2&&(S.cfg.servers||[]).length>1){ S.skip=((S.skip||0)+1)%S.cfg.servers.length; try{ await S.client.disconnect(); }catch(_){} S.client=null; }
-        await sleep(wait); continue;
+      if(isBusy(msg)&&a<14){
+        const m=/retry in ~?(\d+)\s*ms/i.exec(msg), wait=Math.min(60000,(m?+m[1]:4000)+300);
+        if(c&&c._url) POOL.cool[c._url]=Date.now()+(isLimit(msg)?wait:8000);
+        const others=serverList().filter(u=>u!==(c&&c._url)&&(POOL.cool[u]||0)<=Date.now()).length;
+        const note=(isLimit(msg)?'Server '+(c?new URL(c._url.replace('wss','https')).hostname:'')+' is rate limiting, ':'Connection problem, ')+(others?'switching server':'waiting '+Math.round(wait/1000)+' s')+(label?' ('+label+')':'');
+        if(S.note) S.note(note); $('#nettxt').textContent=others?'Switching server':'Server busy, waiting';
+        await sleep(others?250:Math.random()*400); continue;
       }
       throw e;
     }
-    finally{ release(); }
+    finally{ if(cmd) release(); }
   }
 }
+const req=r=>onClient(c=>c.request(r).then(x=>x.result),r.command,r.command);
 /* short-lived cache so one refresh never asks the ledger the same thing twice */
 const CACHE=new Map();
 function cached(key,fn,ttl=12000){ const h=CACHE.get(key); if(h&&Date.now()-h.t<ttl) return h.p; const p=fn(); CACHE.set(key,{t:Date.now(),p}); p.catch(()=>CACHE.delete(key)); return p; }
-const isBusy=m=>/rate limit|slowDown|too much load|units quota|noNetwork|Not connected|timeout/i.test(m);
-async function withRetry(fn,label){
-  for(let a=0;;a++){
-    try{ return await fn(); }
-    catch(e){
-      const msg=String(e&&e.message||e)+' '+JSON.stringify(e&&e.data||{});
-      if(isBusy(msg)&&a<10){
-        const m=/retry in ~?(\d+)\s*ms/i.exec(msg), wait=(m?+m[1]:2500)+400+Math.random()*600;
-        const note='Server is busy, retrying in '+Math.round(wait/1000)+' s'+(label?' ('+label+')':''); $('#nettxt').textContent='Server busy, retrying'; if(S.note) S.note(note);
-        if(a>=2&&(S.cfg.servers||[]).length>1){ S.skip=((S.skip||0)+1)%S.cfg.servers.length; try{ await S.client.disconnect(); }catch(_){} S.client=null; }
-        await sleep(wait); continue;
-      }
-      throw e;
-    }
-  }
-}
 // autofill, sign locally, submit, then poll until validated. Safe to retry: the same signed blob can only apply once.
 async function submit(tx,wallet){
-  const c = await connect();
-  const prep = await withRetry(()=>c.autofill(tx),'preparing '+tx.TransactionType);
+  const prep = await onClient(c=>c.autofill(tx),'preparing '+tx.TransactionType);
   const signed = wallet.sign(prep), hash = signed.hash, last = prep.LastLedgerSequence;
   const sub = await req({command:'submit',tx_blob:signed.tx_blob});
   const er = sub.engine_result||'';
@@ -669,7 +675,8 @@ async function bonsaiXrp(){
   const deep=[pool&&pool.x>=5?pool.p:null,(best(asks,5)||{}).p,(best(bids,5)||{}).p].filter(v=>v>0); info.spread = deep.length>1? Math.max(...deep)/Math.min(...deep) : 1;
   return {xrp:price, src, how, info};
 }
-async function getPrice(){
+async function getPrice(force){
+  if(!force&&S.px&&Date.now()-S.px.t<20000) return S.px;
   const xuP = xrpUsd().then(v=>{ S.xu=v; $('#priceChip').textContent='XRP $'+fmt(v,4); return v; });
   let bx; try{ bx = await bonsaiXrp(); }catch(e){ S.px=null; S.pxErr=e.message; await xuP.catch(()=>{}); throw e; }
   const xu = await xuP; S.pxErr=null;
@@ -688,7 +695,7 @@ async function supplyOf(issuer,cur){
 const TXC={};
 async function acctTx(addr,max=600){
   const c=TXC[addr]||(TXC[addr]={list:[],seen:new Set(),done:false,init:false});
-  const page=m=>req({command:'account_tx',account:addr,limit:200,marker:m,ledger_index_min:-1,ledger_index_max:-1});
+  const page=(m,lim)=>req({command:'account_tx',account:addr,limit:lim||200,marker:m,ledger_index_min:-1,ledger_index_max:-1});
   const isNew=e=>{ const h=e.hash||(e.tx_json||e.tx||{}).hash; if(c.seen.has(h)) return false; c.seen.add(h); return true; };
   if(!c.init){
     let m,n=0; const out=[];
@@ -696,7 +703,7 @@ async function acctTx(addr,max=600){
     c.list=out; c.init=true;
   } else {
     let m; const fresh=[];
-    for(let i=0;i<3;i++){ const r=await page(m); let nf=0; for(const e of r.transactions){ if(isNew(e)){ fresh.push(e); nf++; } } if(nf<r.transactions.length||!r.marker) break; m=r.marker; }
+    for(let i=0;i<3;i++){ const r=await page(m,25); let nf=0; for(const e of r.transactions){ if(isNew(e)){ fresh.push(e); nf++; } } if(nf<r.transactions.length||!r.marker) break; m=r.marker; }
     c.list=fresh.concat(c.list);
   }
   const out=c.list.slice(); out.truncated=!c.done; return out;
@@ -709,7 +716,7 @@ function parseTx(e){
   return {t,meta,hash,time,ok:e.validated!==false && meta.TransactionResult==='tesSUCCESS',mt,mm,delivered:meta.delivered_amount||t.Amount};
 }
 async function scanLedger(){
-  const [rt,it] = await Promise.all([acctTx(S.cfg.recv,600),acctTx(S.cfg.uIss,600)]);
+  const [rt,it] = await Promise.all([acctTx(S.cfg.recv,200),acctTx(S.cfg.uIss,200)]);
   const bc=cc(S.cfg.bCur), uc=cc(S.cfg.uCur);
   const deposits=[], burns={}, receipts={}, burnList=[];
   rt.map(parseTx).forEach(p=>{
@@ -731,7 +738,7 @@ async function scanLedger(){
 }
 
 /* ---------- render ---------- */
-const BUILD='20261027-2225';
+const BUILD='20261027-2229';
 const LIVE_URL='https://thecreator715.github.io/USDX/';
 function sandboxNote(){
   setNet(false); if(document.getElementById('sbNote')) return;
@@ -743,7 +750,7 @@ function sandboxNote(){
    : '<b>This preview is sandboxed and cannot open a connection to the XRP Ledger.</b> Artifact and preview windows block live network access, so prices, supply and balances cannot load here. Open the live app instead: <a href="'+LIVE_URL+'" target="_blank" rel="noopener" style="color:var(--brass,#d9b66c);font-weight:600">'+LIVE_URL+'</a>, or save the HTML file and open it in your browser.';
   document.body.appendChild(d);
 }
-async function refreshAll(){
+async function doRefresh(){
   const step=async(name,fn)=>{ try{ return await fn(); }catch(e){ console.warn(name,e); S.errs=S.errs||{}; S.errs[name]=e.message; } };
   const okc=await step('connect',async()=>{ await connect(); return true; });
   if(!okc){ sandboxNote(); return; }
@@ -753,11 +760,17 @@ async function refreshAll(){
   await Promise.all([
     step('supply',async()=>{ const [u,b]=await Promise.all([supplyOf(S.cfg.uIss,S.cfg.uCur),supplyOf(S.cfg.bIss,S.cfg.bCur)]); S.supply={u,b};
       for(const q of ['#sUsdx','#hUsdx','#fUsdx']) $(q).textContent=fmt(u,2); for(const q of ['#sBonsai','#fBonsai']) $(q).textContent=fmt(b,0); }),
-    step('price',async()=>{ await getPrice(); }),
+    step('price',async()=>{ await getPrice(true); }),
     step('bal',()=>loadUserBal())]);
   paintPrice();
   await step('scan',()=>scanLedger());
   try{ renderAll(); }catch(e){ console.warn('render',e); }
+}
+let refP=null, refAt=0;
+function refreshAll(force){
+  if(refP) return refP;
+  if(!force&&Date.now()-refAt<15000) return Promise.resolve();
+  refAt=Date.now(); refP=doRefresh().finally(()=>{ refP=null; refAt=Date.now(); }); return refP;
 }
 function paintPrice(){
   const px=S.px; if(!px) { if(S.xu) $('#priceChip').textContent='XRP $'+fmt(S.xu,4); renderQuote(); return; }
@@ -949,7 +962,7 @@ async function bmReview(v){
   $('#bmHead').textContent='Review your burn'; $('#bmBody').innerHTML='<div class="s" style="color:var(--mute)">Reading the ledger: fresh price, your balances, trust lines and the issuer flags…</div>'; $('#bmGo').disabled=true; $('#bmAck').hidden=true;
   const w=S.w.user, block=[], warn=[]; let px;
   try{
-    px=await getPrice(); renderQuote();
+    px=await getPrice(true); renderQuote();
     const [xb,rl,ul,ii]=await Promise.all([xrpBal(w.address),lines(S.cfg.recv).catch(()=>[]),lines(w.address).catch(()=>[]),req({command:'account_info',account:S.cfg.bIss,ledger_index:'validated'}).catch(()=>null)]);
     const bl=ul.find(l=>cc(l.currency)===cc(S.cfg.bCur)&&l.account===S.cfg.bIss), bal=bl?Number(bl.balance):0; S.userBonsai=bal;
     const hasU=ul.some(l=>cc(l.currency)===cc(S.cfg.uCur)&&l.account===S.cfg.uIss), recvB=rl.some(l=>cc(l.currency)===cc(S.cfg.bCur)&&l.account===S.cfg.bIss);
@@ -1002,7 +1015,7 @@ async function bmRun(){
   S.note=m=>bmLog(m); let cur=0; const at=(i,s,m,h)=>{ cur=i; bmStage(i,s,m,h); };
   try{
     at(0,'act','Refreshing the price');
-    const px=await getPrice(); at(0,'act','Price $'+fp(px.usd,6)+' · reading balances'); await loadUserBal();
+    const px=await getPrice(true); at(0,'act','Price $'+fp(px.usd,6)+' · reading balances'); await loadUserBal();
     if(v>(S.userBonsai||0)+1e-9) throw new Error('Balance changed: your wallet no longer holds that much BONSAI.');
     if(R.self){ assertPriceSafe(px); if(!S.w.recv) S.w.recv=w; if(!S.w.iss) throw new Error('Load the USDX issuer key on the Operator page first.'); }
     at(0,'done',`Balance ${fmt(S.userBonsai,4)} BONSAI · price $${fp(px.usd,6)}${R.self?' · treasury wallet mode':' · receiver trust line ok'}`);
@@ -1041,7 +1054,7 @@ async function bmRun(){
       if(!d2) at(4,'act','Waiting for the deposit to appear in the receiver history…');
       else if(!d2.burned) at(4,'act',`Deposit seen. Waiting for the treasury processor${canProcess?'':' (the Node keeper or an operator tab)'} · check ${n+1}`);
       else at(5,'act',`Burn done. Waiting for the mint receipt · check ${n+1}`);
-      await new Promise(r=>setTimeout(r,6000));
+      await new Promise(r=>setTimeout(r,8000));
     }
     if(!minted){
       BM.running=false; clearInterval(BM.timer);
@@ -1051,7 +1064,7 @@ async function bmRun(){
     }
     at(5,'done','Minted '+fmt(minted.usdx,4)+' USDX at $'+fp(minted.rate||px.usd,6)+' per BONSAI',minted.hash);
     at(6,'act','Re-reading balances, supply, burns and pools from the ledger');
-    CACHE.clear(); await refreshAll(); await Promise.allSettled([renderWalletUI(),renderPeg(),scanBurns(false).then(()=>renderBurns()),renderPoolData()]); renderQuote();
+    CACHE.clear(); await refreshAll(true); await Promise.allSettled([renderWalletUI(),renderPeg(),scanBurns(false).then(()=>renderBurns()),renderPoolData()]); renderQuote();
     at(6,'done','All pages updated from XRPL data');
     clearInterval(BM.timer); BM.running=false; $('#bmStop').hidden=true; $('#bmDone').hidden=false; $('#bmClose').textContent='Close';
     $('#bmHead').textContent='Complete';
@@ -1124,8 +1137,10 @@ async function processPending(){
 let watching=false;
 async function updateWatch(){
   if(watching||!(S.w.recv&&S.w.iss)) return; watching=true;
-  const c=await connect(); await c.request({command:'subscribe',accounts:[S.cfg.recv]});
-  c.on('transaction',t=>{ if($('#autoProc').checked && (t.transaction||t.tx_json||{}).Destination===S.cfg.recv) setTimeout(processPending,3500); });
+  try{
+    const c=await clientFor(serverList()[0]); await c.request({command:'subscribe',accounts:[S.cfg.recv]});
+    c.on('transaction',t=>{ if($('#autoProc').checked && (t.transaction||t.tx_json||{}).Destination===S.cfg.recv) setTimeout(processPending,3500); });
+  }catch(e){ watching=false; }
 }
 $('#procNow').onclick=processPending;
 $('#setupIssuer').onclick=async()=>{
@@ -1313,7 +1328,7 @@ async function verifySetup(){
 $('#coverBtn').onclick=coverFlow; $('#tmBtn').onclick=treasuryMint; $('#kNow').onclick=()=>keeperStep(true);
 $('#aCreate').onclick=()=>poolAction('create'); $('#aDeposit').onclick=()=>poolAction('deposit'); $('#aWithdraw').onclick=()=>poolAction('withdraw');
 $('#kPool').onchange=()=>renderPeg().catch(()=>{}); $('#prepRecv').onclick=prepReceiver; $('#verifyBtn').onclick=verifySetup;
-setInterval(()=>{ if($('#kOn').checked&&S.w.recv&&!S.busy) keeperStep(false); },30000);
+setInterval(()=>{ if($('#kOn').checked&&S.w.recv&&!S.busy&&!BM.running) keeperStep(false); },45000);
 
 
 /* ---------- peg monitor: watches both pools on its own timer, with or without a key loaded ---------- */
@@ -1362,7 +1377,7 @@ async function monitorStep(){
   }catch(e){ MON.err=e.message; }
   MON.busy=false; renderMonitor();
 }
-setInterval(()=>monitorStep(),30000);
+setInterval(()=>{ if(!document.hidden&&!BM.running) monitorStep(); },60000);
 setInterval(renderMonitor,15000);
 
 /* ---------- BONSAI supply and burn tracking ---------- */
@@ -1373,21 +1388,21 @@ async function scanBurns(deeper){
   if(BS.busy||!X.isValidClassicAddress(S.cfg.bIss||'')) return; BS.busy=true;
   try{
     const bc=cc(S.cfg.bCur);
-    const page=m=>req({command:'account_tx',account:S.cfg.bIss,limit:200,marker:m,ledger_index_min:-1,ledger_index_max:-1});
+    const page=(m,lim)=>req({command:'account_tx',account:S.cfg.bIss,limit:lim||200,marker:m,ledger_index_min:-1,ledger_index_max:-1});
     const take=e=>{
       const p=parseTx(e); if(BS.seen.has(p.hash)) return false; BS.seen.add(p.hash);
       if(p.ok&&p.t.TransactionType==='Payment'&&p.t.Destination===S.cfg.bIss){ const d=p.delivered; if(d&&typeof d==='object'&&cc(d.currency)===bc&&d.issuer===S.cfg.bIss) BS.rows.push({hash:p.hash,from:p.t.Account,value:Number(d.value),time:p.time,mt:p.mt}); }
       return true;
     };
-    if(!BS.init){ let m,n=0; while(n<1000){ const r=await page(m); r.transactions.forEach(e=>{take(e);n++;}); m=r.marker; if(!m){BS.done=true;break;} } BS.marker=m; BS.init=true; }
-    else if(deeper){ if(!BS.done){ let m=BS.marker,n=0; while(m&&n<1000){ const r=await page(m); r.transactions.forEach(e=>{take(e);n++;}); m=r.marker; } BS.marker=m; if(!m) BS.done=true; } }
-    else { let m; for(let i=0;i<5;i++){ const r=await page(m); let fresh=0; r.transactions.forEach(e=>{ if(take(e)) fresh++; }); if(fresh<r.transactions.length||!r.marker) break; m=r.marker; } }
+    if(!BS.init){ let m,n=0; while(n<400){ const r=await page(m); r.transactions.forEach(e=>{take(e);n++;}); m=r.marker; if(!m){BS.done=true;break;} } BS.marker=m; BS.init=true; }
+    else if(deeper){ if(!BS.done){ let m=BS.marker,n=0; while(m&&n<800){ const r=await page(m); r.transactions.forEach(e=>{take(e);n++;}); m=r.marker; } BS.marker=m; if(!m) BS.done=true; } }
+    else { if(Date.now()-(BS.last||0)<90000) { BS.busy=false; return; } BS.last=Date.now(); let m; for(let i=0;i<3;i++){ const r=await page(m,25); let fresh=0; r.transactions.forEach(e=>{ if(take(e)) fresh++; }); if(fresh<r.transactions.length||!r.marker) break; m=r.marker; } }
   }catch(e){ toast('Burn history: '+e.message); }
   BS.busy=false;
 }
 const burnSource=r=> r.from===S.cfg.recv?(r.mt==='USDX/COVER'?'Coverage burn':'USDX mint burn'): r.from===S.cfg.bTrack?'BONSAI receiver':'Holder';
 async function renderBurns(){
-  await scanBurns(false);
+  if($('#p-burns').classList.contains('on')||$('#p-overview').classList.contains('on')||!BS.init) await scanBurns(false);
   const rows=BS.rows.slice().sort((a,b)=>(b.time||0)-(a.time||0));
   const tot=rows.reduce((s,r)=>s+r.value,0), tre=rows.filter(r=>r.from===S.cfg.recv).reduce((s,r)=>s+r.value,0), oth=tot-tre;
   $('#bOut').textContent=fmt(S.supply.b,2); $('#bTot').textContent=fmt(tot,2); $('#bTre').textContent=fmt(tre,2); $('#bOth').textContent=fmt(oth,2);
@@ -1681,14 +1696,14 @@ Object.entries(F).forEach(([id,k])=>$('#'+id).value=S.cfg[k]||'');
 $('#saveCfg').onclick=async()=>{
   Object.entries(F).forEach(([id,k])=>S.cfg[k]=$('#'+id).value.trim());
   try{ localStorage.setItem('usdx-cfg',JSON.stringify(S.cfg)); }catch(e){}
-  try{ if(S.client) await S.client.disconnect(); }catch(e){} S.client=null; watching=false;
+  for(const c of Object.values(POOL.clients)){ try{ await c.disconnect(); }catch(e){} } POOL.clients={}; POOL.cool={}; S.client=null; watching=false;
   toast('Saved'); refreshAll();
 };
 (async function init(){
   if(!window.xrpl){ document.body.insertAdjacentHTML('afterbegin','<div class="note" style="position:fixed;top:10px;left:270px;z-index:99">The xrpl.js library could not load. Check your connection and reload.</div>'); return; }
   $('#buildTag').textContent='build '+BUILD;
   fetch(location.href.split('#')[0].split('?')[0],{cache:'no-store'}).then(r=>r.text()).then(t=>{ const m=/const BUILD='([^']+)'/.exec(t); if(m&&m[1]!==BUILD&&!document.getElementById('newVer')){ const d=document.createElement('div'); d.id='newVer'; d.className='note'; d.style.cssText='position:fixed;z-index:70;right:16px;bottom:16px;max-width:360px;box-shadow:0 10px 40px #0008'; d.innerHTML='A newer version of this app is available. <a href="#" id="newVerGo" style="color:var(--brass,#d9b66c);font-weight:600">Reload now</a>'; document.body.appendChild(d); $('#newVerGo').onclick=e=>{ e.preventDefault(); location.reload(); }; } }).catch(()=>{});
-  await loadFileCfg(); await restoreUser(); renderWalletUI(); renderQuote(); await refreshAll(); monitorStep(); setInterval(()=>{ if(!S.busy&&!document.hidden) refreshAll(); },120000);
+  await loadFileCfg(); await restoreUser(); renderWalletUI(); renderQuote(); await refreshAll(); monitorStep(); setInterval(()=>{ if(!S.busy&&!document.hidden&&!BM.running) refreshAll(); },180000);
 })();
 </script>
 </body>
