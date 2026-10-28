@@ -342,9 +342,43 @@ async function yieldStep(px) {
   if (todo.length - n <= 0 && LIVE) { try { await submit({ TransactionType: 'Payment', Account: RECV, Destination: UI, Amount: '1', Memos: [memo('USDX/YIELDDONE', { v: 1, day, holders: hs.length, usdx: total, bonsaiBurned: burned })] }, recv); YIELD_DONE = day; log('yield: day complete'); } catch (e) { log('yield marker failed:', e.message); } }
 }
 
+// ---- XRPL Batch (XLS-56): withdraw/deposit on both pools in ONE transaction, so both pools are corrected in the same ledger ----
+let BATCH_OK = E.BATCH !== '0';
+const INNER = 0x40000000;   // tfInnerBatchTxn
+async function fastBatch(px) {
+  if (!BATCH_OK || K.pegPools.length < 2) return false;
+  const ls = await lines(recv.address); let usdxLeft = Math.max(0, bal(ls, USDX) - Math.min(0.5, bal(ls, USDX) * 0.1)); const ops = [], before = {};
+  for (const kind of K.pegPools) {
+    const uu = kind === 'xrp' ? px.xrpUsd : px.bonsaiUsd, pool = await poolInfo(kind); if (!pool) continue;
+    const price = pool.ru > 0 ? pool.ro / pool.ru * uu : 1; if (Math.abs(price - 1) <= K.band) continue;
+    const AS = { Asset: otherAsset(kind), Asset2: USDX };
+    if (price < 1) {
+      const need = Math.min(pool.ru * (1 - price), pool.ru * 0.9), lp = pool.lpTotal > 0 ? await lpBal(pool) : 0, share = pool.lpTotal > 0 ? lp / pool.lpTotal : 0, out = Math.min(need, share * pool.ru * 0.9);
+      if (out >= MIN_ACT) { ops.push({ kind, out, tx: { TransactionType: 'AMMWithdraw', Account: recv.address, ...AS, Amount: { ...USDX, value: fmt6(out) }, Flags: 524288 } }); before[kind] = pool; }
+    } else {
+      const need = Math.min(pool.ru * (price - 1), pool.ru * 0.9), x = Math.min(need, usdxLeft);
+      if (x >= MIN_ACT) { usdxLeft -= x; ops.push({ kind, out: 0, tx: { TransactionType: 'AMMDeposit', Account: recv.address, ...AS, Amount: { ...USDX, value: fmt6(x) }, Flags: 524288 } }); before[kind] = pool; }
+    }
+  }
+  if (ops.length < 2) return false;   // one pool off: the normal path handles it with a single transaction
+  try {
+    log(`BATCH re-peg: ${ops.map(o => `${o.kind} ${o.tx.TransactionType} ${o.tx.Amount.value}`).join(' + ')} in one transaction`);
+    await submit({ TransactionType: 'Batch', Account: recv.address, Flags: 524288 /* tfIndependent: each pool is corrected on its own */, RawTransactions: ops.map(o => ({ RawTransaction: { ...o.tx, Flags: o.tx.Flags + INNER } })), Memos: [memo('USDX/PEG', { v: 1, batch: ops.length })] }, recv, 'Batch re-peg');
+    PENDING_BURN.v += ops.reduce((a, o) => a + o.out, 0);
+    for (const o of ops) await freshPool(o.kind, before[o.kind]);
+    return true;
+  } catch (e) {
+    const m = String(e && e.message || e);
+    if (/temINVALID|temDISABLED|temMALFORMED|temBAD|tefNO|tecBATCH|not supported|unknown|Invalid|Unsupported/i.test(m)) { BATCH_OK = false; log('Batch not usable here, using single transactions from now on:', m); }
+    else log('batch re-peg failed, falling back to single transactions:', m);
+    return false;
+  }
+}
+
 // re-peg loop: as soon as a pool leaves the band, keep correcting (and re-reading the price) until it is back, then return to the slow cycle
 async function repeg(px) {
   let again = false;
+  await fastBatch(px).catch(e => log('batch:', e.message));
   for (const kind of K.pegPools) {
     let r = '', n = 0;
     do {
