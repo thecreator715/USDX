@@ -740,10 +740,11 @@ async function scanLedger(force){
   });
   const mints=[];
   it.map(parseTx).forEach(p=>{
-    if(!p.ok||p.t.TransactionType!=='Payment'||p.t.Account!==S.cfg.uIss||p.mt!=='USDX/RECEIPT'||!p.mm) return;
+    if(!p.ok||p.t.TransactionType!=='Payment'||p.t.Account!==S.cfg.uIss) return;
     const d=p.delivered; if(!(d&&typeof d==='object'&&cc(d.currency)===uc)) return;
-    receipts[p.mm.dep]=p.hash;
-    mints.push({hash:p.hash,to:p.t.Destination,usdx:Number(d.value),bonsai:p.mm.bonsai,rate:p.mm.rateUsd,dep:p.mm.dep,burn:p.mm.burn,time:p.time});
+    const mm=p.mm||{};
+    if(mm.dep) receipts[mm.dep]=p.hash;
+    mints.push({hash:p.hash,to:p.t.Destination,usdx:Number(d.value),bonsai:Number(mm.bonsai||0),rate:Number(mm.rateUsd||0),dep:mm.dep,burn:mm.burn,time:p.time});
   });
   deposits.forEach(d=>{ d.minted=!!receipts[d.hash]; d.burned=!!burns[d.hash]; });
   S.ledger={deposits,burns,burnList,receipts,mints,truncated:!!(rt.truncated||it.truncated),at:new Date()};
@@ -751,7 +752,7 @@ async function scanLedger(force){
 }
 
 /* ---------- render ---------- */
-const BUILD='20261027-2322';
+const BUILD='20261027-2336';
 const LIVE_URL='https://thecreator715.github.io/USDX/';
 function sandboxNote(){
   setNet(false); if(document.getElementById('sbNote')) return;
@@ -788,7 +789,7 @@ function refreshAll(force){
 }
 function paintPrice(){
   const px=S.px; if(!px) { if(S.xu) $('#priceChip').textContent='XRP $'+fmt(S.xu,4); renderQuote(); return; }
-  $('#hPrice').textContent=''; $('#pUsd').textContent='$'+fp(px.usd,6); $('#priceChip').textContent='XRP $'+fmt(px.xrpUsd,4); $('#bChip').textContent='BONSAI $'+fp(px.usd,4); renderQuote();
+  if(!$('#hPrice').textContent||$('#hPrice').textContent==='—') $('#hPrice').textContent='$1.0000'; $('#pUsd').textContent='$'+fp(px.usd,6); $('#priceChip').textContent='XRP $'+fmt(px.xrpUsd,4); $('#bChip').textContent='BONSAI $'+fp(px.usd,4); renderQuote();
 }
 function renderConfigWarn(){
   $('#forgeWarn').innerHTML = `<div class="note">Set the BONSAI issuer address in Settings to go live. Currency code, USDX issuer and receiver are already filled in.</div>`;
@@ -1416,7 +1417,7 @@ async function scanBurns(deeper){
     const page=(m,lim)=>req({command:'account_tx',account:S.cfg.bIss,limit:lim||200,marker:m,ledger_index_min:-1,ledger_index_max:-1});
     const take=e=>{
       const p=parseTx(e); if(BS.seen.has(p.hash)) return false; BS.seen.add(p.hash);
-      if(p.ok&&p.t.TransactionType==='Payment'&&p.t.Destination===S.cfg.bIss){ const d=p.delivered; if(d&&typeof d==='object'&&cc(d.currency)===bc&&d.issuer===S.cfg.bIss) BS.rows.push({hash:p.hash,from:p.t.Account,value:Number(d.value),time:p.time,mt:p.mt}); }
+      if(p.ok&&p.t.TransactionType==='Payment'&&p.t.Destination===S.cfg.bIss){ const d=p.delivered; if(d&&typeof d==='object'&&cc(d.currency)===bc) BS.rows.push({hash:p.hash,from:p.t.Account,value:Number(d.value),time:p.time,mt:p.mt}); }
       return true;
     };
     if(!BS.init){ let m,n=0; while(n<200){ const r=await page(m); r.transactions.forEach(e=>{take(e);n++;}); m=r.marker; if(!m){BS.done=true;break;} } BS.marker=m; BS.init=true; }
@@ -1427,7 +1428,7 @@ async function scanBurns(deeper){
 }
 const burnSource=r=> r.from===S.cfg.recv?(r.mt==='USDX/COVER'?'Coverage burn':'USDX mint burn'): r.from===S.cfg.bTrack?'BONSAI receiver':'Holder';
 async function renderBurns(){
-  if($('#p-burns').classList.contains('on')||$('#p-overview').classList.contains('on')) await scanBurns(false);
+  await scanBurns(false);
   const rows=BS.rows.slice().sort((a,b)=>(b.time||0)-(a.time||0));
   const tot=rows.reduce((s,r)=>s+r.value,0), tre=rows.filter(r=>r.from===S.cfg.recv).reduce((s,r)=>s+r.value,0), oth=tot-tre;
   $('#bOut').textContent=fmt(S.supply.b,2); $('#bTot').textContent=fmt(tot,2); $('#bTre').textContent=fmt(tre,2); $('#bOth').textContent=fmt(oth,2);
