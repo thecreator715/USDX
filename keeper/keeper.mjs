@@ -286,9 +286,53 @@ async function processDeposits(px) {
   }
 }
 
+// ---- USDX yield: a guaranteed 5% APY paid daily to every holder (snapshot at the first cycle of each UTC day) ----
+const YIELD_APY = (E.YIELD === '0') ? 0 : (+E.YIELD_APY || +C.yieldApyPercent || 0) / 100;
+const YIELD_MIN = +E.YIELD_MIN_USDX || 0.0001, YIELD_BATCH = +E.YIELD_BATCH || 40;
+let YIELD_DONE = '';
+const utcDay = () => new Date().toISOString().slice(0, 10);
+async function holders(excl) {
+  const out = []; let marker;
+  do { const r = await req({ command: 'account_lines', account: UI, ledger_index: 'validated', limit: 400, marker }); marker = r.marker;
+    for (const l of r.lines) if (cc(l.currency) === USDX.currency && Number(l.balance) < 0 && !excl.has(l.account)) out.push({ addr: l.account, bal: -Number(l.balance) }); } while (marker);
+  return out;
+}
+async function yieldStep(px) {
+  if (!iss || !YIELD_APY) return;
+  const day = utcDay(); if (YIELD_DONE === day) return;
+  const rt = (await history(RECV, 400)).map(parse);
+  if (rt.some(p => p.ok && p.t.Account === RECV && p.mt === 'USDX/YIELDDONE' && p.mm && p.mm.day === day)) { YIELD_DONE = day; return; }
+  const excl = new Set([UI, RECV]);
+  for (const k of ['bonsai', 'xrp']) { const p = await poolInfo(k).catch(() => null); if (p && p.acct) excl.add(p.acct); }
+  const hs = (await holders(excl)).filter(h => h.bal * YIELD_APY / 365 >= YIELD_MIN);
+  const it = (await history(UI, 1000)).map(parse), paid = new Set();
+  it.forEach(p => { if (p.ok && p.t.Account === UI && p.mt === 'USDX/YIELD' && p.mm && p.mm.day === day) paid.add(p.t.Destination); });
+  const todo = hs.filter(h => !paid.has(h.addr)).map(h => ({ ...h, amt: Number(floor6(h.bal * YIELD_APY / 365)) })).filter(h => h.amt >= YIELD_MIN);
+  const total = hs.reduce((s, h) => s + Number(floor6(h.bal * YIELD_APY / 365)), 0);
+  log(`yield ${day}: ${hs.length} eligible holders, ${paid.size} already paid today, ${todo.length} to pay, ${total.toFixed(6)} USDX for the day at ${(YIELD_APY * 100).toFixed(2)}% APY`);
+  if (!todo.length && paid.size === 0 && hs.length === 0) { YIELD_DONE = day; return; }
+  // 1) collateral: burn treasury BONSAI worth the new USDX before issuing it (once per day)
+  const covered = rt.some(p => p.ok && p.t.Account === RECV && p.t.Destination === BI && p.mt === 'USDX/COVER' && p.mm && p.mm.day === day && p.mm.kind === 'yield');
+  let burned = 0;
+  if (!covered && total > 0) {
+    const need = total * 100 / K.ratio / px.bonsaiUsd, have = bal(await lines(RECV), BONSAI), amt = Math.min(need, have);
+    if (amt > 0) { try { await submit({ TransactionType: 'Payment', Account: RECV, Destination: BI, Amount: { ...BONSAI, value: floor6(amt) }, Memos: [memo('USDX/COVER', { v: 1, kind: 'yield', day, usdx: total, bonsai: amt, rateUsd: px.bonsaiUsd })] }, recv); burned = amt; log(`yield cover: burned ${floor6(amt)} BONSAI`); } catch (e) { log('yield cover failed:', e.message); } }
+    if (amt < need) { log(`yield cover SHORT by ${floor6(need - amt)} BONSAI`); await alert(`USDX yield for ${day} is short of collateral by ${floor6(need - amt)} BONSAI. Add BONSAI to the treasury.`); }
+  }
+  // 2) pay holders (a batch per cycle so a run never overruns; the rest follow next cycle)
+  let n = 0;
+  for (const h of todo.slice(0, YIELD_BATCH)) {
+    try { await submit({ TransactionType: 'Payment', Account: UI, Destination: h.addr, Amount: { ...USDX, value: h.amt.toFixed(6) }, Memos: [memo('USDX/YIELD', { v: 1, day, apy: YIELD_APY, bal: h.bal })] }, iss); n++; }
+    catch (e) { log(`yield to ${h.addr} failed:`, e.message); }
+  }
+  log(`yield: paid ${n} holders this cycle, ${Math.max(0, todo.length - n)} remaining`);
+  if (todo.length - n <= 0 && LIVE) { try { await submit({ TransactionType: 'Payment', Account: RECV, Destination: UI, Amount: '1', Memos: [memo('USDX/YIELDDONE', { v: 1, day, holders: hs.length, usdx: total, bonsaiBurned: burned })] }, recv); YIELD_DONE = day; log('yield: day complete'); } catch (e) { log('yield marker failed:', e.message); } }
+}
+
 async function cycle() {
   const px = await prices(); log(`BONSAI $${px.bonsaiUsd.toFixed(10)} (${px.how}) · XRP $${px.xrpUsd.toFixed(4)}`);
   await processDeposits(px).catch(e => log('processor:', e.message));
+  await yieldStep(px).catch(e => log('yield:', e.message));
   for (const kind of K.pegPools) await pegStep(px, kind).catch(async e => { log(`peg ${kind}:`, e.message); await alert(`peg defence failed in the ${kind} pool: ${e.message}`); });
   await dexStep(px).catch(e => log('dex:', e.message));
 }

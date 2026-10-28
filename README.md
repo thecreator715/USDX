@@ -28,3 +28,6 @@ The Peg & Pools page keeps USDX at $1.00 with the BONSAI/USDX and XRP/USDX AMM p
 `.github/workflows/keeper.yml` runs the keeper every 5 minutes on GitHub, so peg defence, DEX quotes and USDX minting
 for BONSAI deposits keep running with every browser closed. Add these in **Settings > Secrets and variables > Actions**:
 `RECEIVER_SEED`, `ISSUER_SEED` (and optionally `ALERT_WEBHOOK`). Secrets are encrypted and never appear in the repo or the page.
+
+## USDX yield (5% APY)
+The keeper pays a guaranteed 5% APY in USDX to every holder, once per UTC day, from a snapshot of balances (issuer, treasury and pool accounts excluded; payouts under 0.0001 USDX are skipped). Each day the treasury first burns BONSAI worth the new USDX (memo `USDX/COVER`, kind `yield`), then the issuer pays holders (memo `USDX/YIELD`), then a `USDX/YIELDDONE` marker closes the day. Set `yieldApyPercent` in `config.json`, or `YIELD=0` to switch it off.
