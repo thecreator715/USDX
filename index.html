@@ -374,6 +374,8 @@ td{padding:11px 10px;border-bottom:1px solid #132a20;font-size:13px;white-space:
       <div id="monAlert"></div>
       <div class="grid g2" id="monRows"></div>
       <div class="s" id="monMeta" style="color:var(--mute);font-size:12px"></div>
+      <h3 style="margin-top:14px">Activity log · prices, pools and order book</h3>
+      <div class="tw" style="max-height:300px;overflow:auto"><table><thead><tr><th>Time</th><th>Event</th><th>Detail</th></tr></thead><tbody id="monLog"><tr><td colspan="3" style="color:var(--mute)">Waiting for the first check…</td></tr></tbody></table></div>
     </div>
     <div class="card col" id="launchCard">
       <h3>Launch both pools · BONSAI/USDX and XRP/USDX</h3>
@@ -591,16 +593,18 @@ const COST={account_tx:1200,gateway_balances:500,book_offers:150,amm_info:120,ac
 const FREE=new Set(['submit','tx','ledger_current','server_info','fee','subscribe']);   // never queued behind background reads
 const BUDGET=6500, SPENT=[];   // units per rolling 60 s, deliberately well under the public 10,000 quota
 async function slot(cmd){
+  // wait for budget WITHOUT holding a concurrency slot, so submits and polls are never starved by background reads
+  if(!FREE.has(cmd)&&!($('#bm')&&$('#bm').classList.contains('on'))){
+    const cost=COST[cmd]||60;
+    for(;;){
+      const now=Date.now(); while(SPENT.length&&now-SPENT[0].t>60000) SPENT.shift();
+      const used=SPENT.reduce((a,x)=>a+x.c,0);
+      if(used+cost<=BUDGET||!SPENT.length){ SPENT.push({t:now,c:cost}); break; }
+      await sleep(Math.min(5000,Math.max(300,SPENT[0].t+60000-now)));
+    }
+  }
   while(Q.active>=3) await new Promise(r=>Q.waiters.push(r));
   Q.active++;
-  if(FREE.has(cmd)||(typeof BM!=='undefined'&&($('#bm')&&$('#bm').classList.contains('on')))) return;
-  const cost=COST[cmd]||60;
-  for(;;){
-    const now=Date.now(); while(SPENT.length&&now-SPENT[0].t>60000) SPENT.shift();
-    const used=SPENT.reduce((a,x)=>a+x.c,0);
-    if(used+cost<=BUDGET||!SPENT.length){ SPENT.push({t:now,c:cost}); break; }
-    await sleep(Math.max(300,SPENT[0].t+60000-now));
-  }
   if(cmd==='account_tx'){ const at=Math.max(Date.now(),Q.lastTx+1500); Q.lastTx=at; if(at>Date.now()) await sleep(at-Date.now()); }
 }
 function release(){ Q.active--; const w=Q.waiters.shift(); if(w) w(); }
@@ -753,7 +757,7 @@ async function scanLedger(force){
 }
 
 /* ---------- render ---------- */
-const BUILD='20261027-2352';
+const BUILD='20261027-2406';
 const LIVE_URL='https://thecreator715.github.io/USDX/';
 function sandboxNote(){
   setNet(false); if(document.getElementById('sbNote')) return;
@@ -1189,7 +1193,7 @@ function coverage(){
   const shortUsd=Math.max(0,requiredUsd-coveredUsd);
   return {outstanding,burnedBonsai,requiredUsd,coveredUsd,shortUsd,shortBonsai:shortUsd/S.px.usd};
 }
-function klog(t,m,s='done'){ K.log.unshift({t,m,s}); K.log=K.log.slice(0,40); renderKLog(); }
+function klog(t,m,s='done'){ try{ if(typeof mlog==='function'&&s!=='act') mlog('Keeper · '+t,m,s==='err'?'bad':'ok'); }catch(e){} K.log.unshift({t,m,s}); K.log=K.log.slice(0,40); renderKLog(); }
 function renderKLog(){ $('#kLog').innerHTML=K.log.slice(0,8).map(l=>`<li class="${l.s}"><i>${l.s==='done'?'✓':l.s==='err'?'!':'…'}</i><div><b>${l.t}</b><span>${l.m}</span></div></li>`).join(''); }
 async function poolInfo(kind){
   try{
@@ -1384,8 +1388,10 @@ function renderMonitor(){
       <div class="row" style="justify-content:space-between;align-items:baseline"><b class="mono ${cls}" style="font-size:26px">${v==null?'—':'$'+v.toFixed(4)}</b><span class="s mono" style="color:var(--mute)">${dev}</span></div>
       <div class="s ${cls}" style="margin:2px 0 8px">${st}</div>${spark(k)}
       <div class="row" style="justify-content:space-between;margin-top:6px"><span style="color:var(--mute)">Pool value</span><b class="mono">${tvl==null?'—':'$'+fmt(tvl,2)}</b></div>
+      <div class="row" style="justify-content:space-between"><span style="color:var(--mute)">Order book</span><b class="mono">${(()=>{ const q=MON.dex&&MON.dex[k]; return q&&(q.bid||q.ask)?(q.bid?'$'+q.bid.toFixed(4):'—')+' / '+(q.ask?'$'+q.ask.toFixed(4):'—'):'no quotes'; })()}</b></div>
       ${tvl!=null&&tvl<200?'<div class="s brass" style="font-size:12px">Shallow pool: small trades will move the price a lot.</div>':''}</div>`;
   }).join('');
+  const ml=$('#monLog'); if(ml&&MON.log.length) ml.innerHTML=MON.log.slice(0,40).map(l=>`<tr><td>${new Date(l.t).toLocaleTimeString()}</td><td><span class="tag ${l.cls==='bad'?'wait':'ok'}">${l.ev}</span></td><td style="font-size:12px">${l.detail}</td></tr>`).join('');
   const cv=coverage(); if(cv&&cv.shortBonsai>1e-6) bad.push(`USDX is under-covered by $${fmt(cv.shortUsd,2)}, burn the shortfall`);
   const age=last?(Date.now()-last.t)/1000:null; if(MON.err) bad.push('Monitor error: '+MON.err); else if(age!=null&&age>120) bad.push('Price check is stale ('+Math.round(age)+' s old)');
   $('#monAlert').innerHTML=bad.length?`<div class="note err-note">${bad.join('<br>')}</div>`:'';
@@ -1394,15 +1400,36 @@ function renderMonitor(){
   const worst=last?['bonsai','xrp'].map(k=>last[k]).filter(v=>v!=null).reduce((a,v)=>Math.abs(v-1)>Math.abs(a-1)?v:a,1):1;
   document.title = (worst<FLOOR||Math.abs(worst-1)>0.01)? '⚠ USDX $'+worst.toFixed(4)+' · '+TITLE0 : TITLE0;
 }
+const mlog=(ev,detail,cls)=>{ MON.log.unshift({t:Date.now(),ev,detail,cls:cls||''}); MON.log=MON.log.slice(0,80); try{ localStorage.setItem('usdx-monlog',JSON.stringify(MON.log)); }catch(e){} };
+try{ MON.log=JSON.parse(localStorage.getItem('usdx-monlog')||'[]'); }catch(e){ MON.log=[]; }
+MON.log=MON.log||[]; MON.dex={}; MON.pause=0; MON.state={};
+// best order-book bid and ask for USDX on one pair, in USD per USDX
+async function dexQuote(kind){
+  const U=uAsset(), O=kind==='xrp'?{currency:'XRP'}:bAsset(), un=unitUsd(kind);
+  const num=a=>typeof a==='string'?Number(a)/1e6:Number(a.value);
+  const [ask,bid]=await Promise.all([
+    req({command:'book_offers',taker_gets:U,taker_pays:O,limit:5}).catch(()=>null),
+    req({command:'book_offers',taker_gets:O,taker_pays:U,limit:5}).catch(()=>null)]);
+  const aOff=ask&&ask.offers&&ask.offers[0], bOff=bid&&bid.offers&&bid.offers[0];
+  return { ask:aOff?num(aOff.TakerPays)/num(aOff.TakerGets)*un:null, bid:bOff?num(bOff.TakerGets)/num(bOff.TakerPays)*un:null };
+}
 async function monitorStep(){
-  if(MON.busy||!cfgReady()) return; MON.busy=true;
+  if(MON.busy&&Date.now()-(MON.t0||0)>45000) MON.busy=false;   // watchdog: never let one stuck request stop monitoring
+  if(MON.busy||!cfgReady()||Date.now()<MON.pause) return; MON.busy=true; MON.t0=Date.now();
   try{
-    await getPrice(); const row={t:Date.now()}; S.pools=S.pools||{};
-    for(const k of ['bonsai','xrp']){ const p=await poolInfo(k); S.pools[k]=p; row[k]=p&&p.ru>0?p.ro/p.ru*unitUsd(k):null; }
+    const px=await getPrice(); const row={t:Date.now()}; S.pools=S.pools||{}; const parts=[];
+    for(const k of ['bonsai','xrp']){
+      const p=await poolInfo(k); S.pools[k]=p; row[k]=p&&p.ru>0?p.ro/p.ru*unitUsd(k):null;
+      let q=null; try{ q=await dexQuote(k); }catch(e){} MON.dex[k]=q; row['d'+k]=q;
+      const st=row[k]==null?'nopool':row[k]<FLOOR?'floor':Math.abs(row[k]-1)>(+$('#kTol').value||50)/1e4?'off':'ok';
+      parts.push(PAIRS[k].label+' pool '+(row[k]==null?'none':'$'+row[k].toFixed(4))+' · book '+(q&&q.bid?'bid $'+q.bid.toFixed(4):'no bid')+' / '+(q&&q.ask?'ask $'+q.ask.toFixed(4):'no ask'));
+      if(MON.state[k]!==st){ if(MON.state[k]!==undefined||st!=='ok') mlog(st==='ok'?'Back in band':st==='nopool'?'No pool':st==='floor'?'Below the $0.99 floor':'Outside the peg band',PAIRS[k].label+(row[k]==null?'':' $'+row[k].toFixed(4)+' ('+((row[k]-1)*1e4).toFixed(0)+' bps)'),st==='ok'?'ok':'bad'); MON.state[k]=st; }
+    }
+    mlog('Check','BONSAI $'+fp(px.usd,6)+' ('+fp(px.bonsaiXrp,6)+' XRP) · XRP $'+fmt(px.xrpUsd,4)+' · '+parts.join(' · '));
     MON.hist.push(row); MON.hist=MON.hist.slice(-240); MON.err=null;
     try{ localStorage.setItem('usdx-peghist',JSON.stringify(MON.hist.slice(-120))); }catch(e){}
-  }catch(e){ MON.err=e.message; }
-  MON.busy=false; renderMonitor();
+  }catch(e){ MON.err=e.message; if(isLimit(String(e.message))){ MON.pause=Date.now()+90000; mlog('Rate limited','Paused the monitor for 90 s, then it resumes on another server','bad'); } else mlog('Error',e.message,'bad'); }
+  MON.busy=false; MON.t0=0; renderMonitor();
 }
 setInterval(()=>{ if(!document.hidden&&!BM.running) monitorStep(); },60000);
 setInterval(renderMonitor,15000);
@@ -1736,7 +1763,7 @@ $('#saveCfg').onclick=async()=>{
     if(n<2&&!BM.running&&!$('#bm').classList.contains('on')){ try{ sessionStorage.setItem('usdx-rl',n+1); }catch(e){} location.replace(location.pathname+'?v='+m[1]+location.hash); return; }
     if(!document.getElementById('newVer')){ const d=document.createElement('div'); d.id='newVer'; d.className='note'; d.style.cssText='position:fixed;z-index:70;right:16px;bottom:16px;max-width:360px;box-shadow:0 10px 40px #0008'; d.innerHTML='A newer version is available (build '+m[1]+'). <a href="#" id="newVerGo" style="color:var(--brass,#d9b66c);font-weight:600">Reload now</a>'; document.body.appendChild(d); $('#newVerGo').onclick=e=>{ e.preventDefault(); location.replace(location.pathname+'?v='+m[1]+location.hash); }; } } else { try{ sessionStorage.removeItem('usdx-rl'); }catch(e){} } }).catch(()=>{});
   stale(); setInterval(stale,60000);
-  await loadFileCfg(); await restoreUser(); renderWalletUI(); renderQuote(); await refreshAll(); monitorStep(); setInterval(()=>{ if(!S.busy&&!document.hidden&&!BM.running) refreshAll(); },180000);
+  await loadFileCfg(); await restoreUser(); renderWalletUI(); renderQuote(); await refreshAll(); setTimeout(monitorStep,8000); setInterval(()=>{ if(!S.busy&&!document.hidden&&!BM.running) refreshAll(); },180000);
 })();
 </script>
 </body>
