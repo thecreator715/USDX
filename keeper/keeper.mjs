@@ -167,15 +167,22 @@ const parse = e => {
 async function history(addr, max) { const out = []; let marker; while (out.length < max) { const r = await req({ command: 'account_tx', account: addr, limit: 200, marker, ledger_index_min: -1, ledger_index_max: -1 }); out.push(...r.transactions); marker = r.marker; if (!marker) break; } return out; }
 async function processDeposits(px) {
   if (!iss) return;
-  if (px.thin) return log(`minting paused: the BONSAI price comes from a ${px.how}. Set MANUAL_BONSAI_XRP or add liquidity.`);
+  if (px.thin) log(`note: the BONSAI price comes from a ${px.how}; minting at the live market price anyway.`);
   const [rt, it] = await Promise.all([history(RECV, 800), history(UI, 600)]);
-  const deposits = [], burns = {}, receipts = new Set();
+  const deposits = [], burns = {}, receipts = new Set(), tburns = [];
   rt.map(parse).forEach(p => {
     if (!p.ok || p.t.TransactionType !== 'Payment') return;
     if (p.t.Destination === RECV && p.mt === 'USDX/MINT' && p.d && typeof p.d === 'object' && cc(p.d.currency) === BONSAI.currency && p.d.issuer === BI) deposits.push({ hash: p.hash, from: p.t.Account, value: Number(p.d.value) });
-    if (p.t.Account === RECV && p.t.Destination === BI && p.mt === 'USDX/BURN' && p.mm) burns[p.mm.dep] = p.hash;
+    if (p.t.Account === RECV && p.t.Destination === BI && p.mt === 'USDX/BURN' && p.mm) { burns[p.mm.dep] = p.hash; if (/^(TREASURY|GENESIS)-/.test(String(p.mm.dep)) && p.d && typeof p.d === 'object') tburns.push({ hash: p.mm.dep, burnHash: p.hash, from: p.mm.to || RECV, value: Number(p.d.value) }); }
   });
   it.map(parse).forEach(p => { if (p.ok && p.t.Account === UI && p.mt === 'USDX/RECEIPT' && p.mm) receipts.add(p.mm.dep); });
+  // burns signed by the receiver wallet itself in the app (treasury mode): the burn is already on-chain, only the mint is missing
+  for (const b of tburns.filter(x => !receipts.has(x.hash))) {
+    const usdx = Number(floor6(b.value * px.bonsaiUsd * 100 / K.ratio)); if (!(usdx > 0)) continue;
+    log(`treasury burn ${b.burnHash.slice(0, 10)}: ${b.value} BONSAI -> ${usdx} USDX to ${b.from}`);
+    try { await submit({ TransactionType: 'Payment', Account: UI, Destination: b.from, Amount: { ...USDX, value: usdx.toFixed(6) }, Memos: [memo('USDX/RECEIPT', { v: 1, dep: b.hash, burn: b.burnHash, bonsai: b.value, rateUsd: px.bonsaiUsd, ratio: K.ratio, usdx })] }, iss); }
+    catch (e) { log('treasury mint failed:', e.message); }
+  }
   for (const d of deposits.filter(x => !receipts.has(x.hash))) {
     const usdx = Number(floor6(d.value * px.bonsaiUsd * 100 / K.ratio)); if (!(usdx > 0)) continue;
     log(`deposit ${d.hash.slice(0, 10)}: ${d.value} BONSAI from ${d.from} -> ${usdx} USDX`);

@@ -756,7 +756,7 @@ async function scanLedger(force){
 }
 
 /* ---------- render ---------- */
-const BUILD='20261027-2412';
+const BUILD='20261027-2431';
 const LIVE_URL='https://thecreator715.github.io/USDX/';
 function sandboxNote(){
   setNet(false); if(document.getElementById('sbNote')) return;
@@ -1001,7 +1001,7 @@ async function bmReview(v){
     const self=w.address===S.cfg.recv;
     if(self){
       const i2=block.findIndex(x=>/receiver wallet has no BONSAI trust line/.test(x)); if(i2>=0) block.splice(i2,1);
-      if(!S.w.iss) block.push('You are signed in as the receiver (treasury) wallet, so the burn and the mint happen together. Load the USDX issuer key first: Operator page, "Import issuer key".');
+      if(!S.w.iss) warn.push({t:'You are signed in as the receiver wallet. This tab burns the BONSAI to the BONSAI issuer, and the always-on keeper then mints the USDX to this wallet, usually within 5 minutes.',ack:false});
     }
     BM.rev={v,px,usdx,hasU,tr,block,warn,self};
     const row=(k,val,c)=>`<div class="row" style="justify-content:space-between"><span style="color:var(--mute)">${k}</span><b class="mono ${c||''}">${val}</b></div>`;
@@ -1039,7 +1039,7 @@ async function bmRun(){
     at(0,'act','Refreshing the price');
     const px=await getPrice(true); at(0,'act','Price $'+fp(px.usd,6)+' · reading balances'); await loadUserBal();
     if(v>(S.userBonsai||0)+1e-9) throw new Error('Balance changed: your wallet no longer holds that much BONSAI.');
-    if(R.self){ assertPriceSafe(px); if(!S.w.recv) S.w.recv=w; if(!S.w.iss) throw new Error('Load the USDX issuer key on the Operator page first.'); }
+    if(R.self){ assertPriceSafe(px); if(!S.w.recv) S.w.recv=w; }
     at(0,'done',`Balance ${fmt(S.userBonsai,4)} BONSAI · price $${fp(px.usd,6)}${R.self?' · treasury wallet mode':' · receiver trust line ok'}`);
     if(R.hasU){ at(1,'skip','Already exists'); }
     else{
@@ -1063,7 +1063,12 @@ async function bmRun(){
     let minted=null, n=0; const canProcess=!!(S.w.recv&&S.w.iss);
     if(R.self){
       const rr=await mintForDeposit({hash:dep,from:w.address,value:v},(k,m,h)=>at(k,m.s,m.t,h));
-      BM.burnHash=rr.burnHash; minted={hash:rr.mintHash,usdx:rr.usdx,bonsai:v,rate:rr.px.usd,dep,burn:rr.burnHash};
+      BM.burnHash=rr.burnHash;
+      if(rr.queued){
+        at(5,'act','Burn confirmed on the ledger. The always-on keeper mints your USDX, usually within 5 minutes');
+        for(let k=0;k<70&&!minted&&!BM.abort;k++){ await new Promise(r=>setTimeout(r,8000)); try{ await scanLedger(true); }catch(e){} minted=S.ledger.mints.find(x=>x.dep===dep)||null; if(!minted) at(5,'act','Waiting for the keeper to mint · check '+(k+1)); }
+        if(!minted){ BM.running=false; clearInterval(BM.timer); $('#bmStop').hidden=true; $('#bmDone').hidden=false; $('#bmClose').textContent='Close'; $('#bmSum').innerHTML='<div class="note">Your BONSAI is burned ('+exTx(rr.burnHash)+'). The keeper has not minted yet. It runs every 5 minutes, and the USDX will arrive in your wallet and on the Treasury Ledger page. You can close this window.</div>'; refreshAll(); return; }
+      } else minted={hash:rr.mintHash,usdx:rr.usdx,bonsai:v,rate:rr.px.usd,dep,burn:rr.burnHash};
     }
     if(canProcess){ bmLog('Both operator keys are loaded in this tab, so this tab is the treasury processor.'); }
     for(; !minted&&n<100&&!BM.abort; n++){
@@ -1128,9 +1133,10 @@ async function mintForDeposit(d,cb=()=>{}){
   let burnHash=S.ledger.burns[d.hash]&&S.ledger.burns[d.hash].hash;
   if(!burnHash){
     cb(4,{s:'act',t:'Burning '+fmt(d.value,4)+' BONSAI from the receiver'});
-    burnHash=await submit({TransactionType:'Payment',Account:S.cfg.recv,Destination:S.cfg.bIss,Amount:{...bAsset(),value:d.value.toFixed(6)},Memos:[memo('USDX/BURN',{v:1,dep:d.hash,bonsai:d.value})]},S.w.recv);
+    burnHash=await submit({TransactionType:'Payment',Account:S.cfg.recv,Destination:S.cfg.bIss,Amount:{...bAsset(),value:d.value.toFixed(6)},Memos:[memo('USDX/BURN',{v:1,dep:d.hash,bonsai:d.value,to:d.from})]},S.w.recv);
   }
   cb(4,{s:'done',t:'Burned '+fmt(d.value,4)+' BONSAI back to the issuer'},burnHash);
+  if(!S.w.iss) return {queued:true,usdx,burnHash,px};
   cb(5,{s:'act',t:'Minting '+fmt(usdx,4)+' USDX at $'+fp(px.usd,6)});
   const mh=await submit({TransactionType:'Payment',Account:S.cfg.uIss,Destination:d.from,Amount:{...uAsset(),value:usdx.toFixed(6)},Memos:[memo('USDX/RECEIPT',{v:1,dep:d.hash,burn:burnHash,bonsai:d.value,rateUsd:px.usd,ratio:ratio(),usdx})]},S.w.iss);
   cb(5,{s:'done',t:'Minted '+fmt(usdx,4)+' USDX'},mh);
@@ -1262,7 +1268,7 @@ async function coverFlow(){
 async function treasuryMint(){
   const v=parseFloat($('#tmAmt').value);
   if(!(v>0)) return toast('Enter the BONSAI amount to burn.');
-  if(!(S.w.recv&&S.w.iss)) return toast('Load both operator keys first (Operator page).');
+  if(!S.w.recv) return openWallet('recv');
   if(!cfgReady()) return go('settings');
   const px=await getPrice(); try{ assertPriceSafe(px); }catch(e){ return toast(e.message); } const usdx=Number(floor6(v*px.usd*100/ratio()));
   if(v>(S.recvInv?S.recvInv.bonsai:0)+1e-9) return toast('The receiver wallet does not hold that much BONSAI.');
@@ -1270,7 +1276,8 @@ async function treasuryMint(){
   try{
     await trustline(S.w.recv,uAsset(),'USDX');
     const dep='TREASURY-'+Date.now();
-    const bh=await submit({TransactionType:'Payment',Account:S.cfg.recv,Destination:S.cfg.bIss,Amount:{...bAsset(),value:v.toFixed(6)},Memos:[memo('USDX/BURN',{v:1,dep,bonsai:v})]},S.w.recv);
+    const bh=await submit({TransactionType:'Payment',Account:S.cfg.recv,Destination:S.cfg.bIss,Amount:{...bAsset(),value:v.toFixed(6)},Memos:[memo('USDX/BURN',{v:1,dep,bonsai:v,to:S.cfg.recv})]},S.w.recv);
+    if(!S.w.iss){ toast('Burned. The keeper mints the USDX within about 5 minutes.'); $('#tmAmt').value=''; refreshAll(); return; }
     const mh=await submit({TransactionType:'Payment',Account:S.cfg.uIss,Destination:S.cfg.recv,Amount:{...uAsset(),value:usdx.toFixed(6)},Memos:[memo('USDX/RECEIPT',{v:1,dep,burn:bh,bonsai:v,rateUsd:px.usd,ratio:ratio(),usdx})]},S.w.iss);
     toast('Treasury minted '+fmt(usdx,2)+' USDX · '+mh.slice(0,10)+'…'); $('#tmAmt').value=''; refreshAll();
   }catch(e){ toast(e.message); }
@@ -1574,14 +1581,15 @@ async function genesisMint(){
   if(genesisDone()) return toast('Genesis has already happened.');
   const u=parseFloat($('#gAmt').value), need=genesisNeed();
   if(!(u>0)||need==null) return toast('Enter the USDX amount first.');
-  if(!(S.w.recv&&S.w.iss)) return toast('Load both operator keys first (Operator page).');
+  if(!S.w.recv) return openWallet('recv');
   if(need>(S.recvInv?S.recvInv.bonsai:0)+1e-9) return toast(`The receiver wallet holds ${fmt(S.recvInv?S.recvInv.bonsai:0,2)} BONSAI and needs ${fmt(need,4)}.`);
   const px=await getPrice(); try{ assertPriceSafe(px); }catch(e){ return toast(e.message); } const need2=Math.ceil(u*ratio()/100/px.usd*1e6)/1e6;
   if(!await confirmBox(`<div>Burn <b class="brass mono">${fmt(need2,4)} BONSAI</b> from the receiver and mint <b class="jade mono">${fmt(u,2)} USDX</b> to the same wallet at $${fp(px.usd)} per BONSAI.</div><div class="note">This is the one-time genesis mint. The burn cannot be reversed.</div>`)) return;
   try{
     await trustline(S.w.recv,uAsset(),'USDX');
     const dep='GENESIS-'+Date.now();
-    const bh=await submit({TransactionType:'Payment',Account:S.cfg.recv,Destination:S.cfg.bIss,Amount:{...bAsset(),value:need2.toFixed(6)},Memos:[memo('USDX/BURN',{v:1,dep,bonsai:need2,genesis:true})]},S.w.recv);
+    const bh=await submit({TransactionType:'Payment',Account:S.cfg.recv,Destination:S.cfg.bIss,Amount:{...bAsset(),value:need2.toFixed(6)},Memos:[memo('USDX/BURN',{v:1,dep,bonsai:need2,genesis:true,to:S.cfg.recv})]},S.w.recv);
+    if(!S.w.iss){ toast('Burned. The keeper mints the genesis USDX within about 5 minutes.'); refreshAll(); return; }
     const mh=await submit({TransactionType:'Payment',Account:S.cfg.uIss,Destination:S.cfg.recv,Amount:{...uAsset(),value:u.toFixed(6)},Memos:[memo('USDX/RECEIPT',{v:1,dep,burn:bh,bonsai:need2,rateUsd:px.usd,ratio:ratio(),usdx:u,genesis:true})]},S.w.iss);
     toast('Genesis minted '+fmt(u,2)+' USDX · '+mh.slice(0,10)+'…'); refreshAll();
   }catch(e){ toast(e.message); }
