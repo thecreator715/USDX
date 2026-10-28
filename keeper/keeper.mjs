@@ -68,7 +68,7 @@ async function submit(tx, wallet) {
   if (/^(tem|tef|tel)/.test(er) && er !== 'tefALREADY' && er !== 'tefPAST_SEQ') throw new Error(er + ' ' + tx.TransactionType);
   for (let i = 0; i < 90; i++) {
     await sleep(i ? 2000 : 1200); let r = null;
-    try { r = await req({ command: 'tx', transaction: signed.hash }); } catch (e) { if (!/txnNotFound/.test(String(e.message || e))) throw e; }
+    try { r = await req({ command: 'tx', transaction: signed.hash }); } catch (e) { if (!/txnNotFound|rate limit|slowDown|too much load|units quota/i.test(String(e.message || e))) throw e; if (/rate limit|slowDown|too much load|units quota/i.test(String(e.message || e))) { await sleep(8000); continue; } }
     if (r && r.validated) { const code = (r.meta || r.metaData || {}).TransactionResult; if (code !== 'tesSUCCESS') throw new Error(code + ' ' + tx.TransactionType); return signed.hash; }
     if (!r && prep.LastLedgerSequence && (await req({ command: 'ledger_current' })).ledger_current_index > prep.LastLedgerSequence + 2) throw new Error('transaction expired before validation, nothing applied');
   }
@@ -168,7 +168,7 @@ async function history(addr, max) { const out = []; let marker; while (out.lengt
 async function processDeposits(px) {
   if (!iss) return;
   if (px.thin) log(`note: the BONSAI price comes from a ${px.how}; minting at the live market price anyway.`);
-  const [rt, it] = await Promise.all([history(RECV, 800), history(UI, 600)]);
+  const rt = await history(RECV, 200), it = await history(UI, 400);   // recent pages only: cheap, and well inside the public servers' quota
   const deposits = [], burns = {}, receipts = new Set(), tburns = [];
   rt.map(parse).forEach(p => {
     if (!p.ok || p.t.TransactionType !== 'Payment') return;
