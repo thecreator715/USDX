@@ -224,7 +224,19 @@ async function pegStep(px, kind, depth = 0) {
 }
 
 const DEX_MIN = +E.DEX_MIN_USDX || 1;
+async function dexFail(side, e) {
+  log(`DEX ${side} quote failed: ${e.message}`);
+  if (/INSUF_RESERVE|tecUNFUNDED|tecNO_LINE|tecFROZEN/.test(e.message)) {
+    try {
+      const ai = (await req({ command: 'account_info', account: recv.address, ledger_index: 'current' })).account_data, si = (await req({ command: 'server_info' })).info.validated_ledger || {};
+      const need = (si.reserve_base_xrp || 1) + (si.reserve_inc_xrp || 0.2) * (ai.OwnerCount + 1);
+      log(`DIAGNOSIS: receiver has ${Number(ai.Balance) / 1e6} XRP, ${ai.OwnerCount} owned objects, reserve with one more offer = ${need.toFixed(2)} XRP ${Number(ai.Balance) / 1e6 < need ? '→ ADD XRP to the receiver' : '(XRP looks sufficient, so the offer was rejected for another reason)'}`);
+    } catch (x) { log('diagnosis failed:', x.message); }
+    K.dexPause = Date.now() + 30 * 60000; log('DEX quotes paused for 30 min to avoid wasting fees; pools are still defended.');
+  }
+}
 async function dexStep(px) {
+  if (K.dexPause && Date.now() < K.dexPause) return;
   const kind = K.pool, uu = kind === 'xrp' ? px.xrpUsd : px.bonsaiUsd, sellP = (1 + K.dexSp) / uu, buyP = (1 - K.dexSp) / uu, size = K.dexSize;
   const ls = await lines(recv.address), usdxInv = bal(ls, USDX), otherInv = kind === 'xrp' ? (await xrpBal(recv.address)) - 5 : bal(ls, BONSAI);
   const offers = (await req({ command: 'account_offers', account: recv.address, limit: 200 })).offers || [], keep = { sell: false, buy: false };
@@ -235,8 +247,8 @@ async function dexStep(px) {
     if (Math.abs(pr / tgt - 1) < 0.001 && usdx >= size * 0.5 && !keep[side]) keep[side] = true;
     else { log(`replacing stale ${side} quote at ${pr.toPrecision(6)}`); await submit({ TransactionType: 'OfferCancel', Account: recv.address, OfferSequence: o.seq }, recv); }
   }
-  if (!keep.sell) { try { const n = Math.min(size, usdxInv * 0.95); if (n >= DEX_MIN) { log(`posting sell quote ${n.toFixed(2)} USDX @ ${sellP.toPrecision(6)}`); await submit({ TransactionType: 'OfferCreate', Account: recv.address, TakerGets: { ...USDX, value: n.toFixed(6) }, TakerPays: other(kind, n * sellP), Flags: 65536, Memos: [memo('USDX/QUOTE', { v: 1, side: 'sell', usdx: n, px: sellP })] }, recv); } else log('sell quote skipped: not enough USDX');  } catch (e) { log(`DEX sell quote failed: ${e.message}`); } }
-  if (!keep.buy) { try { const n = Math.min(size, Math.max(0, otherInv) * 0.95 / buyP); if (n >= DEX_MIN) { log(`posting buy quote ${n.toFixed(2)} USDX @ ${buyP.toPrecision(6)}`); await submit({ TransactionType: 'OfferCreate', Account: recv.address, TakerGets: other(kind, n * buyP), TakerPays: { ...USDX, value: n.toFixed(6) }, Flags: 65536, Memos: [memo('USDX/QUOTE', { v: 1, side: 'buy', usdx: n, px: buyP })] }, recv); } else log('buy quote skipped: not enough of the other asset');  } catch (e) { log(`DEX buy quote failed: ${e.message}`); } }
+  if (!keep.sell) { try { const n = Math.min(size, usdxInv * 0.95); if (n >= DEX_MIN) { log(`posting sell quote ${n.toFixed(2)} USDX @ ${sellP.toPrecision(6)}`); await submit({ TransactionType: 'OfferCreate', Account: recv.address, TakerGets: { ...USDX, value: n.toFixed(6) }, TakerPays: other(kind, n * sellP), Flags: 65536, Memos: [memo('USDX/QUOTE', { v: 1, side: 'sell', usdx: n, px: sellP })] }, recv); } else log('sell quote skipped: not enough USDX');  } catch (e) { await dexFail('sell', e); } }
+  if (!keep.buy) { try { const n = Math.min(size, Math.max(0, otherInv) * 0.95 / buyP); if (n >= DEX_MIN) { log(`posting buy quote ${n.toFixed(2)} USDX @ ${buyP.toPrecision(6)}`); await submit({ TransactionType: 'OfferCreate', Account: recv.address, TakerGets: other(kind, n * buyP), TakerPays: { ...USDX, value: n.toFixed(6) }, Flags: 65536, Memos: [memo('USDX/QUOTE', { v: 1, side: 'buy', usdx: n, px: buyP })] }, recv); } else log('buy quote skipped: not enough of the other asset');  } catch (e) { await dexFail('buy', e); } }
 }
 
 // Burn deposited BONSAI and mint USDX. Needs ISSUER_SEED. Reads state from the ledger, so it is safe to restart.
