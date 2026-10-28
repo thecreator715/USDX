@@ -751,7 +751,7 @@ async function scanLedger(force){
 }
 
 /* ---------- render ---------- */
-const BUILD='20261027-2251';
+const BUILD='20261027-2300';
 const LIVE_URL='https://thecreator715.github.io/USDX/';
 function sandboxNote(){
   setNet(false); if(document.getElementById('sbNote')) return;
@@ -990,14 +990,13 @@ async function bmReview(v){
     if(frozen) block.push('The BONSAI issuer has frozen all BONSAI. Transfers will fail.');
     if(xb==null) block.push('Your wallet is not funded on mainnet.'); else if(xb<1.5) warn.push({t:`Your wallet has ${fmt(xb,2)} XRP. It needs the XRP reserve plus fees, and ${hasU?'':'a trust line costs a further reserve. '}Add XRP first.`,ack:false});
     if(usdx<0.01) warn.push({t:'At this price the mint is under one cent of USDX.',ack:true});
-    if(i.thin) warn.push({t:`The BONSAI price comes from a thin market (${px.how}). The treasury will not mint USDX against a price like this unless the operator sets a manual price, so your BONSAI may wait in the receiver wallet, and a burn cannot be undone.`,ack:true});
+    if(i.thin) warn.push({t:`The BONSAI price comes from a thin market (${px.how}). It is used as is, and the pools will be rebalanced to the peg after the first mints. A burn cannot be undone.`,ack:true});
     if(i.spread>3) warn.push({t:`Price sources disagree by ${i.spread.toFixed(1)}x.`,ack:true});
     if(tr>1) warn.push({t:`BONSAI has a ${((tr-1)*100).toFixed(2)}% transfer fee. Your wallet sends a little extra to cover it.`,ack:false});
     const self=w.address===S.cfg.recv;
     if(self){
       const i2=block.findIndex(x=>/receiver wallet has no BONSAI trust line/.test(x)); if(i2>=0) block.splice(i2,1);
       if(!S.w.iss) block.push('You are signed in as the receiver (treasury) wallet, so the burn and the mint happen together. Load the USDX issuer key first: Operator page, "Import issuer key".');
-      if(i.thin&&!(Number(S.cfg.priceXrp)>0)) block.push('The only BONSAI market is too thin to mint against. Enter the BONSAI price in XRP below and press "Use this price".');
     }
     BM.rev={v,px,usdx,hasU,tr,block,warn,self};
     const row=(k,val,c)=>`<div class="row" style="justify-content:space-between"><span style="color:var(--mute)">${k}</span><b class="mono ${c||''}">${val}</b></div>`;
@@ -1116,9 +1115,7 @@ async function burnFlow(){
 
 
 /* ---------- operator processor ---------- */
-function assertPriceSafe(px){
-  if(px&&px.info&&px.info.thin) throw new Error('Minting is paused: the BONSAI price comes from a thin market ('+px.how+'). A price like that is easy to push around, so USDX could be minted against too little collateral. Set a manual BONSAI price in Settings, or add liquidity, then try again.');
-}
+function assertPriceSafe(px){ /* no restrictions: always mint at the live market price */ }
 // burn one deposit's BONSAI and mint its USDX. cb(stage,{s,t},hash) reports progress for the process modal.
 async function mintForDeposit(d,cb=()=>{}){
   const px=await getPrice(); assertPriceSafe(px);
