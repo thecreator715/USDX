@@ -807,7 +807,7 @@ async function scanLedger(force){
 }
 
 /* ---------- render ---------- */
-const BUILD='20261028-0118';
+const BUILD='20261028-0131';
 const LIVE_URL='https://thecreator715.github.io/USDX/';
 function sandboxNote(){
   setNet(false); if(document.getElementById('sbNote')) return;
@@ -1652,14 +1652,14 @@ async function renderPoolData(force){
     if(!S.px){ try{ await getPrice(force===true); }catch(e){} }
     if(!S.px){ live.className='pd-live err'; txt.textContent='Waiting for prices from the ledger…'; $('#pdErr').innerHTML=`<div class="note">Prices are not available yet${S.pxErr?': '+S.pxErr:''}. This page retries automatically.</div>`; PDS.busy=false; setTimeout(()=>{ if($('#p-pools').classList.contains('on')) renderPoolData(); },5000); return; }
     if(force===true){ CACHE.delete('amm:bonsai'); CACHE.delete('amm:xrp'); }
-    const res=await Promise.all(['bonsai','xrp'].map(poolStrict)); S.pools=S.pools||{}; const errs=[];
+    const res=await Promise.all(['bonsai','xrp'].map(k=>Promise.race([poolStrict(k),sleep(25000).then(()=>{ const l=S.pools&&S.pools[k]; return l?{pool:l,stale:true}:{pool:null,err:new Error('timed out waiting for the ledger')}; })]))); S.pools=S.pools||{}; const errs=[];
     res.forEach((r,i)=>{ const k=['bonsai','xrp'][i]; if(r.pool) S.pools[k]=r.pool; else if(r.missing) S.pools[k]=null; if(r.stale) errs.push(PAIRS[k].label+' could not be refreshed, showing the last reading'); else if(!r.pool&&!r.missing) errs.push(PAIRS[k].label+' could not be read: '+(r.err&&r.err.message||'unknown error')); });
-    const rl=await lines(S.cfg.recv).catch(()=>[]), ul=S.w.user?await lines(S.w.user.address).catch(()=>[]):[];
+    const to=(pr,ms)=>Promise.race([pr,sleep(ms).then(()=>{throw new Error('timeout')})]); const rl=await to(lines(S.cfg.recv),12000).catch(()=>[]), ul=S.w.user?await to(lines(S.w.user.address),12000).catch(()=>[]):[];
     const tol=(+$('#kTol').value||50)/1e4, cards=[]; let tvlSum=0, vol24=0, fees24=0, mineUsd=0, worst=0, wk=null, swaps=0;
     for(const k of ['bonsai','xrp']){
       const p=S.pools[k], r=res[k==='bonsai'?0:1];
       if(!p){ cards.push(r.missing?`<div class="pd-card" style="cursor:default"><div class="pd-h"><h3>${PAIRS[k].label}</h3><span class="tag wait">No pool yet</span></div><p style="color:var(--mute);margin:0">This pool has not been created. Create it from the receiver on the Peg &amp; Pools page.</p></div>`:`<div class="pd-card" style="cursor:default"><div class="pd-h"><h3>${PAIRS[k].label}</h3><span class="tag bad">Read failed</span></div><p style="color:var(--mute);margin:0">The ledger did not answer. Retrying automatically.</p></div>`); continue; }
-      const a=await loadPoolActivity(k).catch(()=>PD[k]||null), uu=unitUsd(k), price=p.ro/p.ru*uu, tvl=p.ro*uu+p.ru, dev=price-1;
+      const a=PD[k]||null, uu=unitUsd(k), price=p.ro/p.ru*uu, tvl=p.ro*uu+p.ru, dev=price-1;
       const lp=rl.find(l=>l.currency===p.lp.currency&&l.account===p.acct), mine=lp?Number(lp.balance):0, lpTot=Number(p.lp.value), share=lpTot>0?mine/lpTot:0;
       const ulp=ul.find(l=>l.currency===p.lp.currency&&l.account===p.acct), umine=ulp&&S.w.user&&S.w.user.address!==S.cfg.recv?Number(ulp.balance):0, ushare=lpTot>0?umine/lpTot:0;
       tvlSum+=tvl; mineUsd+=tvl*share; if(a){ vol24+=a.vol24; fees24+=a.vol24*p.fee; swaps+=a.n24; }
@@ -1706,6 +1706,7 @@ async function renderPoolData(force){
     ].map(t=>`<div class="pd-tile"><div class="l">${t[0]}</div><div class="n mono">${t[1]}</div><div class="t">${t[2]}</div></div>`).join('');
     $('#impRows').innerHTML=[10,100,1000,10000,100000].map(T=>{ const c=(k,sell)=>{ const p=S.pools&&S.pools[k]; if(!p) return '—'; const v=impact(p,T,sell); return v==null?'<span class="brass">Exceeds pool</span>':'<span class="'+(v>0.05?'brass':'')+'">'+(v*100).toFixed(2)+'%</span>'; }; return `<tr><td class="mono">${fmt(T,0)} USDX</td><td class="mono">${c('bonsai',true)}</td><td class="mono">${c('bonsai',false)}</td><td class="mono">${c('xrp',true)}</td><td class="mono">${c('xrp',false)}</td></tr>`; }).join('');
     pdChart(); renderPoolRows();
+    PDS.act=PDS.act||{}; for(const k of ['bonsai','xrp']){ if(S.pools[k]&&!PD[k]&&!PDS.act[k]){ PDS.act[k]=1; loadPoolActivity(k).then(()=>{ PDS.act[k]=0; if($('#p-pools').classList.contains('on')){ renderPoolData(); } },()=>{ setTimeout(()=>{PDS.act[k]=0;},30000); }); } }
     PDS.at=Date.now(); PDS.err=errs.length?errs.join(' · '):null;
     $('#pdErr').innerHTML=errs.length?`<div class="note">${errs.join('<br>')}. Retrying automatically.</div>`:'';
     live.className='pd-live'+(errs.length?' off':''); txt.textContent='Live from the XRP Ledger · updated '+new Date().toLocaleTimeString()+' · refreshes every 30 s';
