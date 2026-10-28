@@ -132,6 +132,43 @@ td{padding:11px 10px;border-bottom:1px solid #132a20;font-size:13px;white-space:
 .days b{display:block;width:100%;border-radius:5px 5px 0 0;background:linear-gradient(180deg,var(--brass),var(--jade-d));min-height:2px}
 .days span{font-size:10px;color:var(--mute)}
 .kv{display:flex;justify-content:space-between;gap:12px;padding:7px 0;border-bottom:1px solid #132a20}.kv span{color:var(--mute)}.kv b{text-align:right;overflow-wrap:anywhere}
+
+/* pool data */
+.pd-top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.pd-live{display:inline-flex;align-items:center;gap:8px;font-size:12px;color:var(--mute)}
+.pd-live i{width:8px;height:8px;border-radius:50%;background:var(--jade);box-shadow:0 0 0 0 #4fd1a188;animation:pdp 2s infinite}
+.pd-live.off i{background:var(--amber);animation:none}.pd-live.err i{background:var(--red);animation:none}
+@keyframes pdp{70%{box-shadow:0 0 0 8px #4fd1a100}100%{box-shadow:0 0 0 0 #4fd1a100}}
+.pd-hero{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px}
+.pd-tile{background:linear-gradient(160deg,var(--panel2),var(--panel));border:1px solid var(--line);border-radius:16px;padding:16px 18px;min-width:0}
+.pd-tile .l{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute)}
+.pd-tile .n{font:400 30px/1.15 var(--display);margin:4px 0 2px;overflow-wrap:anywhere}
+.pd-tile .t{font-size:12px;color:var(--mute)}
+.pd-card{position:relative;background:radial-gradient(120% 80% at 0% 0%,#14352a 0,var(--panel) 55%);border:1px solid var(--line);border-radius:20px;padding:22px;display:flex;flex-direction:column;gap:16px;min-width:0;cursor:pointer;transition:border-color .2s,transform .2s}
+.pd-card:hover{border-color:var(--jade-d);transform:translateY(-1px)}
+.pd-h{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.pd-h h3{margin:0;font:400 22px var(--display)}
+.pd-px{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.pd-px b{font:400 46px/1 var(--display)}
+.pd-gauge{position:relative;height:12px;border-radius:99px;background:#0a1913;border:1px solid var(--line);overflow:visible}
+.pd-gauge .band{position:absolute;top:0;bottom:0;background:#4fd1a133;border-left:1px solid #4fd1a166;border-right:1px solid #4fd1a166}
+.pd-gauge .floor{position:absolute;top:-4px;bottom:-4px;width:2px;background:var(--red)}
+.pd-gauge .mk{position:absolute;top:-5px;width:4px;height:20px;border-radius:3px;background:var(--brass);box-shadow:0 0 12px var(--brass);transform:translateX(-2px)}
+.pd-scale{display:flex;justify-content:space-between;font-size:10px;color:var(--mute);margin-top:6px}
+.pd-comp{display:flex;height:14px;border-radius:99px;overflow:hidden;border:1px solid var(--line)}
+.pd-comp i{display:block;height:100%}
+.pd-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.pd-m{background:#0a1913;border:1px solid #17342a;border-radius:12px;padding:10px 12px;min-width:0}
+.pd-m span{display:block;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--mute)}
+.pd-m b{display:block;font:500 15px var(--mono);margin-top:3px;overflow-wrap:anywhere}
+.pd-fix{border-radius:12px;padding:10px 14px;font-size:13px;border:1px solid var(--line);background:#0a1913}
+.pd-fix.ok{border-color:#2a8f6d66;color:var(--jade)}.pd-fix.bad{border-color:#e0b86766;color:var(--brass)}
+.pd-skel{height:260px;border-radius:20px;border:1px solid var(--line);background:linear-gradient(100deg,var(--panel) 30%,var(--panel2) 50%,var(--panel) 70%);background-size:200% 100%;animation:pdsk 1.4s infinite}
+@keyframes pdsk{to{background-position:-200% 0}}
+.pd-chart{width:100%;height:220px;display:block}
+.pd-leg{display:flex;gap:16px;flex-wrap:wrap;font-size:12px;color:var(--mute)}.pd-leg i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+#pdModal .sheet{width:min(760px,100%)}
+#pdModal pre{margin:0;background:#07120d;border:1px solid var(--line);border-radius:12px;padding:12px;font:12px/1.5 var(--mono);overflow:auto;max-height:260px;color:var(--mute)}
 </style>
 </head>
 <body>
@@ -336,7 +373,11 @@ td{padding:11px 10px;border-bottom:1px solid #132a20;font-size:13px;white-space:
 
   <!-- POOL DATA -->
   <section class="page" id="p-pools">
-    <div class="grid g2" id="pdCards"></div>
+    <div class="pd-top"><div class="pd-live" id="pdLive"><i></i><span id="pdLiveTxt">Loading pools from the ledger…</span></div><div class="row"><button class="btn ghost sm" id="pdRefreshAll">Refresh now</button></div></div>
+    <div id="pdErr"></div>
+    <div class="pd-hero" id="pdHero"></div>
+    <div class="grid g2" id="pdCards"><div class="pd-skel"></div><div class="pd-skel"></div></div>
+    <div class="card"><div class="row" style="justify-content:space-between;align-items:center"><h3 style="margin:0">USDX price in each pool</h3><div class="pd-leg" id="pdLeg"></div></div><div id="pdChart" style="margin-top:12px"></div><div class="s" id="pdChartMeta" style="color:var(--mute);font-size:12px;margin-top:6px"></div></div>
     <div class="card"><h3>Price impact · what a trade does to the pool</h3><div class="tw"><table><thead><tr><th>USDX traded</th><th>BONSAI/USDX sell</th><th>BONSAI/USDX buy</th><th>XRP/USDX sell</th><th>XRP/USDX buy</th></tr></thead><tbody id="impRows"></tbody></table></div><p class="s" style="color:var(--mute);font-size:12px;margin:10px 0 0">Impact is the gap between the average price you get and the pool&rsquo;s spot price, including the trading fee. Sell means you give the pool USDX.</p></div>
     <div class="card"><div class="row" style="justify-content:space-between"><h3 style="margin:0">Recent pool activity</h3><div class="row"><select id="pdKind" style="width:auto"><option value="bonsai">BONSAI / USDX</option><option value="xrp">XRP / USDX</option></select><button class="btn ghost sm" id="pdRefresh">Refresh</button></div></div>
       <div class="tw" style="margin-top:12px"><table><thead><tr><th>Time</th><th>Type</th><th>Wallet</th><th>Other asset</th><th>USDX</th><th>Tx</th></tr></thead><tbody id="pdRows"></tbody></table></div><div class="s" id="pdMeta" style="color:var(--mute);margin-top:10px"></div></div>
@@ -507,6 +548,7 @@ td{padding:11px 10px;border-bottom:1px solid #132a20;font-size:13px;white-space:
   <div class="row"><button class="btn ghost sm" id="wmClose">Close</button><button class="btn ghost sm" id="wmOut" hidden>Disconnect and forget</button></div>
 </div></div>
 <!-- confirm modal -->
+<div class="modal" id="pdModal"><div class="sheet" id="pdSheet"></div></div>
 <div class="modal" id="bm"><div class="sheet" style="width:min(760px,100%)">
   <div class="row" style="justify-content:space-between;align-items:baseline"><h2 id="bmHead">Review your burn</h2><span class="s mono" style="color:var(--mute)" id="bmTime"></span></div>
   <div id="bmReview" class="col"><div id="bmBody" class="col"></div>
@@ -765,7 +807,7 @@ async function scanLedger(force){
 }
 
 /* ---------- render ---------- */
-const BUILD='20261028-0052';
+const BUILD='20261028-0118';
 const LIVE_URL='https://thecreator715.github.io/USDX/';
 function sandboxNote(){
   setNet(false); if(document.getElementById('sbNote')) return;
@@ -1221,7 +1263,7 @@ async function poolInfo(kind){
   try{
     const r=await cached('amm:'+kind,()=>req({command:'amm_info',asset:PAIRS[kind].other(),asset2:uAsset(),ledger_index:'validated'}),20000); const a=r.amm;
     const uIsFirst=isUsdx(a.amount), u=uIsFirst?a.amount:a.amount2, o=uIsFirst?a.amount2:a.amount;
-    return {kind,ro:aval(o),ru:aval(u),fee:a.trading_fee/100000,lp:a.lp_token,acct:a.account,auction:a.auction_slot,vote:a.vote_slots};
+    return {kind,ro:aval(o),ru:aval(u),fee:a.trading_fee/100000,lp:a.lp_token,acct:a.account,auction:a.auction_slot,vote:a.vote_slots,raw:a};
   }catch(e){ return null; }
 }
 function poolPrice(p){ return p.ro/p.ru*unitUsd(p.kind); }   // USD per USDX implied by the pool
@@ -1552,38 +1594,134 @@ async function loadPoolActivity(kind){
   return PD[kind];
 }
 const impact=(p,T,sell)=>{ const f=p.fee, spot=p.ro/p.ru; if(sell){ const out=p.ro*(T*(1-f))/(p.ru+T*(1-f)); return 1-(out/T)/spot; } if(T>=p.ru*0.999) return null; const inn=p.ro*T/((p.ru-T)*(1-f)); return (inn/T)/spot-1; };
-async function renderPoolData(){
-  if(!S.px) await getPrice().catch(()=>{});
-  if(!S.px) return toast('Prices unavailable right now.');
-  if(!S.pools) await renderPeg();
-  const tol=(+$('#kTol').value||50)/1e4; const cards=[];
-  for(const k of ['bonsai','xrp']){
-    const p=S.pools&&S.pools[k];
-    if(!p){ cards.push(`<div class="card"><h3>${PAIRS[k].label}</h3><p style="color:var(--mute)">No pool yet. Create it on the Peg &amp; Pools page.</p></div>`); continue; }
-    const a=await loadPoolActivity(k).catch(()=>null), uu=unitUsd(k), price=p.ro/p.ru*uu, tvl=p.ro*uu+p.ru;
-    const rl=await lines(S.cfg.recv).catch(()=>[]), lp=rl.find(l=>l.currency===p.lp.currency&&l.account===p.acct), mine=lp?Number(lp.balance):0, share=Number(p.lp.value)>0?mine/Number(p.lp.value):0;
-    const slot=p.auction, vs=p.vote||[];
-    const kv=[['USDX price',`<span class="${Math.abs(price-1)<=tol?'jade':'brass'}">$${price.toFixed(5)}</span>`],
-      ['Pool value','$'+fmt(tvl,2)],
-      [PAIRS[k].name+' reserve',fmt(p.ro,4)],['USDX reserve',fmt(p.ru,4)],
-      [PAIRS[k].name+' per USDX',(p.ro/p.ru).toPrecision(7)],['USDX per '+PAIRS[k].name,(p.ru/p.ro).toPrecision(7)],
-      ['Trading fee',(p.fee*100).toFixed(3)+'%'],['LP tokens outstanding',Number(p.lp.value).toPrecision(10)],
-      ['Treasury share',(share*100).toFixed(3)+'% · $'+fmt(tvl*share,2)],
-      ['Volume 24h',a?'$'+fmt(a.vol24,2):'—'],['Volume 7d (loaded)',a?'$'+fmt(a.vol7,2):'—'],['Swaps 24h',a?a.n24:'—'],['Fees earned 24h',a?'$'+fmt(a.vol24*p.fee,2):'—'],
-      ['Auction slot',slot?`${short(slot.account)} · fee ${(slot.discounted_fee/1000).toFixed(3)}%`:'None'],['Fee voters',vs.length],['Pool account',alink(p.acct)]];
-    cards.push(`<div class="card"><h3>${PAIRS[k].label}${$('#kPool').value===k?' · peg pool':''}</h3>${kv.map(x=>`<div class="kv"><span>${x[0]}</span><b class="mono">${x[1]}</b></div>`).join('')}</div>`);
+/* strict pool read: tells a missing pool apart from a failed read, retries, and falls back to the last good data */
+async function poolStrict(kind){
+  let err=null;
+  for(let i=0;i<3;i++){
+    try{
+      const r=await cached('amm:'+kind,()=>req({command:'amm_info',asset:PAIRS[kind].other(),asset2:uAsset(),ledger_index:'validated'}),i?0:15000); const a=r.amm;
+      const uIsFirst=isUsdx(a.amount), u=uIsFirst?a.amount:a.amount2, o=uIsFirst?a.amount2:a.amount;
+      return {pool:{kind,ro:aval(o),ru:aval(u),fee:a.trading_fee/100000,lp:a.lp_token,acct:a.account,auction:a.auction_slot,vote:a.vote_slots,raw:a},stale:false};
+    }catch(e){
+      const m=String(e&&e.message||e)+JSON.stringify(e&&e.data||{});
+      if(/actNotFound|ammNotFound|Account not found/i.test(m)) return {pool:null,missing:true};
+      err=e; CACHE.delete('amm:'+kind); await sleep(700*(i+1));
+    }
   }
-  $('#pdCards').innerHTML=cards.join('');
-  $('#impRows').innerHTML=[100,1000,10000].map(T=>{ const c=(k,sell)=>{ const p=S.pools&&S.pools[k]; if(!p) return '—'; const v=impact(p,T,sell); return v==null?'Exceeds pool':(v*100).toFixed(2)+'%'; }; return `<tr><td class="mono">${fmt(T,0)}</td><td class="mono">${c('bonsai',true)}</td><td class="mono">${c('bonsai',false)}</td><td class="mono">${c('xrp',true)}</td><td class="mono">${c('xrp',false)}</td></tr>`; }).join('');
-  renderPoolRows();
+  const last=S.pools&&S.pools[kind]; if(last) return {pool:last,stale:true,err};
+  return {pool:null,err};
 }
+const PDS={busy:false,at:0,err:null};
+function pdTimeAgo(t){ const d=Math.max(0,Math.round((Date.now()-t)/1000)); return d<5?'just now':d<90?d+' s ago':Math.round(d/60)+' min ago'; }
+function pdMaxTrade(p,sell,pct){ let lo=0,hi=p.ru*0.999; for(let i=0;i<40;i++){ const m=(lo+hi)/2, v=impact(p,m,sell); if(v!=null&&v<=pct) lo=m; else hi=m; } return lo; }
+function pdChart(){
+  const W=900,H=220,P={l:44,r:12,t:12,b:22}, pts={bonsai:MON.hist.filter(h=>h.bonsai!=null),xrp:MON.hist.filter(h=>h.xrp!=null)};
+  const all=[...pts.bonsai,...pts.xrp]; const box=$('#pdChart'), meta=$('#pdChartMeta');
+  $('#pdLeg').innerHTML=`<span><i style="background:var(--brass)"></i>BONSAI / USDX</span><span><i style="background:#7aa2f7"></i>XRP / USDX</span><span><i style="background:#4fd1a155"></i>peg band</span><span><i style="background:var(--red)"></i>$0.99 floor</span>`;
+  if(all.length<2){ box.innerHTML='<div class="s" style="color:var(--mute)">The monitor records a point every minute, so the chart fills as the app stays open.</div>'; meta.textContent=''; return; }
+  const tmin=Math.min(...all.map(h=>h.t)), tmax=Math.max(...all.map(h=>h.t)), vs=all.map(h=>h.bonsai!=null&&pts.bonsai.includes(h)?h.bonsai:h.xrp);
+  const lo=Math.min(0.985,...vs)-0.002, hi=Math.max(1.015,...vs)+0.002, X=t=>P.l+(t-tmin)/Math.max(1,tmax-tmin)*(W-P.l-P.r), Y=v=>P.t+(hi-v)/(hi-lo)*(H-P.t-P.b);
+  const tol=(+$('#kTol').value||50)/1e4;
+  const line=(arr,k,c)=>arr.length<2?'':`<path d="${arr.map((h,i)=>(i?'L':'M')+X(h.t).toFixed(1)+' '+Y(h[k]).toFixed(1)).join('')}" fill="none" stroke="${c}" stroke-width="2" stroke-linejoin="round"/>`;
+  const ticks=[lo,0.99,1,1.01,hi].filter((v,i,a)=>v>=lo&&v<=hi).map(v=>`<text x="${P.l-6}" y="${Y(v)+3}" text-anchor="end" fill="var(--mute)" font-size="10" font-family="var(--mono)">${v.toFixed(3)}</text>`).join('');
+  box.innerHTML=`<svg class="pd-chart" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" role="img" aria-label="USDX price history in both pools">
+    <rect x="${P.l}" y="${Y(1+tol)}" width="${W-P.l-P.r}" height="${Math.max(1,Y(1-tol)-Y(1+tol))}" fill="#4fd1a122"/>
+    <line x1="${P.l}" x2="${W-P.r}" y1="${Y(1)}" y2="${Y(1)}" stroke="#4fd1a1" stroke-opacity=".6" stroke-dasharray="4 4"/>
+    <line x1="${P.l}" x2="${W-P.r}" y1="${Y(0.99)}" y2="${Y(0.99)}" stroke="var(--red)" stroke-opacity=".7"/>
+    ${ticks}${line(pts.bonsai,'bonsai','#e0b867')}${line(pts.xrp,'xrp','#7aa2f7')}
+    <text x="${P.l}" y="${H-5}" fill="var(--mute)" font-size="10" font-family="var(--mono)">${new Date(tmin).toLocaleTimeString()}</text><text x="${W-P.r}" y="${H-5}" text-anchor="end" fill="var(--mute)" font-size="10" font-family="var(--mono)">${new Date(tmax).toLocaleTimeString()}</text></svg>`;
+  meta.textContent=all.length+' readings, one per minute while this app is open.';
+}
+function pdModal(k){
+  const p=S.pools&&S.pools[k]; if(!p) return; const uu=unitUsd(k), price=p.ro/p.ru*uu, a=PD[k], q=MON.dex&&MON.dex[k];
+  const kv=(x,y)=>`<div class="kv"><span>${x}</span><b class="mono">${y}</b></div>`;
+  const slot=p.auction, vs=p.vote||[];
+  $('#pdSheet').innerHTML=`<div class="row" style="justify-content:space-between;align-items:center"><h2>${PAIRS[k].label} · pool details</h2><button class="btn ghost sm" id="pdClose">Close</button></div>
+   <div class="grid g2" style="gap:0 24px">
+    <div>${kv('USDX price','$'+price.toFixed(6))}${kv(PAIRS[k].name+' reserve',fmt(p.ro,6))}${kv('USDX reserve',fmt(p.ru,6))}${kv(PAIRS[k].name+' per USDX',(p.ro/p.ru).toPrecision(8))}${kv('USDX per '+PAIRS[k].name,(p.ru/p.ro).toPrecision(8))}${kv('Constant product k',(p.ro*p.ru).toPrecision(10))}${kv('Trading fee',(p.fee*100).toFixed(3)+'%')}</div>
+    <div>${kv('LP tokens outstanding',Number(p.lp.value).toPrecision(12))}${kv('LP currency',p.lp.currency)}${kv('Auction slot',slot?short(slot.account)+' · '+(slot.discounted_fee/1000).toFixed(3)+'%':'None')}${kv('Fee voters',vs.length)}${kv('DEX best bid',q&&q.bid?'$'+q.bid.toFixed(5):'—')}${kv('DEX best ask',q&&q.ask?'$'+q.ask.toFixed(5):'—')}${kv('Pool account',alink(p.acct))}</div></div>
+   ${a?`<div class="s" style="color:var(--mute)">Activity window: ${a.count} transactions${a.oldest?', back to '+a.oldest.toLocaleDateString():''} · 24h swaps ${a.n24} · 24h volume $${fmt(a.vol24,2)}</div>`:''}
+   <div class="row"><a class="btn ghost sm" href="https://livenet.xrpl.org/accounts/${p.acct}" target="_blank" rel="noopener">Open in the XRPL explorer</a></div>
+   <div class="s" style="color:var(--mute)">Raw amm_info from the ledger</div><pre>${JSON.stringify(p.raw||{},null,2).replace(/[<>&]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]))}</pre>`;
+  $('#pdModal').classList.add('on'); $('#pdClose').onclick=()=>$('#pdModal').classList.remove('on');
+}
+$('#pdModal').onclick=e=>{ if(e.target.id==='pdModal') $('#pdModal').classList.remove('on'); };
+async function renderPoolData(force){
+  if(PDS.busy) return; PDS.busy=true; const live=$('#pdLive'), txt=$('#pdLiveTxt');
+  try{
+    if(!S.px){ try{ await getPrice(force===true); }catch(e){} }
+    if(!S.px){ live.className='pd-live err'; txt.textContent='Waiting for prices from the ledger…'; $('#pdErr').innerHTML=`<div class="note">Prices are not available yet${S.pxErr?': '+S.pxErr:''}. This page retries automatically.</div>`; PDS.busy=false; setTimeout(()=>{ if($('#p-pools').classList.contains('on')) renderPoolData(); },5000); return; }
+    if(force===true){ CACHE.delete('amm:bonsai'); CACHE.delete('amm:xrp'); }
+    const res=await Promise.all(['bonsai','xrp'].map(poolStrict)); S.pools=S.pools||{}; const errs=[];
+    res.forEach((r,i)=>{ const k=['bonsai','xrp'][i]; if(r.pool) S.pools[k]=r.pool; else if(r.missing) S.pools[k]=null; if(r.stale) errs.push(PAIRS[k].label+' could not be refreshed, showing the last reading'); else if(!r.pool&&!r.missing) errs.push(PAIRS[k].label+' could not be read: '+(r.err&&r.err.message||'unknown error')); });
+    const rl=await lines(S.cfg.recv).catch(()=>[]), ul=S.w.user?await lines(S.w.user.address).catch(()=>[]):[];
+    const tol=(+$('#kTol').value||50)/1e4, cards=[]; let tvlSum=0, vol24=0, fees24=0, mineUsd=0, worst=0, wk=null, swaps=0;
+    for(const k of ['bonsai','xrp']){
+      const p=S.pools[k], r=res[k==='bonsai'?0:1];
+      if(!p){ cards.push(r.missing?`<div class="pd-card" style="cursor:default"><div class="pd-h"><h3>${PAIRS[k].label}</h3><span class="tag wait">No pool yet</span></div><p style="color:var(--mute);margin:0">This pool has not been created. Create it from the receiver on the Peg &amp; Pools page.</p></div>`:`<div class="pd-card" style="cursor:default"><div class="pd-h"><h3>${PAIRS[k].label}</h3><span class="tag bad">Read failed</span></div><p style="color:var(--mute);margin:0">The ledger did not answer. Retrying automatically.</p></div>`); continue; }
+      const a=await loadPoolActivity(k).catch(()=>PD[k]||null), uu=unitUsd(k), price=p.ro/p.ru*uu, tvl=p.ro*uu+p.ru, dev=price-1;
+      const lp=rl.find(l=>l.currency===p.lp.currency&&l.account===p.acct), mine=lp?Number(lp.balance):0, lpTot=Number(p.lp.value), share=lpTot>0?mine/lpTot:0;
+      const ulp=ul.find(l=>l.currency===p.lp.currency&&l.account===p.acct), umine=ulp&&S.w.user&&S.w.user.address!==S.cfg.recv?Number(ulp.balance):0, ushare=lpTot>0?umine/lpTot:0;
+      tvlSum+=tvl; mineUsd+=tvl*share; if(a){ vol24+=a.vol24; fees24+=a.vol24*p.fee; swaps+=a.n24; }
+      if(Math.abs(dev)>=Math.abs(worst)){ worst=dev; wk=k; }
+      const inBand=Math.abs(dev)<=tol, floor=price<0.99;
+      const gmin=0.98, gmax=1.02, pos=v=>Math.min(100,Math.max(0,(v-gmin)/(gmax-gmin)*100));
+      const otherUsd=p.ro*uu, otherPct=tvl>0?otherUsd/tvl*100:50;
+      const fix=Math.abs(dev)<1e-6?'':dev>0?`To restore $1.00 the pool needs about <b>${fmt(p.ru*dev,4)} USDX</b> added, or ${fmt(p.ro*(1-1/price),4)} ${PAIRS[k].name} removed.`:`To restore $1.00 about <b>${fmt(p.ru*-dev,4)} USDX</b> must come out of the pool, or ${fmt(p.ro*(1/price-1),4)} ${PAIRS[k].name} be added.`;
+      const q=MON.dex&&MON.dex[k], apr=tvl>0&&a?(a.vol24*p.fee*365/tvl*100):null;
+      const t1s=pdMaxTrade(p,true,0.01), t1b=pdMaxTrade(p,false,0.01);
+      cards.push(`<div class="pd-card" data-pd="${k}" title="Click for full pool details">
+        <div class="pd-h"><h3>${PAIRS[k].label}</h3><span class="tag ${floor?'bad':inBand?'ok':'wait'}">${floor?'Below the $0.99 floor':inBand?'On peg':(dev>0?'Above peg':'Below peg')}</span></div>
+        <div class="pd-px"><b class="${inBand?'jade':'brass'}">$${price.toFixed(5)}</b><span class="mono" style="color:var(--mute)">${dev>=0?'+':''}${(dev*1e4).toFixed(1)} bps</span>${r.stale?'<span class="tag wait">stale</span>':''}</div>
+        <div><div class="pd-gauge"><div class="band" style="left:${pos(1-tol)}%;width:${pos(1+tol)-pos(1-tol)}%"></div><div class="floor" style="left:${pos(0.99)}%"></div><div class="mk" style="left:${pos(price)}%"></div></div><div class="pd-scale"><span>$0.980</span><span>$0.990 floor</span><span>$1.000</span><span>$1.010</span><span>$1.020</span></div></div>
+        <div><div class="pd-comp"><i style="width:${otherPct}%;background:#e0b867"></i><i style="width:${100-otherPct}%;background:var(--jade)"></i></div><div class="pd-scale"><span>${PAIRS[k].name} ${otherPct.toFixed(1)}% · $${fmt(otherUsd,2)}</span><span>USDX ${(100-otherPct).toFixed(1)}% · $${fmt(p.ru,2)}</span></div></div>
+        <div class="pd-fix ${Math.abs(dev)<1e-6||inBand?'ok':'bad'}">${inBand?'Within the ±'+(tol*1e4).toFixed(0)+' bps band. '+(fix?fix:''):fix}</div>
+        <div class="pd-grid">
+          <div class="pd-m"><span>Pool value</span><b>$${fmt(tvl,2)}</b></div>
+          <div class="pd-m"><span>${PAIRS[k].name} reserve</span><b>${fmt(p.ro,4)}</b></div>
+          <div class="pd-m"><span>USDX reserve</span><b>${fmt(p.ru,4)}</b></div>
+          <div class="pd-m"><span>Trading fee</span><b>${(p.fee*100).toFixed(2)}%</b></div>
+          <div class="pd-m"><span>Volume 24h</span><b>${a?'$'+fmt(a.vol24,2):'—'}</b></div>
+          <div class="pd-m"><span>Swaps 24h</span><b>${a?a.n24:'—'}</b></div>
+          <div class="pd-m"><span>Fees 24h</span><b>${a?'$'+fmt(a.vol24*p.fee,4):'—'}</b></div>
+          <div class="pd-m"><span>Fee APR (24h)</span><b>${apr==null?'—':apr.toFixed(2)+'%'}</b></div>
+          <div class="pd-m"><span>1% impact: sell / buy</span><b>${fmt(t1s,2)} / ${fmt(t1b,2)}</b></div>
+          <div class="pd-m"><span>DEX bid / ask</span><b>${q&&(q.bid||q.ask)?(q.bid?'$'+q.bid.toFixed(4):'—')+' / '+(q.ask?'$'+q.ask.toFixed(4):'—'):'none'}</b></div>
+          <div class="pd-m"><span>Treasury LP</span><b>${fmt(mine,4)} · ${(share*100).toFixed(2)}%</b></div>
+          <div class="pd-m"><span>Treasury stake</span><b>$${fmt(tvl*share,2)}</b></div>
+          ${S.w.user&&S.w.user.address!==S.cfg.recv?`<div class="pd-m"><span>Your LP</span><b>${fmt(umine,4)} · ${(ushare*100).toFixed(2)}%</b></div><div class="pd-m"><span>Your stake</span><b>$${fmt(tvl*ushare,2)}</b></div>`:''}
+        </div>
+        <div class="s" style="color:var(--mute);font-size:12px">${spark(k)}</div></div>`);
+    }
+    $('#pdCards').innerHTML=cards.join('');
+    document.querySelectorAll('#pdCards [data-pd]').forEach(el=>el.onclick=()=>pdModal(el.dataset.pd));
+    const dbps=wk?worst*1e4:0, ok=wk&&Math.abs(worst)<=tol;
+    $('#pdHero').innerHTML=[
+      ['Total pool value','$'+fmt(tvlSum,2),'BONSAI/USDX and XRP/USDX combined'],
+      ['Peg status',!wk?'—':ok?'<span class="jade">On peg</span>':'<span class="brass">Off peg</span>',!wk?'No pools yet':'Worst pool '+PAIRS[wk].label+' · '+(dbps>=0?'+':'')+dbps.toFixed(1)+' bps'],
+      ['Volume 24h','$'+fmt(vol24,2),swaps+' swaps across both pools'],
+      ['Fees earned 24h','$'+fmt(fees24,4),'Paid to liquidity providers'],
+      ['Treasury in pools','$'+fmt(mineUsd,2),tvlSum>0?(mineUsd/tvlSum*100).toFixed(1)+'% of all pool liquidity':'—'],
+      ['BONSAI price',S.px?'$'+fp(S.px.usd,7):'—',S.px?fp(S.px.bonsaiXrp,7)+' XRP · XRP $'+fmt(S.px.xrpUsd,4):'']
+    ].map(t=>`<div class="pd-tile"><div class="l">${t[0]}</div><div class="n mono">${t[1]}</div><div class="t">${t[2]}</div></div>`).join('');
+    $('#impRows').innerHTML=[10,100,1000,10000,100000].map(T=>{ const c=(k,sell)=>{ const p=S.pools&&S.pools[k]; if(!p) return '—'; const v=impact(p,T,sell); return v==null?'<span class="brass">Exceeds pool</span>':'<span class="'+(v>0.05?'brass':'')+'">'+(v*100).toFixed(2)+'%</span>'; }; return `<tr><td class="mono">${fmt(T,0)} USDX</td><td class="mono">${c('bonsai',true)}</td><td class="mono">${c('bonsai',false)}</td><td class="mono">${c('xrp',true)}</td><td class="mono">${c('xrp',false)}</td></tr>`; }).join('');
+    pdChart(); renderPoolRows();
+    PDS.at=Date.now(); PDS.err=errs.length?errs.join(' · '):null;
+    $('#pdErr').innerHTML=errs.length?`<div class="note">${errs.join('<br>')}. Retrying automatically.</div>`:'';
+    live.className='pd-live'+(errs.length?' off':''); txt.textContent='Live from the XRP Ledger · updated '+new Date().toLocaleTimeString()+' · refreshes every 30 s';
+  }catch(e){ live.className='pd-live err'; txt.textContent='Could not load pool data: '+(e.message||e); $('#pdErr').innerHTML=`<div class="note">${String(e.message||e)}. Retrying automatically.</div>`; }
+  PDS.busy=false;
+}
+$('#pdRefreshAll').onclick=()=>renderPoolData(true);
+setInterval(()=>{ if(!document.hidden&&$('#p-pools').classList.contains('on')&&!BM.running) renderPoolData(); },30000);
+setInterval(()=>{ const t=$('#pdLiveTxt'); if(t&&PDS.at&&$('#p-pools').classList.contains('on')&&/updated/.test(t.textContent)&&Date.now()-PDS.at>75000){ $('#pdLive').className='pd-live off'; t.textContent='Last update '+pdTimeAgo(PDS.at)+', retrying…'; } },15000);
 function renderPoolRows(){
   const k=$('#pdKind').value, a=PD[k];
   if(!a){ $('#pdRows').innerHTML='<tr><td colspan="6" style="color:var(--mute)">No pool activity loaded.</td></tr>'; $('#pdMeta').textContent=''; return; }
   $('#pdRows').innerHTML=a.rows.slice(0,40).map(r=>`<tr><td>${r.time?r.time.toLocaleString():''}</td><td><span class="tag ${/Sell/.test(r.ty)?'bad':/Buy/.test(r.ty)?'ok':'wait'}">${r.ty}</span></td><td>${alink(r.who)}</td><td class="mono">${(r.dox>0?'+':'')+fmt(r.dox,4)} ${PAIRS[k].name}</td><td class="mono">${(r.du>0?'+':'')+fmt(r.du,4)}</td><td>${txl(r.hash)}</td></tr>`).join('')||'<tr><td colspan="6" style="color:var(--mute)">No activity yet.</td></tr>';
   $('#pdMeta').textContent=`Read from the pool account's last ${a.count} transactions${a.oldest?', back to '+a.oldest.toLocaleDateString():''}. Volumes cover that window. Amounts are the pool's change: plus means the pool received it.`;
 }
-$('#pdKind').onchange=renderPoolRows; $('#pdRefresh').onclick=renderPoolData;
+$('#pdKind').onchange=renderPoolRows; $('#pdRefresh').onclick=()=>renderPoolData(true);
 
 /* ---------- genesis mint, DEX quotes, one-sided pool actions ---------- */
 const genesisDone=()=> (S.supply.u||0)>0 || (S.ledger&&S.ledger.mints.some(m=>String(m.dep).startsWith('GENESIS')));
