@@ -169,6 +169,10 @@ td{padding:11px 10px;border-bottom:1px solid #132a20;font-size:13px;white-space:
 .pd-leg{display:flex;gap:16px;flex-wrap:wrap;font-size:12px;color:var(--mute)}.pd-leg i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:-1px}
 #pdModal .sheet{width:min(760px,100%)}
 #pdModal pre{margin:0;background:#07120d;border:1px solid var(--line);border-radius:12px;padding:12px;font:12px/1.5 var(--mono);overflow:auto;max-height:260px;color:var(--mute)}
+
+/* public build: operator and treasury controls are not shown; the keeper runs them automatically */
+#genesisCard,#launchCard,#aCreate,#coverBtn,#coverBtn+span,#tmAmt,#tmBtn,#kOn,#kPool,#kNow,#dCancel,#kLast,#dOffers,#dOn,#dSize,#dSpread{display:none!important}
+.op-hide{display:none!important}
 </style>
 </head>
 <body>
@@ -435,29 +439,29 @@ td{padding:11px 10px;border-bottom:1px solid #132a20;font-size:13px;white-space:
         <div class="row" style="justify-content:space-between"><span style="color:var(--mute)">BONSAI burned (all time in history)</span><b class="mono" id="cBurn">—</b></div>
         <div class="row" style="justify-content:space-between"><span style="color:var(--mute)">Burned value at today&rsquo;s price</span><b class="mono jade" id="cCov">—</b></div>
         <div class="bar"><i id="cBar" style="width:0"></i></div>
-        <div class="row"><button class="btn brass sm" id="coverBtn">Burn the shortfall</button><span class="s" style="color:var(--mute);font-size:12px">Burns BONSAI from the receiver wallet. No new USDX is minted.</span></div>
-        <hr style="border:0;border-top:1px solid var(--line);width:100%">
-        <div><label>Mint USDX to the treasury (burns BONSAI the receiver holds)</label><div class="row" style="flex-wrap:nowrap"><input id="tmAmt" inputmode="decimal" placeholder="BONSAI to burn"><button class="btn sm" id="tmBtn" style="white-space:nowrap">Burn &amp; mint</button></div></div>
-        <p class="s" style="color:var(--mute);font-size:12px;margin:0">Same rule as a user mint: every USDX is created only after its BONSAI is burned. Treasury USDX is the stock the keeper sells when the price rises above $1.</p>
+        <div class="row op-hide"><button class="btn brass sm" id="coverBtn">Burn the shortfall</button><span class="s" style="color:var(--mute);font-size:12px">Burns BONSAI from the receiver wallet. No new USDX is minted.</span></div>
+        <hr class="op-hide" style="border:0;border-top:1px solid var(--line);width:100%">
+        <div class="op-hide"><label>Mint USDX to the treasury (burns BONSAI the receiver holds)</label><div class="row" style="flex-wrap:nowrap"><input id="tmAmt" inputmode="decimal" placeholder="BONSAI to burn"><button class="btn sm" id="tmBtn" style="white-space:nowrap">Burn &amp; mint</button></div></div>
+        <p class="s op-hide" style="color:var(--mute);font-size:12px;margin:0">Same rule as a user mint: every USDX is created only after its BONSAI is burned. Treasury USDX is the stock the keeper sells when the price rises above $1.</p>
       </div>
       <div class="card col">
-        <h3>Peg keeper · signs from the receiver wallet</h3>
-        <div class="row" style="justify-content:space-between"><label class="row" style="margin:0;gap:8px;text-transform:none;letter-spacing:0;font-size:13px;color:var(--fg)"><input type="checkbox" id="kOn" style="width:auto"> Auto-rebalance from this tab every 45 s (paused while the GitHub keeper is live)</label><span class="pill" id="kArmed"><i class="dot"></i><span>Key not loaded</span></span></div>
-        <div class="row"><button class="btn ghost sm" data-slot="recv">Load receiver key</button><span class="s" style="color:var(--mute);font-size:12px">The keeper trades from the receiver wallet and only runs while its key is loaded in this tab. The Node keeper in the repo runs without a browser.</span></div>
-        <div><label>Headline pool (DEX quotes and the big price). The keeper defends both pools.</label><select id="kPool"><option value="bonsai">BONSAI / USDX</option><option value="xrp">XRP / USDX</option></select></div>
-        <div class="grid" style="grid-template-columns:repeat(3,1fr);gap:10px">
+        <h3>Peg keeper · automatic, runs 24/7</h3><p class="s" style="color:var(--mute);margin:0">Rebalancing, DEX quotes, deposits and withdrawals are run automatically by the treasury keeper. Nothing here needs a visitor to act.</p>
+        <div class="row op-hide" style="justify-content:space-between"><label class="row" style="margin:0;gap:8px;text-transform:none;letter-spacing:0;font-size:13px;color:var(--fg)"><input type="checkbox" id="kOn" style="width:auto"> Auto-rebalance from this tab every 45 s (paused while the GitHub keeper is live)</label><span class="pill" id="kArmed"><i class="dot"></i><span>Key not loaded</span></span></div>
+        <div class="row op-hide"><button class="btn ghost sm" data-slot="recv">Load receiver key</button><span class="s" style="color:var(--mute);font-size:12px">The keeper trades from the receiver wallet and only runs while its key is loaded in this tab. The Node keeper in the repo runs without a browser.</span></div>
+        <div class="op-hide"><label>Headline pool (DEX quotes and the big price). The keeper defends both pools.</label><select id="kPool"><option value="bonsai">BONSAI / USDX</option><option value="xrp">XRP / USDX</option></select></div>
+        <div class="grid op-hide" style="grid-template-columns:repeat(3,1fr);gap:10px">
           <div><label>Band (bps)</label><input id="kTol" value="50" inputmode="numeric"></div>
           <div><label>Max trade % of pool</label><input id="kMax" value="20" inputmode="numeric"></div>
           <div><label>Slippage (bps)</label><input id="kSlip" value="100" inputmode="numeric"></div>
         </div>
-        <label class="row" style="margin:6px 0 0;gap:8px;text-transform:none;letter-spacing:0;font-size:13px;color:var(--fg)"><input type="checkbox" id="dOn" style="width:auto"> DEX quotes: keep standing buy and sell offers around $1.00</label>
-        <div class="grid" style="grid-template-columns:repeat(2,1fr);gap:10px">
+        <label class="row op-hide" style="margin:6px 0 0;gap:8px;text-transform:none;letter-spacing:0;font-size:13px;color:var(--fg)"><input type="checkbox" id="dOn" style="width:auto"> DEX quotes: keep standing buy and sell offers around $1.00</label>
+        <div class="grid op-hide" style="grid-template-columns:repeat(2,1fr);gap:10px">
           <div><label>Quote size per side (USDX)</label><input id="dSize" value="500" inputmode="decimal"></div>
           <div><label>Spread (bps)</label><input id="dSpread" value="30" inputmode="numeric"></div>
         </div>
-        <div class="row"><button class="btn sm" id="kNow">Rebalance now</button><button class="btn ghost sm" id="dCancel">Cancel my quotes</button><span class="s" style="color:var(--mute);font-size:12px" id="kLast">Not run yet</span></div>
+        <div class="row op-hide"><button class="btn sm" id="kNow">Rebalance now</button><button class="btn ghost sm" id="dCancel">Cancel my quotes</button><span class="s" style="color:var(--mute);font-size:12px" id="kLast">Not run yet</span></div>
         <div class="addr" id="dOffers"></div>
-        <p class="s" style="color:var(--mute);font-size:12px;margin:0">Pool: price below $1, the treasury buys USDX and sends it to the issuer to retire it. Price above $1, it sells its own USDX into the pool. DEX: it posts a sell offer a little above $1 and a buy offer a little below, and re-posts them when the BONSAI price moves. Every trade is sized with constant-product math and carries an on-chain memo.</p>
+        <p class="s op-hide" style="color:var(--mute);font-size:12px;margin:0">Pool: price below $1, the treasury buys USDX and sends it to the issuer to retire it. Price above $1, it sells its own USDX into the pool. DEX: it posts a sell offer a little above $1 and a buy offer a little below, and re-posts them when the BONSAI price moves. Every trade is sized with constant-product math and carries an on-chain memo.</p>
         <ol class="steps" id="kLog"></ol>
         <h3 style="margin-top:14px">GitHub keeper · always on <span class="tag" id="ghState" style="margin-left:8px">checking…</span></h3>
         <div class="s" style="color:var(--mute);font-size:12px" id="ghMeta">Reads the keeper's published log. No ledger requests are used.</div>
@@ -465,11 +469,11 @@ td{padding:11px 10px;border-bottom:1px solid #132a20;font-size:13px;white-space:
       </div>
     </div>
     <div class="card col">
-      <h3>Liquidity pools (XLS-30 AMM) · treasury balances</h3>
+      <h3>Liquidity pools (XLS-30 AMM)</h3>
       <div class="grid g2" id="poolCards"></div>
       <div class="grid g4" style="gap:12px;align-items:end">
         <div><label>Pool</label><select id="aKind"><option value="bonsai">BONSAI / USDX</option><option value="xrp">XRP / USDX</option></select></div>
-        <div><label>Sign with</label><select id="aActor"><option value="recv">Receiver wallet</option><option value="user">Connected wallet</option></select></div>
+        <div style="display:none"><select id="aActor"><option value="user">Connected wallet</option></select></div>
         <div><label>Deposit type</label><select id="aMode"><option value="both">Both sides, matched</option><option value="usdx">USDX only (one-sided)</option><option value="other">Other asset only (one-sided)</option></select></div>
         <div><label>Amount · USDX, or the single asset</label><input id="aUsdx" inputmode="decimal" placeholder="e.g. 1000"></div>
       </div>
@@ -480,7 +484,7 @@ td{padding:11px 10px;border-bottom:1px solid #132a20;font-size:13px;white-space:
         <div><button class="btn ghost sm" id="aWithdraw" style="width:100%">Withdraw</button></div>
       </div>
       <div class="grid g4" style="gap:12px" id="actorBox"></div>
-      <p class="s" style="color:var(--mute);font-size:12px;margin:0">Create sizes the two sides from live prices so USDX opens at exactly $1.00. A one-sided deposit or withdrawal moves the pool price and pays the trading fee on the half that is swapped, so use it deliberately to nudge the peg. The signing wallet must hold what it deposits.</p>
+      <p class="s op-hide" style="color:var(--mute);font-size:12px;margin:0">Create sizes the two sides from live prices so USDX opens at exactly $1.00. A one-sided deposit or withdrawal moves the pool price and pays the trading fee on the half that is swapped, so use it deliberately to nudge the peg. The signing wallet must hold what it deposits.</p>
     </div>
   </section>
 
@@ -806,7 +810,7 @@ async function scanLedger(force){
 }
 
 /* ---------- render ---------- */
-const BUILD='20261028-1105';
+const BUILD='20261028-1332';
 const LIVE_URL='https://thecreator715.github.io/USDX/';
 function sandboxNote(){
   setNet(false); if(document.getElementById('sbNote')) return;
@@ -963,7 +967,8 @@ function forgetUser(){
 }
 
 /* ---------- wallet modal ---------- */
-function openWallet(slot){
+function openWallet(slot){ slot='user';   // public app: only the visitor's own wallet can ever be connected
+
   S.slot=slot; $('#wmTitle').textContent = {user:'Connect wallet',recv:'Import receiver key',iss:'Import issuer key'}[slot];
   $('#genTab').style.display = slot==='user'?'':'none'; $('#wmKeepRow').style.display=$('#wmKeepNote').style.display=slot==='user'?'':'none'; $('#wmOut').hidden=!(slot==='user'&&S.w.user); $('#wmErr').hidden=true; $('#seedIn').value=''; setTab('imp'); $('#genOut').hidden=true; $('#wm').classList.add('on');
 }
