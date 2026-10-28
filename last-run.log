@@ -1,10 +1,3 @@
-2026-10-28T20:22:16.732Z xrp/USDX pool: USDX $0.99102 (-90 bps) · reserves 0.75 XRP / 1.01 USDX
-2026-10-28T20:22:17.354Z USDX below $1: withdrawing 0.009081 USDX from the pool with the treasury's LP tokens (100.00% of the pool)
-2026-10-28T20:22:31.936Z retired 0.009081 USDX
-2026-10-28T20:22:32.114Z after rebalancing: USDX $1.00000 in the xrp pool
-2026-10-28T20:22:32.601Z posting sell quote 10.18 USDX @ 46930.9
-2026-10-28T20:22:40.847Z posting buy quote 9.42 USDX @ 46650.2
-2026-10-28T20:23:17.174Z BONSAI $0.0000213823 (thin AMM pool (1.13 XRP)) · XRP $1.3276
 2026-10-28T20:23:17.174Z note: the BONSAI price comes from a thin AMM pool (1.13 XRP); minting at the live market price anyway.
 2026-10-28T20:24:00.938Z bonsai/USDX pool: USDX $1.00049 (5 bps) · reserves 46990.44 BONSAI / 1.00 USDX
 2026-10-28T20:24:01.094Z xrp/USDX pool: USDX $1.00049 (5 bps) · reserves 0.75 XRP / 1.00 USDX
@@ -898,3 +891,10 @@ RippledError: rate limit: units quota (10000 per 60s) exhausted, retry in ~57737
 2026-10-28T23:06:15.816Z bonsai/USDX pool: USDX $0.99962 (-4 bps) · reserves 35135.68 BONSAI / 0.23 USDX
 2026-10-28T23:06:24.178Z BONSAI $0.0000064625 (thin AMM pool (0.62 XRP)) · XRP $1.3242
 2026-10-28T23:06:24.178Z note: the BONSAI price comes from a thin AMM pool (0.62 XRP); minting at the live market price anyway.
+--- run 40782517025 2026-10-28T23:07:49Z ---
+2026-10-28T23:07:19.619Z LIVE mode: transactions will be submitted
+2026-10-28T23:07:19.621Z receiver rphatRpwXcPAo7CVm46dC78JAQ6kLMqb2M · issuer key loaded, deposits will be processed · defending pools bonsai + xrp · DEX quotes in bonsai
+2026-10-28T23:07:20.627Z BONSAI $0.0000064650 (thin AMM pool (0.62 XRP)) · XRP $1.3247
+2026-10-28T23:07:20.627Z note: the BONSAI price comes from a thin AMM pool (0.62 XRP); minting at the live market price anyway.
+2026-10-28T23:07:31.418Z bonsai/USDX pool: USDX $1.00000 (0 bps) · reserves 35135.68 BONSAI / 0.23 USDX
+2026-10-28T23:07:31.989Z DEX quotes skipped: receiver has 77.58 XRP, needs 77.60 XRP to hold another offer. Add XRP to the receiver.
