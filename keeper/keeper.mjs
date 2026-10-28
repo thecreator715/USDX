@@ -40,7 +40,20 @@ async function connect() {
   for (const u of C.servers) { try { const c = new xrpl.Client(u); await c.connect(); client = c; return c; } catch (e) { last = e; } }
   throw last || new Error('no XRPL server reachable');
 }
-const req = async r => (await (await connect()).request(r)).result;
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const req = async r => {
+  for (let a = 0; ; a++) {
+    try { return (await (await connect()).request(r)).result; }
+    catch (e) {
+      const m = String(e && e.message || e);
+      if (/rate limit|slowDown|too much load|units quota/i.test(m) && a < 8) {
+        const t = /retry in ~?(\d+)\s*ms/i.exec(m);
+        await sleep((t ? +t[1] : 3000) + 400 + Math.random() * 600); continue;
+      }
+      throw e;
+    }
+  }
+};
 async function submit(tx, wallet) {
   if (!LIVE) { log('DRY RUN', tx.TransactionType, JSON.stringify(tx.Amount || tx.TakerGets || tx.OfferSequence || '')); return 'dryrun'; }
   const c = await connect(); const r = await c.submitAndWait(tx, { wallet, autofill: true });
@@ -123,7 +136,7 @@ const parse = e => {
 async function history(addr, max) { const out = []; let marker; while (out.length < max) { const r = await req({ command: 'account_tx', account: addr, limit: 200, marker, ledger_index_min: -1, ledger_index_max: -1 }); out.push(...r.transactions); marker = r.marker; if (!marker) break; } return out; }
 async function processDeposits(px) {
   if (!iss) return;
-  const [rt, it] = await Promise.all([history(RECV, 2000), history(UI, 1200)]);
+  const [rt, it] = await Promise.all([history(RECV, 800), history(UI, 600)]);
   const deposits = [], burns = {}, receipts = new Set();
   rt.map(parse).forEach(p => {
     if (!p.ok || p.t.TransactionType !== 'Payment') return;

@@ -420,6 +420,12 @@ td{padding:11px 10px;border-bottom:1px solid #132a20;font-size:13px;white-space:
       <div class="card"><h3>Receiver wallet</h3><div class="addr" id="opRecvAddr"></div><div class="mono" id="opRecvBal" style="margin:8px 0 14px"></div><button class="btn ghost sm" data-slot="recv">Import receiver key</button> <button class="btn ghost sm" id="prepRecv">Set up receiver trust lines</button></div>
       <div class="card"><h3>Issuer wallet</h3><div class="addr" id="opIssAddr"></div><div class="mono" id="opIssBal" style="margin:8px 0 14px"></div><button class="btn ghost sm" data-slot="iss">Import issuer key</button> <button class="btn ghost sm" id="setupIssuer">Enable DefaultRipple</button></div>
     </div>
+    <div class="card col">
+      <h3>Operator keys on this device</h3>
+      <p class="s" style="color:var(--mute);margin:0">Import the receiver and issuer seeds once, then save them here encrypted with a passphrase you choose. Next visit, type the passphrase to unlock both. Nothing is sent anywhere, and the seeds are never written into the website or the repo.</p>
+      <div class="grid g4" style="gap:12px;align-items:end"><div><label>Passphrase (8+ characters)</label><input id="vPass" type="password" autocomplete="off"></div><div><button class="btn sm" id="vSave" style="width:100%">Save loaded keys</button></div><div><button class="btn ghost sm" id="vOpen" style="width:100%">Unlock saved keys</button></div><div><button class="btn ghost sm" id="vForget" style="width:100%">Forget saved keys</button></div></div>
+      <div class="s" id="vState" style="color:var(--mute)"></div>
+    </div>
     <div class="card">
       <h3>Processor</h3>
       <div class="row" style="justify-content:space-between">
@@ -510,17 +516,47 @@ const cfgReady = () => X.isValidClassicAddress(S.cfg.bIss||'') && X.isValidClass
 /* ---------- network ---------- */
 async function connect(){
   if(S.client && S.client.isConnected()) return S.client;
-  const list=[S.cfg.server,...(S.cfg.servers||[])].filter((v,i,a)=>v&&a.indexOf(v)===i); let last;
+  let list=[S.cfg.server,...(S.cfg.servers||[])].filter((v,i,a)=>v&&a.indexOf(v)===i); const k=(S.skip||0)%Math.max(1,list.length); list=list.slice(k).concat(list.slice(0,k)); let last;
   for(const u of list){
     try{ const c=new X.Client(u); c.on('disconnected',()=>setNet(false)); await c.connect(); S.client=c; setNet(true); return c; }catch(e){ last=e; }
   }
   throw last||new Error('No XRPL server reachable');
 }
 function setNet(ok){ $('#netdot').className='dot'+(ok?' ok':''); $('#nettxt').textContent = ok?'Mainnet connected':'Disconnected'; }
-const req = async r => (await (await connect()).request(r)).result;
+/* All ledger reads go through one queue: at most 3 at a time, account_tx spaced out, and a rate-limit reply
+   waits the time the server asks for, then retries (rotating to the next server after repeated limits). */
+const sleep = ms => new Promise(r=>setTimeout(r,ms));
+const Q={active:0,waiters:[],lastTx:0};
+async function slot(cmd){
+  while(Q.active>=3) await new Promise(r=>Q.waiters.push(r));
+  Q.active++;
+  if(cmd==='account_tx'){ const at=Math.max(Date.now(),Q.lastTx+650); Q.lastTx=at; if(at>Date.now()) await sleep(at-Date.now()); }
+}
+function release(){ Q.active--; const w=Q.waiters.shift(); if(w) w(); }
+async function req(r){
+  for(let attempt=0;;attempt++){
+    await slot(r.command);
+    try{ const c=await connect(); return (await c.request(r)).result; }
+    catch(e){
+      const msg=String(e&&e.message||e)+' '+JSON.stringify(e&&e.data||{});
+      if(/rate limit|slowDown|too much load|units quota/i.test(msg)&&attempt<8){
+        const m=/retry in ~?(\d+)\s*ms/i.exec(msg), wait=(m?+m[1]:3000)+400+Math.random()*600;
+        $('#nettxt').textContent='Rate limited, retrying';
+        if(attempt>=2&&(S.cfg.servers||[]).length>1){ S.skip=((S.skip||0)+1)%S.cfg.servers.length; try{ await S.client.disconnect(); }catch(_){} S.client=null; }
+        await sleep(wait); continue;
+      }
+      throw e;
+    }
+    finally{ release(); }
+  }
+}
+/* short-lived cache so one refresh never asks the ledger the same thing twice */
+const CACHE=new Map();
+function cached(key,fn,ttl=12000){ const h=CACHE.get(key); if(h&&Date.now()-h.t<ttl) return h.p; const p=fn(); CACHE.set(key,{t:Date.now(),p}); p.catch(()=>CACHE.delete(key)); return p; }
 async function submit(tx,wallet){
   const c = await connect();
   const r = await c.submitAndWait(tx,{wallet,autofill:true});
+  CACHE.clear();
   const code = r.result.meta.TransactionResult;
   if(code!=='tesSUCCESS') throw new Error(code+' · '+tx.TransactionType);
   return r.result.hash;
@@ -553,21 +589,28 @@ async function getPrice(){
 }
 
 /* ---------- ledger reads ---------- */
-async function lines(addr){ const r=await req({command:'account_lines',account:addr,ledger_index:'validated',limit:400}); return r.lines; }
-async function xrpBal(addr){ try{ const r=await req({command:'account_info',account:addr,ledger_index:'validated'}); return Number(r.account_data.Balance)/1e6; }catch(e){ return null; } }
+async function lines(addr){ return cached('lines:'+addr,async()=>(await req({command:'account_lines',account:addr,ledger_index:'validated',limit:400})).lines); }
+async function xrpBal(addr){ try{ const r=await cached('xrp:'+addr,()=>req({command:'account_info',account:addr,ledger_index:'validated'})); return Number(r.account_data.Balance)/1e6; }catch(e){ return null; } }
 async function supplyOf(issuer,cur){
   const r = await req({command:'gateway_balances',account:issuer,ledger_index:'validated'});
   const o = r.obligations||{}; const k = Object.keys(o).find(x=>cc(x)===cc(cur));
   return k? Number(o[k]) : 0;
 }
-async function acctTx(addr,max=1200){
-  const out=[]; let marker;
-  while(out.length<max){
-    const r = await req({command:'account_tx',account:addr,limit:200,marker,ledger_index_min:-1,ledger_index_max:-1});
-    out.push(...r.transactions); marker=r.marker; if(!marker) break;
+const TXC={};
+async function acctTx(addr,max=600){
+  const c=TXC[addr]||(TXC[addr]={list:[],seen:new Set(),done:false,init:false});
+  const page=m=>req({command:'account_tx',account:addr,limit:200,marker:m,ledger_index_min:-1,ledger_index_max:-1});
+  const isNew=e=>{ const h=e.hash||(e.tx_json||e.tx||{}).hash; if(c.seen.has(h)) return false; c.seen.add(h); return true; };
+  if(!c.init){
+    let m,n=0; const out=[];
+    while(n<max){ const r=await page(m); for(const e of r.transactions){ if(isNew(e)) out.push(e); n++; } m=r.marker; if(!m){ c.done=true; break; } }
+    c.list=out; c.init=true;
+  } else {
+    let m; const fresh=[];
+    for(let i=0;i<3;i++){ const r=await page(m); let nf=0; for(const e of r.transactions){ if(isNew(e)){ fresh.push(e); nf++; } } if(nf<r.transactions.length||!r.marker) break; m=r.marker; }
+    c.list=fresh.concat(c.list);
   }
-  out.truncated=!!marker;
-  return out;
+  const out=c.list.slice(); out.truncated=!c.done; return out;
 }
 function parseTx(e){
   const t = e.tx_json||e.tx||{}; const meta=e.meta||e.metadata||{};
@@ -577,7 +620,7 @@ function parseTx(e){
   return {t,meta,hash,time,ok:e.validated!==false && meta.TransactionResult==='tesSUCCESS',mt,mm,delivered:meta.delivered_amount||t.Amount};
 }
 async function scanLedger(){
-  const [rt,it] = await Promise.all([acctTx(S.cfg.recv,2000),acctTx(S.cfg.uIss,1200)]);
+  const [rt,it] = await Promise.all([acctTx(S.cfg.recv,600),acctTx(S.cfg.uIss,600)]);
   const bc=cc(S.cfg.bCur), uc=cc(S.cfg.uCur);
   const deposits=[], burns={}, receipts={}, burnList=[];
   rt.map(parseTx).forEach(p=>{
@@ -606,6 +649,8 @@ async function refreshAll(){
     const [u,b] = await Promise.all([supplyOf(S.cfg.uIss,S.cfg.uCur),supplyOf(S.cfg.bIss,S.cfg.bCur)]);
     S.supply={u,b};
     await getPrice().catch(e=>{ S.px=null; S.pxErr=e.message; });
+    $('#sUsdx').textContent=fmt(u,2); $('#hUsdx').textContent=fmt(u,2); $('#sBonsai').textContent=fmt(b,0);
+    if(S.px){ $('#hPrice').textContent=''; $('#pUsd').textContent='$'+S.px.usd.toPrecision(6); $('#priceChip').textContent='XRP $'+fmt(S.px.xrpUsd,4); }
     await scanLedger();
     renderAll();
   }catch(e){ toast(e.message); }
@@ -982,8 +1027,8 @@ async function scanBurns(deeper){
       if(p.ok&&p.t.TransactionType==='Payment'&&p.t.Destination===S.cfg.bIss){ const d=p.delivered; if(d&&typeof d==='object'&&cc(d.currency)===bc&&d.issuer===S.cfg.bIss) BS.rows.push({hash:p.hash,from:p.t.Account,value:Number(d.value),time:p.time,mt:p.mt}); }
       return true;
     };
-    if(!BS.init){ let m,n=0; while(n<4000){ const r=await page(m); r.transactions.forEach(e=>{take(e);n++;}); m=r.marker; if(!m){BS.done=true;break;} } BS.marker=m; BS.init=true; }
-    else if(deeper){ if(!BS.done){ let m=BS.marker,n=0; while(m&&n<4000){ const r=await page(m); r.transactions.forEach(e=>{take(e);n++;}); m=r.marker; } BS.marker=m; if(!m) BS.done=true; } }
+    if(!BS.init){ let m,n=0; while(n<1000){ const r=await page(m); r.transactions.forEach(e=>{take(e);n++;}); m=r.marker; if(!m){BS.done=true;break;} } BS.marker=m; BS.init=true; }
+    else if(deeper){ if(!BS.done){ let m=BS.marker,n=0; while(m&&n<1000){ const r=await page(m); r.transactions.forEach(e=>{take(e);n++;}); m=r.marker; } BS.marker=m; if(!m) BS.done=true; } }
     else { let m; for(let i=0;i<5;i++){ const r=await page(m); let fresh=0; r.transactions.forEach(e=>{ if(take(e)) fresh++; }); if(fresh<r.transactions.length||!r.marker) break; m=r.marker; } }
   }catch(e){ toast('Burn history: '+e.message); }
   BS.busy=false;
@@ -1209,6 +1254,31 @@ async function poolAction(act){
 $('#gBtn').onclick=genesisMint; $('#gAmt').oninput=renderGenesis; $('#dCancel').onclick=cancelQuotes;
 $('#aActor').onchange=renderActor; $('#aKind').onchange=renderActor;
 
+/* ---------- operator keys: encrypted on this device (AES-GCM, key derived from your passphrase) ---------- */
+const VK='usdx-vault';
+const b64=u=>btoa(String.fromCharCode(...u)), unb64=t=>Uint8Array.from(atob(t),c=>c.charCodeAt(0));
+async function vaultKey(pass,salt){ const km=await crypto.subtle.importKey('raw',new TextEncoder().encode(pass),'PBKDF2',false,['deriveKey']); return crypto.subtle.deriveKey({name:'PBKDF2',salt,iterations:250000,hash:'SHA-256'},km,{name:'AES-GCM',length:256},false,['encrypt','decrypt']); }
+function vaultState(){ let has=false; try{ has=!!localStorage.getItem(VK); }catch(e){} $('#vState').textContent=has?'Encrypted keys are saved on this device.':'No keys saved on this device.'; }
+$('#vSave').onclick=async()=>{
+  try{
+    const pass=$('#vPass').value; if(pass.length<8) return toast('Use a passphrase of at least 8 characters.');
+    const keys={}; if(S.w.recv) keys.recv=S.w.recv.seed; if(S.w.iss) keys.iss=S.w.iss.seed; if(!Object.keys(keys).length) return toast('Import a key first, then save.');
+    const salt=crypto.getRandomValues(new Uint8Array(16)), iv=crypto.getRandomValues(new Uint8Array(12));
+    const ct=await crypto.subtle.encrypt({name:'AES-GCM',iv},await vaultKey(pass,salt),new TextEncoder().encode(JSON.stringify(keys)));
+    localStorage.setItem(VK,JSON.stringify({s:b64(salt),i:b64(iv),c:b64(new Uint8Array(ct))})); $('#vPass').value=''; vaultState(); toast('Keys saved, encrypted, on this device.');
+  }catch(e){ toast('Could not save: '+e.message); }
+};
+$('#vOpen').onclick=async()=>{
+  try{
+    const raw=localStorage.getItem(VK); if(!raw) return toast('No saved keys on this device.');
+    const v=JSON.parse(raw), pt=await crypto.subtle.decrypt({name:'AES-GCM',iv:unb64(v.i)},await vaultKey($('#vPass').value,unb64(v.s)),unb64(v.c));
+    const keys=JSON.parse(new TextDecoder().decode(pt)); $('#vPass').value='';
+    for(const [slot,seed] of Object.entries(keys)){ const w=X.Wallet.fromSeed(seed); if(w.address!==(slot==='recv'?S.cfg.recv:S.cfg.uIss)) { toast('A saved key does not match the configured '+slot+' wallet.'); continue; } attach(slot,w); }
+  }catch(e){ toast('Wrong passphrase, or the saved data is damaged.'); }
+};
+$('#vForget').onclick=()=>{ try{ localStorage.removeItem(VK); }catch(e){} vaultState(); toast('Saved keys removed from this device.'); };
+vaultState();
+
 /* ---------- nav / settings / init ---------- */
 const TITLES={home:'USDX <em>Treasury</em>',overview:'<em>Dashboard</em>',burns:'Supply <em>&amp; Burns</em>',pools:'Pool <em>Data</em>',peg:'Peg <em>&amp; Pools</em>',forge:'Burn <em>&amp; Mint</em>',ledger:'Treasury <em>Ledger</em>',operator:'<em>Operator</em>',wallets:'<em>Wallets</em>',settings:'<em>Settings</em>'};
 function go(p){ document.querySelectorAll('.page').forEach(x=>x.classList.toggle('on',x.id==='p-'+p)); document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('on',b.dataset.p===p)); $('#title').innerHTML=TITLES[p]; if(p==='wallets') renderWalletUI(); if(p==='burns') renderTracker(); if(p==='pools') renderPoolData(); }
@@ -1227,7 +1297,7 @@ $('#saveCfg').onclick=async()=>{
 };
 (async function init(){
   if(!window.xrpl){ document.body.insertAdjacentHTML('afterbegin','<div class="note" style="position:fixed;top:10px;left:270px;z-index:99">The xrpl.js library could not load. Check your connection and reload.</div>'); return; }
-  await loadFileCfg(); await refreshAll(); setInterval(()=>{ if(!S.busy) refreshAll(); },60000);
+  await loadFileCfg(); await refreshAll(); setInterval(()=>{ if(!S.busy&&!document.hidden) refreshAll(); },120000);
 })();
 </script>
 </body>
