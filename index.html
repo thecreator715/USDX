@@ -402,7 +402,7 @@ td{padding:11px 10px;border-bottom:1px solid #132a20;font-size:13px;white-space:
       </div>
       <div class="card col">
         <h3>Peg keeper · signs from the receiver wallet</h3>
-        <div class="row" style="justify-content:space-between"><label class="row" style="margin:0;gap:8px;text-transform:none;letter-spacing:0;font-size:13px;color:var(--fg)"><input type="checkbox" id="kOn" style="width:auto" checked> Auto-rebalance both pools every 45 s</label><span class="pill" id="kArmed"><i class="dot"></i><span>Key not loaded</span></span></div>
+        <div class="row" style="justify-content:space-between"><label class="row" style="margin:0;gap:8px;text-transform:none;letter-spacing:0;font-size:13px;color:var(--fg)"><input type="checkbox" id="kOn" style="width:auto"> Auto-rebalance from this tab every 45 s (paused while the GitHub keeper is live)</label><span class="pill" id="kArmed"><i class="dot"></i><span>Key not loaded</span></span></div>
         <div class="row"><button class="btn ghost sm" data-slot="recv">Load receiver key</button><span class="s" style="color:var(--mute);font-size:12px">The keeper trades from the receiver wallet and only runs while its key is loaded in this tab. The Node keeper in the repo runs without a browser.</span></div>
         <div><label>Headline pool (DEX quotes and the big price). The keeper defends both pools.</label><select id="kPool"><option value="bonsai">BONSAI / USDX</option><option value="xrp">XRP / USDX</option></select></div>
         <div class="grid" style="grid-template-columns:repeat(3,1fr);gap:10px">
@@ -410,7 +410,7 @@ td{padding:11px 10px;border-bottom:1px solid #132a20;font-size:13px;white-space:
           <div><label>Max trade % of pool</label><input id="kMax" value="20" inputmode="numeric"></div>
           <div><label>Slippage (bps)</label><input id="kSlip" value="100" inputmode="numeric"></div>
         </div>
-        <label class="row" style="margin:6px 0 0;gap:8px;text-transform:none;letter-spacing:0;font-size:13px;color:var(--fg)"><input type="checkbox" id="dOn" style="width:auto" checked> DEX quotes: keep standing buy and sell offers around $1.00</label>
+        <label class="row" style="margin:6px 0 0;gap:8px;text-transform:none;letter-spacing:0;font-size:13px;color:var(--fg)"><input type="checkbox" id="dOn" style="width:auto"> DEX quotes: keep standing buy and sell offers around $1.00</label>
         <div class="grid" style="grid-template-columns:repeat(2,1fr);gap:10px">
           <div><label>Quote size per side (USDX)</label><input id="dSize" value="500" inputmode="decimal"></div>
           <div><label>Spread (bps)</label><input id="dSpread" value="30" inputmode="numeric"></div>
@@ -419,6 +419,9 @@ td{padding:11px 10px;border-bottom:1px solid #132a20;font-size:13px;white-space:
         <div class="addr" id="dOffers"></div>
         <p class="s" style="color:var(--mute);font-size:12px;margin:0">Pool: price below $1, the treasury buys USDX and sends it to the issuer to retire it. Price above $1, it sells its own USDX into the pool. DEX: it posts a sell offer a little above $1 and a buy offer a little below, and re-posts them when the BONSAI price moves. Every trade is sized with constant-product math and carries an on-chain memo.</p>
         <ol class="steps" id="kLog"></ol>
+        <h3 style="margin-top:14px">GitHub keeper · always on <span class="tag" id="ghState" style="margin-left:8px">checking…</span></h3>
+        <div class="s" style="color:var(--mute);font-size:12px" id="ghMeta">Reads the keeper's published log. No ledger requests are used.</div>
+        <div class="tw" style="max-height:380px;overflow:auto"><table><thead><tr><th>Time</th><th>Event</th></tr></thead><tbody id="ghLog"><tr><td colspan="2" style="color:var(--mute)">Loading…</td></tr></tbody></table></div>
       </div>
     </div>
     <div class="card col">
@@ -635,7 +638,13 @@ const CACHE=new Map();
 function cached(key,fn,ttl=12000){ const h=CACHE.get(key); if(h&&Date.now()-h.t<ttl) return h.p; const p=fn(); CACHE.set(key,{t:Date.now(),p}); p.catch(()=>CACHE.delete(key)); return p; }
 // autofill, sign locally, submit, then poll until validated. Safe to retry: the same signed blob can only apply once.
 async function submit(tx,wallet){
-  const prep = await onClient(c=>c.autofill(tx),'preparing '+tx.TransactionType);
+  for(let a=0;;a++){
+    try{ return await submitOnce(tx,wallet); }
+    catch(e){ if(/expired before it was validated/.test(String(e&&e.message))&&a<3){ if(S.note) S.note('Ledger was slow, resubmitting with a fresh window ('+(a+1)+'/3)'); try{ klog('Retrying '+tx.TransactionType,'The first attempt expired without applying. Sending it again.','act'); }catch(_){} await sleep(2000); continue; } throw e; }
+  }
+}
+async function submitOnce(tx,wallet){
+  const prep = await onClient(c=>c.autofill(tx),'preparing '+tx.TransactionType); if(prep.LastLedgerSequence) prep.LastLedgerSequence+=25;
   const signed = wallet.sign(prep), hash = signed.hash, last = prep.LastLedgerSequence;
   const sub = await req({command:'submit',tx_blob:signed.tx_blob});
   const er = sub.engine_result||'';
@@ -756,7 +765,7 @@ async function scanLedger(force){
 }
 
 /* ---------- render ---------- */
-const BUILD='20261027-2431';
+const BUILD='20261028-0052';
 const LIVE_URL='https://thecreator715.github.io/USDX/';
 function sandboxNote(){
   setNet(false); if(document.getElementById('sbNote')) return;
@@ -868,7 +877,15 @@ async function renderWalletUI(){
     if(slot==='user'){ const bl=ls.find(l=>cc(l.currency)===cc(S.cfg.bCur)&&l.account===S.cfg.bIss); S.userBonsai=bl?Number(bl.balance):0; $('#maxBtn').textContent=fmt(S.userBonsai,2); }
     if(slot==='recv') $('#opRecvBal').textContent=fmt(x,2)+' XRP';
     if(slot==='iss') $('#opIssBal').textContent=fmt(x,2)+' XRP';
-    const rows=ls.filter(l=>Number(l.balance)!==0||l.account===S.cfg.bIss||l.account===S.cfg.uIss).map(l=>`<div class="row" style="justify-content:space-between"><span>${dc(l.currency)}</span><span class="mono">${fmt(Number(l.balance),4)}</span></div>`).join('');
+    const R=(k,v,c)=>`<div class="row" style="justify-content:space-between"><span>${k}</span><span class="mono ${c||''}">${v}</span></div>`;
+    const getB=(cur,iss)=>{ const l=ls.find(z=>cc(z.currency)===cc(cur)&&z.account===iss); return l?Number(l.balance):0; };
+    let rows;
+    if(slot==='iss'){ rows=R('USDX issued (outstanding)',S.supply?fmt(S.supply.u,4):'—','jade')+R('BONSAI supply (as issued by BONSAI)',S.supply?fmt(S.supply.b,2):'—'); }
+    else{
+      rows=R('BONSAI',fmt(getB(S.cfg.bCur,S.cfg.bIss),4),'brass')+R('USDX',fmt(getB(S.cfg.uCur,S.cfg.uIss),4),'jade');
+      for(const k of ['bonsai','xrp']){ const pl=await cached('amm:'+k,()=>req({command:'amm_info',asset:PAIRS[k].other(),asset2:uAsset(),ledger_index:'validated'}),20000).then(r=>r.amm).catch(()=>null);
+        const lpl=pl&&ls.find(z=>z.account===pl.account); rows+=R('LP · '+PAIRS[k].label+(pl?'':' (no pool yet)'),pl?fmt(lpl?Number(lpl.balance):0,6):'—'); }
+    }
     html.push(`<div class="card"><h3>${name}</h3><div class="addr">${addr}</div><div class="v mono" style="font:400 28px var(--display);margin:8px 0">${fmt(x,2)} XRP</div><div class="col" style="gap:6px">${rows}</div></div>`);
   }
   $('#walletCards').innerHTML=html.join('');
@@ -912,7 +929,7 @@ function openWallet(slot){
 function setTab(t){ document.querySelectorAll('.tabs button').forEach(b=>b.classList.toggle('on',b.dataset.t===t)); $('#wmImp').hidden=t!=='imp'; $('#wmGen').hidden=t!=='gen'; }
 function wmErr(m){ const e=$('#wmErr'); e.textContent=m; e.hidden=false; }
 function attach(slot,wallet){
-  S.w[slot]=wallet; if(slot==='user') rememberUser(wallet); $('#wm').classList.remove('on'); if(slot==='user') loadUserBal(); renderWalletUI(); renderQuote(); updateWatch(); renderPeg().catch(()=>{}); if(slot==='recv'&&$('#kOn').checked) setTimeout(()=>keeperStep(false),1500);
+  S.w[slot]=wallet; if(slot==='user') rememberUser(wallet); $('#wm').classList.remove('on'); if(slot==='user') loadUserBal(); renderWalletUI(); renderQuote(); updateWatch(); renderPeg().catch(()=>{}); if(slot==='recv'&&$('#kOn').checked&&!S.ghFresh) setTimeout(()=>keeperStep(false),1500);
   toast((slot==='user'?'Wallet connected: ':slot==='recv'?'Receiver key loaded: ':'Issuer key loaded: ')+short(wallet.address));
 }
 $('#seedGo').onclick=()=>{
@@ -1365,7 +1382,7 @@ async function verifySetup(){
 $('#coverBtn').onclick=coverFlow; $('#tmBtn').onclick=treasuryMint; $('#kNow').onclick=()=>keeperStep(true);
 $('#aCreate').onclick=()=>poolAction('create'); $('#aDeposit').onclick=()=>poolAction('deposit'); $('#aWithdraw').onclick=()=>poolAction('withdraw');
 $('#kPool').onchange=()=>renderPeg().catch(()=>{}); $('#prepRecv').onclick=prepReceiver; $('#verifyBtn').onclick=verifySetup;
-setInterval(()=>{ if($('#kOn').checked&&S.w.recv&&!S.busy&&!BM.running) keeperStep(false); },45000);
+setInterval(()=>{ if($('#kOn').checked&&S.w.recv&&!S.busy&&!BM.running&&!S.ghFresh) keeperStep(false); },45000);
 
 
 /* ---------- peg monitor: watches both pools on its own timer, with or without a key loaded ---------- */
@@ -1762,6 +1779,22 @@ $('#saveCfg').onclick=async()=>{
   for(const c of Object.values(POOL.clients)){ try{ await c.disconnect(); }catch(e){} } POOL.clients={}; POOL.cool={}; S.client=null; watching=false;
   toast('Saved'); refreshAll();
 };
+
+/* ---------- GitHub keeper activity: the always-on keeper publishes its log to the keeper-log branch ---------- */
+const GH_LOG='https://raw.githubusercontent.com/thecreator715/USDX/keeper-log/last-run.log';
+async function loadGhLog(){
+  try{
+    const t=await (await fetch(GH_LOG+'?t='+Date.now(),{cache:'no-store'})).text();
+    const rows=[]; let last=0;
+    for(const l of t.split('\n')){ const m=/^(\d{4}-\d\d-\d\dT[\d:.]+Z)\s+(.*)$/.exec(l); if(m){ const d=new Date(m[1]); last=Math.max(last,d.getTime()); rows.push({t:d,m:m[2]}); } else if(/^--- run/.test(l)) rows.push({t:null,m:l.replace(/-/g,'').trim()}); }
+    S.ghFresh = last && Date.now()-last<12*60000;
+    $('#ghState').className='tag '+(S.ghFresh?'ok':'wait'); $('#ghState').textContent=S.ghFresh?'live':'no recent run';
+    $('#ghMeta').textContent=last?'Last keeper activity '+new Date(last).toLocaleTimeString()+' · runs every ~5 min, rebalances both pools, quotes the DEX, mints deposits':'No keeper log yet.';
+    const bad=m=>/ERROR|failed|ALERT|needs|no USDX|Fund the receiver/i.test(m);
+    $('#ghLog').innerHTML=rows.slice(-120).reverse().map(r=>`<tr><td style="white-space:nowrap">${r.t?r.t.toLocaleTimeString():''}</td><td style="font-size:12px;${bad(r.m)?'color:var(--brass,#d9b66c)':''}">${r.m.replace(/[<>&]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]))}</td></tr>`).join('')||'<tr><td colspan="2" style="color:var(--mute)">Empty.</td></tr>';
+  }catch(e){ $('#ghState').textContent='unavailable'; }
+}
+setInterval(()=>{ if(!document.hidden) loadGhLog(); },60000); setTimeout(loadGhLog,1500);
 (async function init(){
   if(!window.xrpl){ document.body.insertAdjacentHTML('afterbegin','<div class="note" style="position:fixed;top:10px;left:270px;z-index:99">The xrpl.js library could not load. Check your connection and reload.</div>'); return; }
   $('#buildTag').textContent='build '+BUILD;

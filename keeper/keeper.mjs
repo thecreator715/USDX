@@ -60,10 +60,11 @@ const req = async r => {
     }
   }
 };
-async function submit(tx, wallet) {
+let FEEBUMP = 1;
+async function submit1(tx, wallet) {
   if (!LIVE) { log('DRY RUN', tx.TransactionType, JSON.stringify(tx.Amount || tx.TakerGets || tx.OfferSequence || '')); return 'dryrun'; }
   const c = await connect(), busy = /rate limit|slowDown|too much load|units quota/i;
-  let prep; for (let a = 0; ; a++) { try { prep = await c.autofill(tx); break; } catch (e) { if (busy.test(String(e.message || e)) && a < 10) { await sleep(3000 + Math.random() * 1000); continue; } throw e; } }
+  let prep; for (let a = 0; ; a++) { try { prep = await c.autofill(tx); if (FEEBUMP > 1) prep.Fee = String(Math.ceil(Number(prep.Fee) * FEEBUMP)); if (prep.LastLedgerSequence) prep.LastLedgerSequence += 30; break; } catch (e) { if (busy.test(String(e.message || e)) && a < 10) { await sleep(3000 + Math.random() * 1000); continue; } throw e; } }
   const signed = wallet.sign(prep), sub = await req({ command: 'submit', tx_blob: signed.tx_blob }), er = sub.engine_result || '';
   if (/^(tem|tef|tel)/.test(er) && er !== 'tefALREADY' && er !== 'tefPAST_SEQ') throw new Error(er + ' ' + tx.TransactionType);
   for (let i = 0; i < 90; i++) {
@@ -73,6 +74,21 @@ async function submit(tx, wallet) {
     if (!r && prep.LastLedgerSequence && (await req({ command: 'ledger_current' })).ledger_current_index > prep.LastLedgerSequence + 2) throw new Error('transaction expired before validation, nothing applied');
   }
   throw new Error('timed out waiting for validation of ' + signed.hash);
+}
+// sends a transaction and survives expiry, fee spikes and rate limits. Only retries when nothing was applied.
+async function submit(tx, wallet, label) {
+  const name = label || tx.TransactionType; let last;
+  for (let a = 0; a < 4; a++) {
+    FEEBUMP = 1 + a * 1.5;
+    try { const h = await submit1(tx, wallet); FEEBUMP = 1; if (a) log(`${name}: confirmed on attempt ${a + 1}`); return h; }
+    catch (e) {
+      last = e; const m = String(e && e.message || e);
+      const retry = /expired before validation|tefPAST_SEQ|tefMAX_LEDGER|telINSUF_FEE_P|terQUEUED|terPRE_SEQ|rate limit|slowDown|too much load|units quota/i.test(m);
+      log(`ERROR ${name} (attempt ${a + 1}/4): ${m}${retry && a < 3 ? ' → retrying with a higher fee' : ''}`);
+      if (!retry) break; await sleep(4000 + a * 4000);
+    }
+  }
+  FEEBUMP = 1; throw last;
 }
 const lines = async a => (await req({ command: 'account_lines', account: a, ledger_index: 'validated', limit: 400 })).lines;
 const xrpBal = async a => { try { return Number((await req({ command: 'account_info', account: a, ledger_index: 'validated' })).account_data.Balance) / 1e6; } catch { return 0; } };
@@ -108,7 +124,7 @@ async function poolInfo(kind) {
   try {
     const a = (await req({ command: 'amm_info', asset: otherAsset(kind), asset2: USDX, ledger_index: 'validated' })).amm;
     const uFirst = isUsdx(a.amount), u = uFirst ? a.amount : a.amount2, o = uFirst ? a.amount2 : a.amount;
-    return { ro: aval(o), ru: aval(u), fee: a.trading_fee / 100000 };
+    return { ro: aval(o), ru: aval(u), fee: a.trading_fee / 100000, acct: a.account, lpTotal: Number(a.lp_token && a.lp_token.value || 0) };
   } catch { return null; }
 }
 
@@ -118,31 +134,96 @@ async function alert(msg) {
   log('ALERT:', msg); const now = Date.now(); if (lastAlert[msg] && now - lastAlert[msg] < 900000) return; lastAlert[msg] = now;
   if (K.hook) { try { await fetch(K.hook, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ content: 'USDX Treasury: ' + msg, text: 'USDX Treasury: ' + msg }) }); } catch (e) { log('webhook failed:', e.message); } }
 }
-async function pegStep(px, kind) {
-  const uu = kind === 'xrp' ? px.xrpUsd : px.bonsaiUsd, pool = await poolInfo(kind);
+// ---- smart peg defence -------------------------------------------------------------------------------------------
+// USDX price in a pool = (other asset reserve / USDX reserve) x USD value of the other asset. The keeper moves it back to $1.00 with
+// whichever of these tools the treasury can actually afford, cheapest first:
+//   below $1 (too much USDX in the pool):  1) withdraw USDX single-sided from the treasury's LP tokens   2) buy USDX with the other asset   -> burn what it recovered
+//   above $1 (too little USDX in the pool): 1) deposit treasury USDX single-sided   2) burn BONSAI, mint collateralised USDX, deposit it   3) withdraw the other asset single-sided
+const MINT_ON = E.PEG_MINT !== '0';
+const lpBal = async (pool) => { const ls = await lines(recv.address); const l = ls.find(z => z.account === pool.acct); return l ? Number(l.balance) : 0; };
+const fmt6 = n => Number(n).toFixed(6);
+async function pegStep(px, kind, depth = 0) {
+  const uu = kind === 'xrp' ? px.xrpUsd : px.bonsaiUsd, pool = await poolInfo(kind), nm = kind === 'xrp' ? 'XRP' : 'BONSAI';
   if (!pool) return log(`no ${kind}/USDX pool yet`);
-  const price = pool.ro / pool.ru * uu; log(`USDX = $${price.toFixed(5)} in the ${kind} pool (${((price - 1) * 1e4).toFixed(0)} bps)`);
+  const price = pool.ro / pool.ru * uu;
+  log(`${kind}/USDX pool: USDX $${price.toFixed(5)} (${((price - 1) * 1e4).toFixed(0)} bps) · reserves ${pool.ro.toFixed(2)} ${nm} / ${pool.ru.toFixed(2)} USDX`);
   if (price < K.floor) await alert(`USDX is $${price.toFixed(4)} in the ${kind}/USDX pool, below the $${K.floor} floor`);
   if (Math.abs(price - 1) <= K.band) return;
-  const pStar = 1 / uu, k = pool.ro * pool.ru, ru2 = Math.sqrt(k / pStar), ro2 = Math.sqrt(k * pStar);
+  if (depth > 1) return;
   const cap = price < 0.99 ? Math.min(0.5, K.maxPct * 2) : K.maxPct, ls = await lines(recv.address);
-  const usdxInv = bal(ls, USDX), otherInv = kind === 'xrp' ? (await xrpBal(recv.address)) - 3 : bal(ls, BONSAI);
+  const usdxInv = bal(ls, USDX), bonsaiInv = bal(ls, BONSAI), xrpInv = Math.max(0, (await xrpBal(recv.address)) - 5);
+  const otherInv = kind === 'xrp' ? xrpInv : bonsaiInv, lp = pool.lpTotal > 0 ? await lpBal(pool) : 0, share = pool.lpTotal > 0 ? lp / pool.lpTotal : 0;
+  const AS = { Asset: otherAsset(kind), Asset2: USDX }, memoP = o => [memo('USDX/PEG', { v: 1, price, pool: kind, ...o })];
+  let acted = false;
   if (price < 1) {
-    const full = pool.ru - ru2, du = Math.min(full, pool.ru * cap); if (du < 1) return;
-    const dx = (ro2 - pool.ro) * (du / full), sendMax = dx / (1 - pool.fee) * (1 + K.slip);
-    if (otherInv < sendMax) return log(`peg defence needs ${sendMax.toFixed(2)} ${kind}, treasury has ${Math.max(0, otherInv).toFixed(2)}`);
-    log(`USDX below $1: buying ${du.toFixed(2)} USDX with up to ${sendMax.toFixed(2)}`);
-    await submit({ TransactionType: 'Payment', Account: recv.address, Destination: recv.address, Amount: { ...USDX, value: du.toFixed(6) }, SendMax: other(kind, sendMax), Memos: [memo('USDX/PEG', { v: 1, side: 'buy', usdx: du, price, pool: kind })] }, recv);
-    await submit({ TransactionType: 'Payment', Account: recv.address, Destination: UI, Amount: { ...USDX, value: du.toFixed(6) }, Memos: [memo('USDX/PEGBURN', { v: 1, usdx: du })] }, recv);
+    // need = USDX to remove so that other/USDX x unitUsd = 1
+    const need = Math.min(pool.ru * (1 - price), pool.ru * cap);
+    if (need < 0.01) return;
+    let got = 0;
+    const out = Math.min(need, share * pool.ru * 0.9);
+    if (out >= 0.01) {
+      try {
+        log(`USDX below $1: withdrawing ${fmt6(out)} USDX from the pool with the treasury's LP tokens (${(share * 100).toFixed(2)}% of the pool)`);
+        await submit({ TransactionType: 'AMMWithdraw', Account: recv.address, ...AS, Amount: { ...USDX, value: fmt6(out) }, Flags: 524288 }, recv, 'AMMWithdraw USDX'); got += out; acted = true;
+      } catch (e) { log(`LP withdraw failed: ${e.message}`); }
+    }
+    const left = need - got;
+    if (left >= 0.01) {
+      const p2 = acted ? await poolInfo(kind) : pool; if (!p2) return;
+      const k = p2.ro * p2.ru, ru2 = Math.sqrt(k * uu), ro2 = Math.sqrt(k / uu), full = p2.ru - ru2, du = Math.min(left, full); // pStar = 1/uu
+      if (du >= 0.01 && full > 0) {
+        const dx = (ro2 - p2.ro) * (du / full), sendMax = dx / (1 - p2.fee) * (1 + K.slip);
+        if (otherInv >= sendMax) {
+          try { log(`USDX below $1: buying ${fmt6(du)} USDX with up to ${sendMax.toFixed(4)} ${nm}`); await submit({ TransactionType: 'Payment', Account: recv.address, Destination: recv.address, Amount: { ...USDX, value: fmt6(du) }, SendMax: other(kind, sendMax), Memos: memoP({ side: 'buy', usdx: du }) }, recv, 'peg buy'); got += du; acted = true; }
+          catch (e) { log(`peg buy failed: ${e.message}`); }
+        } else log(`peg buy needs ${sendMax.toFixed(4)} ${nm}, treasury has ${otherInv.toFixed(4)}. Add ${nm} to the receiver or LP tokens to defend the floor.`);
+      }
+    }
+    if (got > 0) {   // retire what was recovered: USDX sent back to its issuer stops existing
+      const have = bal(await lines(recv.address), USDX), burn = Math.min(have, got);
+      if (burn >= 0.000001) { await submit({ TransactionType: 'Payment', Account: recv.address, Destination: UI, Amount: { ...USDX, value: fmt6(burn) }, Memos: [memo('USDX/PEGBURN', { v: 1, usdx: burn })] }, recv, 'burn recovered USDX'); log(`retired ${fmt6(burn)} USDX`); }
+    }
   } else {
-    const full = ru2 - pool.ru, dux = Math.min(full, pool.ru * cap); if (dux < 1) return;
-    const out = (pool.ro - ro2) * (dux / full) * (1 - K.slip), sendMax = dux / (1 - pool.fee) * (1 + K.slip);
-    if (usdxInv < sendMax) return log(`USDX above $1 but treasury has ${usdxInv.toFixed(2)} USDX, needs ${sendMax.toFixed(2)}`);
-    log(`USDX above $1: selling up to ${sendMax.toFixed(2)} USDX`);
-    await submit({ TransactionType: 'Payment', Account: recv.address, Destination: recv.address, Amount: other(kind, out), SendMax: { ...USDX, value: sendMax.toFixed(6) }, Memos: [memo('USDX/PEG', { v: 1, side: 'sell', usdx: dux, price, pool: kind })] }, recv);
+    const need = Math.min(pool.ru * (price - 1), pool.ru * cap);   // USDX to add so the price returns to $1
+    if (need < 0.01) return;
+    let added = 0;
+    const have = Math.max(0, usdxInv - 0.5);
+    if (have >= 0.01) {
+      const x = Math.min(need, have);
+      try { log(`USDX above $1: depositing ${fmt6(x)} treasury USDX into the pool`); await submit({ TransactionType: 'AMMDeposit', Account: recv.address, ...AS, Amount: { ...USDX, value: fmt6(x) }, Flags: 524288 }, recv, 'AMMDeposit USDX'); added += x; acted = true; }
+      catch (e) { log(`USDX deposit failed: ${e.message}`); }
+    }
+    let left = need - added;
+    if (left >= 0.01 && MINT_ON && iss && bonsaiInv > 0 && px.bonsaiUsd > 0) {
+      // collateralised mint: burn BONSAI worth the USDX, issue exactly that much USDX, put it in the pool
+      const x = Math.min(left, bonsaiInv * px.bonsaiUsd * 100 / K.ratio * 0.98), bonsaiBurn = x * K.ratio / 100 / px.bonsaiUsd;
+      if (x >= 0.01 && bonsaiBurn <= bonsaiInv) {
+        try {
+          const dep = 'PEGMINT-' + Date.now();
+          log(`USDX above $1 and the pool is short of USDX: burning ${bonsaiBurn.toFixed(4)} BONSAI to mint ${fmt6(x)} USDX`);
+          const burn = await submit({ TransactionType: 'Payment', Account: recv.address, Destination: BI, Amount: { ...BONSAI, value: bonsaiBurn.toFixed(6) }, Memos: [memo('USDX/BURN', { v: 1, dep, bonsai: bonsaiBurn, to: recv.address })] }, recv, 'burn BONSAI');
+          await submit({ TransactionType: 'Payment', Account: UI, Destination: recv.address, Amount: { ...USDX, value: fmt6(x) }, Memos: [memo('USDX/RECEIPT', { v: 1, dep, burn, bonsai: bonsaiBurn, rateUsd: px.bonsaiUsd, ratio: K.ratio, usdx: x })] }, iss, 'mint USDX');
+          log(`MINTED ${fmt6(x)} USDX to the treasury · backed by ${bonsaiBurn.toFixed(4)} BONSAI burned`);
+          await submit({ TransactionType: 'AMMDeposit', Account: recv.address, ...AS, Amount: { ...USDX, value: fmt6(x) }, Flags: 524288 }, recv, 'AMMDeposit USDX'); added += x; acted = true; left -= x;
+        } catch (e) { log(`mint-and-deposit failed: ${e.message}`); }
+      }
+    }
+    if (left >= 0.01 && share > 0) {
+      const p2 = acted ? await poolInfo(kind) : pool; if (!p2) return;
+      const y = Math.min(p2.ro - p2.ru / uu, p2.ro * cap, share * p2.ro * 0.9);   // other asset to remove so the price returns to $1
+      if (y > 0) {
+        const amt = kind === 'xrp' ? String(Math.floor(y * 1e6)) : { ...BONSAI, value: fmt6(y) };
+        if (kind !== 'xrp' || Math.floor(y * 1e6) > 0) {
+          try { log(`USDX above $1: withdrawing ${y.toFixed(4)} ${nm} from the pool with the treasury's LP tokens`); await submit({ TransactionType: 'AMMWithdraw', Account: recv.address, ...AS, Amount: amt, Flags: 524288 }, recv, 'AMMWithdraw ' + nm); acted = true; }
+          catch (e) { log(`LP withdraw failed: ${e.message}`); }
+        }
+      }
+    } else if (left >= 0.01 && !acted) log(`USDX above $1 by ${((price - 1) * 1e4).toFixed(0)} bps but the treasury has no USDX, no BONSAI to burn and no LP tokens. Fund the receiver to defend the ceiling.`);
   }
+  if (acted) { const p3 = await poolInfo(kind); if (p3) log(`after rebalancing: USDX $${(p3.ro / p3.ru * uu).toFixed(5)} in the ${kind} pool`); }
 }
 
+const DEX_MIN = +E.DEX_MIN_USDX || 1;
 async function dexStep(px) {
   const kind = K.pool, uu = kind === 'xrp' ? px.xrpUsd : px.bonsaiUsd, sellP = (1 + K.dexSp) / uu, buyP = (1 - K.dexSp) / uu, size = K.dexSize;
   const ls = await lines(recv.address), usdxInv = bal(ls, USDX), otherInv = kind === 'xrp' ? (await xrpBal(recv.address)) - 5 : bal(ls, BONSAI);
@@ -154,8 +235,8 @@ async function dexStep(px) {
     if (Math.abs(pr / tgt - 1) < 0.001 && usdx >= size * 0.5 && !keep[side]) keep[side] = true;
     else { log(`replacing stale ${side} quote at ${pr.toPrecision(6)}`); await submit({ TransactionType: 'OfferCancel', Account: recv.address, OfferSequence: o.seq }, recv); }
   }
-  if (!keep.sell) { const n = Math.min(size, usdxInv * 0.95); if (n >= 10) { log(`posting sell quote ${n.toFixed(2)} USDX @ ${sellP.toPrecision(6)}`); await submit({ TransactionType: 'OfferCreate', Account: recv.address, TakerGets: { ...USDX, value: n.toFixed(6) }, TakerPays: other(kind, n * sellP), Flags: 65536, Memos: [memo('USDX/QUOTE', { v: 1, side: 'sell', usdx: n, px: sellP })] }, recv); } else log('sell quote skipped: not enough USDX'); }
-  if (!keep.buy) { const n = Math.min(size, Math.max(0, otherInv) * 0.95 / buyP); if (n >= 10) { log(`posting buy quote ${n.toFixed(2)} USDX @ ${buyP.toPrecision(6)}`); await submit({ TransactionType: 'OfferCreate', Account: recv.address, TakerGets: other(kind, n * buyP), TakerPays: { ...USDX, value: n.toFixed(6) }, Flags: 65536, Memos: [memo('USDX/QUOTE', { v: 1, side: 'buy', usdx: n, px: buyP })] }, recv); } else log('buy quote skipped: not enough of the other asset'); }
+  if (!keep.sell) { try { const n = Math.min(size, usdxInv * 0.95); if (n >= DEX_MIN) { log(`posting sell quote ${n.toFixed(2)} USDX @ ${sellP.toPrecision(6)}`); await submit({ TransactionType: 'OfferCreate', Account: recv.address, TakerGets: { ...USDX, value: n.toFixed(6) }, TakerPays: other(kind, n * sellP), Flags: 65536, Memos: [memo('USDX/QUOTE', { v: 1, side: 'sell', usdx: n, px: sellP })] }, recv); } else log('sell quote skipped: not enough USDX');  } catch (e) { log(`DEX sell quote failed: ${e.message}`); } }
+  if (!keep.buy) { try { const n = Math.min(size, Math.max(0, otherInv) * 0.95 / buyP); if (n >= DEX_MIN) { log(`posting buy quote ${n.toFixed(2)} USDX @ ${buyP.toPrecision(6)}`); await submit({ TransactionType: 'OfferCreate', Account: recv.address, TakerGets: other(kind, n * buyP), TakerPays: { ...USDX, value: n.toFixed(6) }, Flags: 65536, Memos: [memo('USDX/QUOTE', { v: 1, side: 'buy', usdx: n, px: buyP })] }, recv); } else log('buy quote skipped: not enough of the other asset');  } catch (e) { log(`DEX buy quote failed: ${e.message}`); } }
 }
 
 // Burn deposited BONSAI and mint USDX. Needs ISSUER_SEED. Reads state from the ledger, so it is safe to restart.

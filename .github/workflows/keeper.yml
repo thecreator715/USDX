@@ -42,15 +42,20 @@ jobs:
           timeout 270 node keeper.mjs 2>&1 | tee run.log
           rc=${PIPESTATUS[0]}
           [ $rc -eq 0 ] || [ $rc -eq 124 ]
-      - name: Publish the run log (branch keeper-log, no secrets in it)
+      - name: Publish the run log (branch keeper-log, secrets scrubbed)
         if: always()
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           set +e
-          mkdir /tmp/kl && tail -n 300 keeper/run.log | sed -E 's/s[A-Za-z0-9]{24,}/[hidden]/g' > /tmp/kl/last-run.log
-          cd /tmp/kl && git init -q -b keeper-log && git config user.name github-actions && git config user.email actions@users.noreply.github.com
-          git add . && git commit -qm "keeper run $GITHUB_RUN_ID" && git push -qf "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" keeper-log || true
+          URL="https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          rm -rf /tmp/kl
+          git clone -q --depth 1 -b keeper-log "$URL" /tmp/kl 2>/dev/null || { mkdir /tmp/kl && cd /tmp/kl && git init -q -b keeper-log; }
+          cd /tmp/kl && git config user.name github-actions && git config user.email actions@users.noreply.github.com
+          touch last-run.log
+          { cat last-run.log; echo "--- run $GITHUB_RUN_ID $(date -u +%FT%TZ) ---"; grep -v '^    at ' "$GITHUB_WORKSPACE/keeper/run.log" | sed -E 's/s[A-Za-z0-9]{24,}/[hidden]/g' | cut -c1-400; } | tail -n 900 > next.log
+          mv next.log last-run.log
+          git add -A && git commit -qm "keeper run $GITHUB_RUN_ID" && git push -qf "$URL" keeper-log || true
       - name: Start the next run (keeps the keeper going even when GitHub delays the schedule)
         if: always()
         env:
