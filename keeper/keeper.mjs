@@ -299,7 +299,8 @@ async function holders(excl) {
 }
 async function yieldStep(px) {
   if (!iss || !YIELD_APY) return;
-  const day = utcDay(); if (YIELD_DONE === day) return;
+  const day = utcDay(); if (day < (E.YIELD_START || C.yieldStart || '2026-12-01')) return; if (YIELD_DONE === day) return;   // rewards begin December 2026
+
   const rt = (await history(RECV, 400)).map(parse);
   if (rt.some(p => p.ok && p.t.Account === RECV && p.mt === 'USDX/YIELDDONE' && p.mm && p.mm.day === day)) { YIELD_DONE = day; return; }
   const excl = new Set([UI, RECV]);
