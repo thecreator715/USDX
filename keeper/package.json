@@ -1,0 +1,9 @@
+{
+  "name": "usdx-keeper",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": { "start": "node keeper.mjs" },
+  "dependencies": { "xrpl": "4.2.5" },
+  "engines": { "node": ">=18" }
+}

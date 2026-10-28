@@ -18,3 +18,7 @@ Repo Settings, Pages, deploy from branch `main`, folder `/ (root)`.
 3. The USDX issuer pays USDX to the user, priced at the BONSAI market price.
 
 The Peg & Pools page keeps USDX at $1.00 with the BONSAI/USDX and XRP/USDX AMM pools, and checks that burned BONSAI covers all USDX outstanding.
+
+## Keeper
+
+`keeper/` is a Node script that defends the peg and keeps DEX quotes from the receiver wallet without a browser. See `keeper/README.md`. It starts in dry-run mode.
