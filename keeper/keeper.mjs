@@ -76,15 +76,25 @@ async function xrpUsd() {
 }
 async function prices() {
   const xrp = { currency: 'XRP' }, [ask, bid, amm] = await Promise.all([
-    req({ command: 'book_offers', taker_gets: BONSAI, taker_pays: xrp, limit: 5 }).catch(() => null),
-    req({ command: 'book_offers', taker_gets: xrp, taker_pays: BONSAI, limit: 5 }).catch(() => null),
+    req({ command: 'book_offers', taker_gets: BONSAI, taker_pays: xrp, limit: 30 }).catch(() => null),
+    req({ command: 'book_offers', taker_gets: xrp, taker_pays: BONSAI, limit: 30 }).catch(() => null),
     req({ command: 'amm_info', asset: xrp, asset2: BONSAI }).catch(() => null)]);
-  const v = [];
-  const o1 = ask?.offers?.[0]; if (o1) v.push((Number(o1.TakerPays) / 1e6) / Number(o1.TakerGets.value));
-  const o2 = bid?.offers?.[0]; if (o2) v.push((Number(o2.TakerGets) / 1e6) / Number(o2.TakerPays.value));
-  if (amm?.amm) { const { amount, amount2 } = amm.amm, x = typeof amount === 'string' ? amount : amount2, t = typeof amount === 'string' ? amount2 : amount; if (x && t && +t.value > 0) v.push((Number(x) / 1e6) / Number(t.value)); }
-  const good = v.filter(n => n > 0 && isFinite(n)); if (!good.length) throw new Error('no BONSAI/XRP market found');
-  const xu = await xrpUsd(), bx = Math.min(...good); return { xrpUsd: xu, bonsaiXrp: bx, bonsaiUsd: bx * xu };
+  // Depth-aware BONSAI/XRP price: pool first, then order-book mid, ignoring dust offers under MIN_DEPTH_XRP (default 5).
+  const MIN = +E.MIN_DEPTH_XRP || 5, asks = [], bids = [];
+  for (const o of ask?.offers || []) { const g = Number(o.taker_gets_funded?.value ?? o.TakerGets.value), x = Number(typeof o.taker_pays_funded === 'string' ? o.taker_pays_funded : o.TakerPays) / 1e6; if (g > 0 && x > 0) asks.push({ p: x / g, x }); }
+  for (const o of bid?.offers || []) { const x = Number(typeof o.taker_gets_funded === 'string' ? o.taker_gets_funded : o.TakerGets) / 1e6, g = Number(o.TakerPays.value); if (g > 0 && x > 0) bids.push({ p: x / g, x }); }
+  asks.sort((a, b) => a.p - b.p); bids.sort((a, b) => b.p - a.p);
+  let pool = null; if (amm?.amm) { const { amount, amount2 } = amm.amm, x = typeof amount === 'string' ? amount : amount2, t = typeof amount === 'string' ? amount2 : amount; if (x && t && +t.value > 0) pool = { p: (Number(x) / 1e6) / Number(t.value), x: Number(x) / 1e6 }; }
+  const sa = asks.find(o => o.x >= MIN), sb = bids.find(o => o.x >= MIN), man = +E.MANUAL_BONSAI_XRP;
+  let bx, how, thin = false;
+  if (man > 0) { bx = man; how = 'manual price'; }
+  else if (pool && pool.x >= MIN) { bx = pool.p; how = 'AMM pool'; }
+  else if (sa && sb) { bx = (sa.p + sb.p) / 2; how = 'order book mid'; }
+  else if (sa || sb) { bx = (sa || sb).p; how = 'order book one side'; }
+  else if (pool) { bx = pool.p; how = `thin AMM pool (${pool.x.toFixed(2)} XRP)`; thin = true; }
+  else if (asks[0] || bids[0]) { bx = (asks[0] || bids[0]).p; how = 'thin order book'; thin = true; }
+  else throw new Error('no BONSAI/XRP market found');
+  const xu = await xrpUsd(); return { xrpUsd: xu, bonsaiXrp: bx, bonsaiUsd: bx * xu, how, thin };
 }
 async function poolInfo(kind) {
   try {
@@ -149,6 +159,7 @@ const parse = e => {
 async function history(addr, max) { const out = []; let marker; while (out.length < max) { const r = await req({ command: 'account_tx', account: addr, limit: 200, marker, ledger_index_min: -1, ledger_index_max: -1 }); out.push(...r.transactions); marker = r.marker; if (!marker) break; } return out; }
 async function processDeposits(px) {
   if (!iss) return;
+  if (px.thin) return log(`minting paused: the BONSAI price comes from a ${px.how}. Set MANUAL_BONSAI_XRP or add liquidity.`);
   const [rt, it] = await Promise.all([history(RECV, 800), history(UI, 600)]);
   const deposits = [], burns = {}, receipts = new Set();
   rt.map(parse).forEach(p => {
@@ -168,7 +179,7 @@ async function processDeposits(px) {
 }
 
 async function cycle() {
-  const px = await prices(); log(`BONSAI $${px.bonsaiUsd.toPrecision(6)} · XRP $${px.xrpUsd.toFixed(4)}`);
+  const px = await prices(); log(`BONSAI $${px.bonsaiUsd.toFixed(10)} (${px.how}) · XRP $${px.xrpUsd.toFixed(4)}`);
   await processDeposits(px).catch(e => log('processor:', e.message));
   for (const kind of K.pegPools) await pegStep(px, kind).catch(async e => { log(`peg ${kind}:`, e.message); await alert(`peg defence failed in the ${kind} pool: ${e.message}`); });
   await dexStep(px).catch(e => log('dex:', e.message));

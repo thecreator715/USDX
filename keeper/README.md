@@ -17,6 +17,6 @@ Each cycle (default 30 s) it:
 3. checks the USDX pool price. Below $1 it buys USDX from the pool and sends it to the issuer to retire it. Above $1 it sells its own USDX into the pool;
 4. keeps a sell and a buy quote on the DEX around $1.00 and re-posts them when the BONSAI price moves.
 
-Settings come from `../config.json` and these optional variables: `PEG_POOL` (`both` by default, or `bonsai` / `xrp`; the peg is defended in each listed pool, worst first), `DEX_POOL` (pool for standing DEX quotes, default `bonsai`), `PEG_FLOOR` (0.99, logs an ALERT below it), `ALERT_WEBHOOK` (optional Slack/Discord-style URL that receives alerts, throttled to one per 15 min per message), `BAND_BPS` (50), `MAX_TRADE_PCT` (20), `SLIP_BPS` (100), `DEX_SIZE_USD` (500), `DEX_SPREAD_BPS` (30), `INTERVAL_SEC` (30).
+Settings come from `../config.json` and these optional variables: `PEG_POOL` (`both` by default, or `bonsai` / `xrp`; the peg is defended in each listed pool, worst first), `DEX_POOL` (pool for standing DEX quotes, default `bonsai`), `PEG_FLOOR` (0.99, logs an ALERT below it), `MIN_DEPTH_XRP` (5, ignores dust offers when pricing), `MANUAL_BONSAI_XRP` (fixed BONSAI price in XRP, overrides the market; required to mint while the market is thin), `ALERT_WEBHOOK` (optional Slack/Discord-style URL that receives alerts, throttled to one per 15 min per message), `BAND_BPS` (50), `MAX_TRADE_PCT` (20), `SLIP_BPS` (100), `DEX_SIZE_USD` (500), `DEX_SPREAD_BPS` (30), `INTERVAL_SEC` (30).
 
 Seeds are read from the environment only. Never put them in a file in this repo.
