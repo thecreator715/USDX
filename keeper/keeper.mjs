@@ -143,14 +143,15 @@ const MINT_ON = E.PEG_MINT !== '0';
 const lpBal = async (pool) => { const ls = await lines(recv.address); const l = ls.find(z => z.account === pool.acct); return l ? Number(l.balance) : 0; };
 const fmt6 = n => Number(n).toFixed(6);
 const MIN_ACT = +E.PEG_MIN_USDX || 0.0005;   // pools are small, so corrections of a fraction of a cent matter
+let OFFBAND = false;   // set while any pool is outside the band: the keeper then loops fast until it is restored
 async function pegStep(px, kind, depth = 0) {
   const uu = kind === 'xrp' ? px.xrpUsd : px.bonsaiUsd, pool = await poolInfo(kind), nm = kind === 'xrp' ? 'XRP' : 'BONSAI';
   if (!pool) return log(`no ${kind}/USDX pool yet`);
   const price = pool.ro / pool.ru * uu;
   log(`${kind}/USDX pool: USDX $${price.toFixed(5)} (${((price - 1) * 1e4).toFixed(0)} bps) · reserves ${pool.ro.toFixed(2)} ${nm} / ${pool.ru.toFixed(2)} USDX`);
   if (price < K.floor) await alert(`USDX is $${price.toFixed(4)} in the ${kind}/USDX pool, below the $${K.floor} floor`);
-  if (Math.abs(price - 1) <= K.band) return;
-  if (depth > 1) return;
+  if (Math.abs(price - 1) <= K.band) return 'ok';
+  OFFBAND = true;
   const cap = price < 0.99 ? Math.min(0.5, K.maxPct * 2) : K.maxPct, ls = await lines(recv.address);
   const usdxInv = bal(ls, USDX), bonsaiInv = bal(ls, BONSAI), xrpInv = Math.max(0, (await xrpBal(recv.address)) - 5);
   const otherInv = kind === 'xrp' ? xrpInv : bonsaiInv, lp = pool.lpTotal > 0 ? await lpBal(pool) : 0, share = pool.lpTotal > 0 ? lp / pool.lpTotal : 0;
@@ -221,7 +222,8 @@ async function pegStep(px, kind, depth = 0) {
       }
     } else if (left >= MIN_ACT && !acted) log(`USDX above $1 by ${((price - 1) * 1e4).toFixed(0)} bps but the treasury has no USDX, no BONSAI to burn and no LP tokens. Fund the receiver to defend the ceiling.`);
   }
-  if (acted) { const p3 = await poolInfo(kind); if (p3) log(`after rebalancing: USDX $${(p3.ro / p3.ru * uu).toFixed(5)} in the ${kind} pool`); }
+  if (acted) { const p3 = await poolInfo(kind); if (p3) { const pr3 = p3.ro / p3.ru * uu; log(`after rebalancing: USDX $${pr3.toFixed(5)} in the ${kind} pool`); return Math.abs(pr3 - 1) > K.band ? 'again' : 'fixed'; } }
+  return acted ? 'fixed' : 'stuck';
 }
 
 const DEX_MIN = +E.DEX_MIN_USDX || 1;
@@ -331,13 +333,30 @@ async function yieldStep(px) {
   if (todo.length - n <= 0 && LIVE) { try { await submit({ TransactionType: 'Payment', Account: RECV, Destination: UI, Amount: '1', Memos: [memo('USDX/YIELDDONE', { v: 1, day, holders: hs.length, usdx: total, bonsaiBurned: burned })] }, recv); YIELD_DONE = day; log('yield: day complete'); } catch (e) { log('yield marker failed:', e.message); } }
 }
 
+// re-peg loop: as soon as a pool leaves the band, keep correcting (and re-reading the price) until it is back, then return to the slow cycle
+async function repeg(px) {
+  let again = false;
+  for (const kind of K.pegPools) {
+    let r = '', n = 0;
+    do {
+      try { r = await pegStep(px, kind); } catch (e) { log(`peg ${kind}:`, e.message); await alert(`peg defence failed in the ${kind} pool: ${e.message}`); r = 'stuck'; }
+      if (r === 'again') { n++; await sleep(1500); px = await prices().catch(() => px); }
+    } while (r === 'again' && n < 8);
+    if (r === 'again') { again = true; log(`${kind}: still outside the band after ${n} corrections, continuing`); }
+  }
+  OFFBAND = again;   // fast loop only while corrections are actually moving the price; a pool that cannot be corrected falls back to the normal cycle
+}
+
 async function cycle() {
   const px = await prices(); log(`BONSAI $${px.bonsaiUsd.toFixed(10)} (${px.how}) · XRP $${px.xrpUsd.toFixed(4)}`);
   await processDeposits(px).catch(e => log('processor:', e.message));
   await yieldStep(px).catch(e => log('yield:', e.message));
-  for (const kind of K.pegPools) await pegStep(px, kind).catch(async e => { log(`peg ${kind}:`, e.message); await alert(`peg defence failed in the ${kind} pool: ${e.message}`); });
+  await repeg(px);
   await dexStep(px).catch(e => log('dex:', e.message));
 }
 log(LIVE ? 'LIVE mode: transactions will be submitted' : 'DRY RUN: nothing is submitted. Set LIVE=1 to trade.');
 log(`receiver ${RECV}${iss ? ' · issuer key loaded, deposits will be processed' : ' · no issuer key, deposits are not processed'} · defending pools ${K.pegPools.join(' + ')} · DEX quotes in ${K.pool}`);
-for (;;) { try { await cycle(); } catch (e) { log('cycle error:', e.message); } await new Promise(r => setTimeout(r, K.every)); }
+for (;;) {
+  try { if (OFFBAND) { const px = await prices(); await repeg(px); } else await cycle(); } catch (e) { log('cycle error:', e.message); }
+  await new Promise(r => setTimeout(r, OFFBAND ? 4000 : K.every));   // off the peg: re-check every 4 s without the heavy history reads
+}
