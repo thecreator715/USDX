@@ -1,40 +1,3 @@
-2026-10-28T16:57:53.885Z bonsai/USDX pool: USDX $1.00060 (6 bps) · reserves 47271.26 BONSAI / 1.00 USDX
-2026-10-28T16:57:54.056Z xrp/USDX pool: USDX $0.99667 (-33 bps) · reserves 0.76 XRP / 1.00 USDX
-2026-10-28T16:58:25.097Z BONSAI $0.0000210702 (thin AMM pool (1.12 XRP)) · XRP $1.3130
-2026-10-28T16:58:25.097Z note: the BONSAI price comes from a thin AMM pool (1.12 XRP); minting at the live market price anyway.
-2026-10-28T16:58:26.120Z bonsai/USDX pool: USDX $1.00053 (5 bps) · reserves 47271.26 BONSAI / 1.00 USDX
-2026-10-28T16:58:26.288Z xrp/USDX pool: USDX $0.99659 (-34 bps) · reserves 0.76 XRP / 1.00 USDX
-2026-10-28T16:58:56.572Z BONSAI $0.0000210742 (thin AMM pool (1.12 XRP)) · XRP $1.3133
-2026-10-28T16:58:56.572Z note: the BONSAI price comes from a thin AMM pool (1.12 XRP); minting at the live market price anyway.
-2026-10-28T16:58:57.712Z bonsai/USDX pool: USDX $1.00072 (7 bps) · reserves 47271.26 BONSAI / 1.00 USDX
-2026-10-28T16:58:57.881Z xrp/USDX pool: USDX $0.99678 (-32 bps) · reserves 0.76 XRP / 1.00 USDX
---- run 40731330610 2026-10-28T17:04:03Z ---
-2026-10-28T16:59:33.434Z LIVE mode: transactions will be submitted
-2026-10-28T16:59:33.436Z receiver rphatRpwXcPAo7CVm46dC78JAQ6kLMqb2M · issuer key loaded, deposits will be processed · defending pools bonsai + xrp · DEX quotes in bonsai
-2026-10-28T16:59:34.371Z BONSAI $0.0000210734 (thin AMM pool (1.12 XRP)) · XRP $1.3132
-2026-10-28T16:59:34.371Z note: the BONSAI price comes from a thin AMM pool (1.12 XRP); minting at the live market price anyway.
-2026-10-28T17:00:11.135Z bonsai/USDX pool: USDX $1.00068 (7 bps) · reserves 47271.26 BONSAI / 1.00 USDX
-2026-10-28T17:00:11.316Z xrp/USDX pool: USDX $0.99674 (-33 bps) · reserves 0.76 XRP / 1.00 USDX
-2026-10-28T17:00:11.914Z posting sell quote 10.21 USDX @ 47595.6
-2026-10-28T17:00:20.982Z ERROR OfferCreate (attempt 1/4): tecINSUF_RESERVE_OFFER OfferCreate
-2026-10-28T17:00:20.983Z DEX sell quote failed: tecINSUF_RESERVE_OFFER OfferCreate
-2026-10-28T17:00:21.341Z DIAGNOSIS: receiver has 77.298473 XRP, 381 owned objects, reserve with one more offer = 77.40 XRP → ADD XRP to the receiver
-2026-10-28T17:00:21.341Z DEX quotes paused for 30 min to avoid wasting fees; pools are still defended.
-2026-10-28T17:00:21.341Z posting buy quote 9.28 USDX @ 47310.8
-2026-10-28T17:00:29.643Z ERROR OfferCreate (attempt 1/4): tecINSUF_RESERVE_OFFER OfferCreate
-2026-10-28T17:00:29.643Z DEX buy quote failed: tecINSUF_RESERVE_OFFER OfferCreate
-2026-10-28T17:00:30.008Z DIAGNOSIS: receiver has 77.298461 XRP, 381 owned objects, reserve with one more offer = 77.40 XRP → ADD XRP to the receiver
-2026-10-28T17:00:30.008Z DEX quotes paused for 30 min to avoid wasting fees; pools are still defended.
-2026-10-28T17:01:00.270Z BONSAI $0.0000210501 (thin AMM pool (1.12 XRP)) · XRP $1.3117
-2026-10-28T17:01:00.270Z note: the BONSAI price comes from a thin AMM pool (1.12 XRP); minting at the live market price anyway.
-2026-10-28T17:01:40.918Z bonsai/USDX pool: USDX $0.99957 (-4 bps) · reserves 47271.26 BONSAI / 1.00 USDX
-2026-10-28T17:01:41.095Z xrp/USDX pool: USDX $0.99564 (-44 bps) · reserves 0.76 XRP / 1.00 USDX
-2026-10-28T17:02:11.355Z BONSAI $0.0000210622 (thin AMM pool (1.12 XRP)) · XRP $1.3125
-2026-10-28T17:02:11.355Z note: the BONSAI price comes from a thin AMM pool (1.12 XRP); minting at the live market price anyway.
-2026-10-28T17:02:31.123Z bonsai/USDX pool: USDX $1.00015 (1 bps) · reserves 47271.26 BONSAI / 1.00 USDX
-2026-10-28T17:02:31.304Z xrp/USDX pool: USDX $0.99621 (-38 bps) · reserves 0.76 XRP / 1.00 USDX
-2026-10-28T17:03:01.535Z BONSAI $0.0000210686 (thin AMM pool (1.12 XRP)) · XRP $1.3129
-2026-10-28T17:03:01.535Z note: the BONSAI price comes from a thin AMM pool (1.12 XRP); minting at the live market price anyway.
 2026-10-28T17:03:02.814Z bonsai/USDX pool: USDX $1.00045 (5 bps) · reserves 47271.26 BONSAI / 1.00 USDX
 2026-10-28T17:03:02.993Z xrp/USDX pool: USDX $0.99652 (-35 bps) · reserves 0.76 XRP / 1.00 USDX
 2026-10-28T17:03:33.226Z BONSAI $0.0000210630 (thin AMM pool (1.12 XRP)) · XRP $1.3126
@@ -898,3 +861,40 @@
 2026-10-28T18:58:45.425Z note: the BONSAI price comes from a thin AMM pool (1.12 XRP); minting at the live market price anyway.
 2026-10-28T18:58:46.405Z bonsai/USDX pool: USDX $1.00272 (27 bps) · reserves 47042.16 BONSAI / 1.00 USDX
 2026-10-28T18:58:46.563Z xrp/USDX pool: USDX $1.00433 (43 bps) · reserves 0.76 XRP / 1.00 USDX
+--- run 40750173910 2026-10-28T19:04:04Z ---
+2026-10-28T18:59:34.600Z LIVE mode: transactions will be submitted
+2026-10-28T18:59:34.603Z receiver rphatRpwXcPAo7CVm46dC78JAQ6kLMqb2M · issuer key loaded, deposits will be processed · defending pools bonsai + xrp · DEX quotes in bonsai
+2026-10-28T18:59:35.693Z BONSAI $0.0000213226 (thin AMM pool (1.12 XRP)) · XRP $1.3265
+2026-10-28T18:59:35.694Z note: the BONSAI price comes from a thin AMM pool (1.12 XRP); minting at the live market price anyway.
+2026-10-28T19:00:10.693Z bonsai/USDX pool: USDX $1.00272 (27 bps) · reserves 47042.16 BONSAI / 1.00 USDX
+2026-10-28T19:00:10.852Z xrp/USDX pool: USDX $1.00433 (43 bps) · reserves 0.76 XRP / 1.00 USDX
+2026-10-28T19:00:11.200Z posting sell quote 10.20 USDX @ 47039.2
+2026-10-28T19:00:17.908Z ERROR OfferCreate (attempt 1/4): tecINSUF_RESERVE_OFFER OfferCreate
+2026-10-28T19:00:17.908Z DEX sell quote failed: tecINSUF_RESERVE_OFFER OfferCreate
+2026-10-28T19:00:18.230Z DIAGNOSIS: receiver has 77.297849 XRP, 381 owned objects, reserve with one more offer = 77.40 XRP → ADD XRP to the receiver
+2026-10-28T19:00:18.230Z DEX quotes paused for 30 min to avoid wasting fees; pools are still defended.
+2026-10-28T19:00:18.230Z posting buy quote 9.39 USDX @ 46757.8
+2026-10-28T19:00:26.410Z ERROR OfferCreate (attempt 1/4): tecINSUF_RESERVE_OFFER OfferCreate
+2026-10-28T19:00:26.410Z DEX buy quote failed: tecINSUF_RESERVE_OFFER OfferCreate
+2026-10-28T19:00:26.731Z DIAGNOSIS: receiver has 77.297837 XRP, 381 owned objects, reserve with one more offer = 77.40 XRP → ADD XRP to the receiver
+2026-10-28T19:00:26.731Z DEX quotes paused for 30 min to avoid wasting fees; pools are still defended.
+2026-10-28T19:00:56.963Z BONSAI $0.0000213226 (thin AMM pool (1.12 XRP)) · XRP $1.3265
+2026-10-28T19:00:56.963Z note: the BONSAI price comes from a thin AMM pool (1.12 XRP); minting at the live market price anyway.
+2026-10-28T19:01:31.116Z bonsai/USDX pool: USDX $1.00272 (27 bps) · reserves 47042.16 BONSAI / 1.00 USDX
+2026-10-28T19:01:31.281Z xrp/USDX pool: USDX $1.00433 (43 bps) · reserves 0.76 XRP / 1.00 USDX
+2026-10-28T19:02:01.525Z BONSAI $0.0000213226 (thin AMM pool (1.12 XRP)) · XRP $1.3265
+2026-10-28T19:02:01.525Z note: the BONSAI price comes from a thin AMM pool (1.12 XRP); minting at the live market price anyway.
+2026-10-28T19:02:02.538Z bonsai/USDX pool: USDX $1.00272 (27 bps) · reserves 47042.16 BONSAI / 1.00 USDX
+2026-10-28T19:02:02.745Z xrp/USDX pool: USDX $1.00433 (43 bps) · reserves 0.76 XRP / 1.00 USDX
+2026-10-28T19:02:33.037Z BONSAI $0.0000213226 (thin AMM pool (1.12 XRP)) · XRP $1.3265
+2026-10-28T19:02:33.037Z note: the BONSAI price comes from a thin AMM pool (1.12 XRP); minting at the live market price anyway.
+2026-10-28T19:02:34.958Z bonsai/USDX pool: USDX $1.00272 (27 bps) · reserves 47042.16 BONSAI / 1.00 USDX
+2026-10-28T19:02:35.118Z xrp/USDX pool: USDX $1.00433 (43 bps) · reserves 0.76 XRP / 1.00 USDX
+2026-10-28T19:03:05.352Z BONSAI $0.0000213226 (thin AMM pool (1.12 XRP)) · XRP $1.3265
+2026-10-28T19:03:05.352Z note: the BONSAI price comes from a thin AMM pool (1.12 XRP); minting at the live market price anyway.
+2026-10-28T19:03:06.354Z bonsai/USDX pool: USDX $1.00272 (27 bps) · reserves 47042.16 BONSAI / 1.00 USDX
+2026-10-28T19:03:06.512Z xrp/USDX pool: USDX $1.00433 (43 bps) · reserves 0.76 XRP / 1.00 USDX
+2026-10-28T19:03:36.791Z BONSAI $0.0000212833 (thin AMM pool (1.12 XRP)) · XRP $1.3240
+2026-10-28T19:03:36.791Z note: the BONSAI price comes from a thin AMM pool (1.12 XRP); minting at the live market price anyway.
+2026-10-28T19:03:37.832Z bonsai/USDX pool: USDX $1.00087 (9 bps) · reserves 47042.16 BONSAI / 1.00 USDX
+2026-10-28T19:03:37.992Z xrp/USDX pool: USDX $1.00247 (25 bps) · reserves 0.76 XRP / 1.00 USDX
