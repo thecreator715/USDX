@@ -6,11 +6,17 @@ on:
   schedule:
     - cron: '*/5 * * * *'
   workflow_dispatch:
+  push:
+    paths:
+      - 'keeper/**'
+      - '.github/workflows/keeper.yml'
+      - 'config.json'
 concurrency:
   group: usdx-keeper
   cancel-in-progress: false
 permissions:
   contents: read
+  actions: write
 jobs:
   keep:
     runs-on: ubuntu-latest
@@ -32,3 +38,8 @@ jobs:
           LIVE: '1'
           INTERVAL_SEC: '30'
         run: timeout 270 node keeper.mjs || [ $? -eq 124 ]
+      - name: Start the next run (keeps the keeper going even when GitHub delays the schedule)
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run keeper.yml --repo "$GITHUB_REPOSITORY" --ref "${{ github.ref_name }}" || true
