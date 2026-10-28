@@ -10,6 +10,11 @@ import xrpl from 'xrpl';
 import fs from 'node:fs';
 
 const C = JSON.parse(fs.readFileSync(new URL('../config.json', import.meta.url), 'utf8'));
+import { readFileSync as _rf } from 'node:fs';
+// load KEY=VALUE lines from keeper/.env or ./.env (git-ignored); real environment variables win
+for (const f of [new URL('./.env', import.meta.url), new URL('../.env', import.meta.url)]) {
+  try { for (const l of _rf(f, 'utf8').split(/\r?\n/)) { const m = /^\s*([A-Z_]+)\s*=\s*(.*?)\s*$/.exec(l); if (m && !l.trim().startsWith('#') && !(m[1] in process.env)) process.env[m[1]] = m[2].replace(/^["']|["']$/g, ''); } } catch (_) {}
+}
 const E = process.env, LIVE = E.LIVE === '1';
 const K = {
   band: (+E.BAND_BPS || 50) / 1e4, maxPct: (+E.MAX_TRADE_PCT || 20) / 100, slip: (+E.SLIP_BPS || 100) / 1e4,
