@@ -180,7 +180,7 @@ async function processDeposits(px) {
   for (const b of tburns.filter(x => !receipts.has(x.hash))) {
     const usdx = Number(floor6(b.value * px.bonsaiUsd * 100 / K.ratio)); if (!(usdx > 0)) continue;
     log(`treasury burn ${b.burnHash.slice(0, 10)}: ${b.value} BONSAI -> ${usdx} USDX to ${b.from}`);
-    try { await submit({ TransactionType: 'Payment', Account: UI, Destination: b.from, Amount: { ...USDX, value: usdx.toFixed(6) }, Memos: [memo('USDX/RECEIPT', { v: 1, dep: b.hash, burn: b.burnHash, bonsai: b.value, rateUsd: px.bonsaiUsd, ratio: K.ratio, usdx })] }, iss); }
+    try { await submit({ TransactionType: 'Payment', Account: UI, Destination: b.from, Amount: { ...USDX, value: usdx.toFixed(6) }, Memos: [memo('USDX/RECEIPT', { v: 1, dep: b.hash, burn: b.burnHash, bonsai: b.value, rateUsd: px.bonsaiUsd, ratio: K.ratio, usdx })] }, iss).then(h => log(`MINTED ${usdx} USDX to ${b.from} · ${h}`)); }
     catch (e) { log('treasury mint failed:', e.message); }
   }
   for (const d of deposits.filter(x => !receipts.has(x.hash))) {
