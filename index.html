@@ -366,6 +366,23 @@ td{padding:11px 10px;border-bottom:1px solid #132a20;font-size:13px;white-space:
       </div>
       <p class="s" style="color:var(--mute);font-size:12px;margin:0">This creates the first USDX in the treasury. It runs once. The BONSAI is burned first at today&rsquo;s price, then the issuer mints to the receiver wallet. After this the app only tracks supply, and new USDX appears only when someone burns BONSAI for it.</p>
     </div>
+    <div class="card col" id="monCard">
+      <h3>Peg monitor · both pools watched every 30 s</h3>
+      <div id="monAlert"></div>
+      <div class="grid g2" id="monRows"></div>
+      <div class="s" id="monMeta" style="color:var(--mute);font-size:12px"></div>
+    </div>
+    <div class="card col" id="launchCard">
+      <h3>Launch both pools · BONSAI/USDX and XRP/USDX</h3>
+      <div id="lState" class="lead"></div>
+      <div class="grid g4" style="gap:12px;align-items:end" id="lForm">
+        <div><label>USDX for the BONSAI/USDX pool</label><input id="lBU" inputmode="decimal" placeholder="e.g. 500"></div>
+        <div><label>USDX for the XRP/USDX pool</label><input id="lXU" inputmode="decimal" placeholder="e.g. 500"></div>
+        <div><label>The receiver will add</label><b class="mono" id="lNeed">—</b></div>
+        <div><button class="btn brass" id="lBtn" style="width:100%">Create both pools from the receiver</button></div>
+      </div>
+      <p class="s" style="color:var(--mute);font-size:12px;margin:0">Run this once, after the genesis mint. Each pool opens with USDX at exactly $1.00, so the other side is sized from the live BONSAI and XRP prices. It uses the receiver wallet, which must hold the USDX and the BONSAI or XRP. A pool that already exists is skipped. After that, the peg keeper keeps both pools at $1.00.</p>
+    </div>
     <div class="grid g2">
       <div class="card col">
         <h3>Backing coverage</h3>
@@ -381,9 +398,9 @@ td{padding:11px 10px;border-bottom:1px solid #132a20;font-size:13px;white-space:
       </div>
       <div class="card col">
         <h3>Peg keeper · signs from the receiver wallet</h3>
-        <div class="row" style="justify-content:space-between"><label class="row" style="margin:0;gap:8px;text-transform:none;letter-spacing:0;font-size:13px;color:var(--fg)"><input type="checkbox" id="kOn" style="width:auto" checked> Auto-rebalance every 30 s</label><span class="pill" id="kArmed"><i class="dot"></i><span>Key not loaded</span></span></div>
+        <div class="row" style="justify-content:space-between"><label class="row" style="margin:0;gap:8px;text-transform:none;letter-spacing:0;font-size:13px;color:var(--fg)"><input type="checkbox" id="kOn" style="width:auto" checked> Auto-rebalance both pools every 30 s</label><span class="pill" id="kArmed"><i class="dot"></i><span>Key not loaded</span></span></div>
         <div class="row"><button class="btn ghost sm" data-slot="recv">Load receiver key</button><span class="s" style="color:var(--mute);font-size:12px">The keeper trades from the receiver wallet and only runs while its key is loaded in this tab. The Node keeper in the repo runs without a browser.</span></div>
-        <div><label>Peg pool the keeper defends</label><select id="kPool"><option value="bonsai">BONSAI / USDX</option><option value="xrp">XRP / USDX</option></select></div>
+        <div><label>Headline pool (DEX quotes and the big price). The keeper defends both pools.</label><select id="kPool"><option value="bonsai">BONSAI / USDX</option><option value="xrp">XRP / USDX</option></select></div>
         <div class="grid" style="grid-template-columns:repeat(3,1fr);gap:10px">
           <div><label>Band (bps)</label><input id="kTol" value="50" inputmode="numeric"></div>
           <div><label>Max trade % of pool</label><input id="kMax" value="20" inputmode="numeric"></div>
@@ -977,16 +994,14 @@ async function treasuryMint(){
     toast('Treasury minted '+fmt(usdx,2)+' USDX · '+mh.slice(0,10)+'…'); $('#tmAmt').value=''; refreshAll();
   }catch(e){ toast(e.message); }
 }
-async function pegStep(manual){
-  if(K.busy||!S.w.recv||!cfgReady()) { if(manual&&!S.w.recv) openWallet('recv'); return; }
-  K.busy=true; const w=S.w.recv, kind=$('#kPool').value, nm=PAIRS[kind].name;
+async function pegOne(kind,manual){
+  const w=S.w.recv, nm=PAIRS[kind].name;
   try{
-    await getPrice();
     const pool=await poolInfo(kind); if(!pool){ if(manual) toast('No '+PAIRS[kind].label+' pool yet.'); return; }
     const uu=unitUsd(kind), price=pool.ro/pool.ru*uu;
     const tol=(+$('#kTol').value||50)/1e4, maxPct=(+$('#kMax').value||20)/100, slip=(+$('#kSlip').value||100)/1e4;
-    $('#kLast').textContent='Checked '+new Date().toLocaleTimeString()+' · $'+price.toFixed(4);
-    if(Math.abs(price-1)<=tol){ if(manual) klog('In band','USDX is $'+price.toFixed(4)+'. Nothing to do.'); return; }
+    K.seen=K.seen||{}; K.seen[kind]=price; $('#kLast').textContent='Checked '+new Date().toLocaleTimeString()+' · '+Object.keys(K.seen).map(k=>PAIRS[k].name+' $'+K.seen[k].toFixed(4)).join(' · ');
+    if(Math.abs(price-1)<=tol){ if(manual) klog('In band',PAIRS[kind].label+': USDX is $'+price.toFixed(4)+'. Nothing to do.'); return; }
     const pStar=1/uu, k=pool.ro*pool.ru, ru2=Math.sqrt(k/pStar), ro2=Math.sqrt(k*pStar);
     const cap=price<0.99?Math.min(.5,maxPct*2):maxPct, rl=await lines(w.address);
     const bal=x=>Number((rl.find(z=>cc(z.currency)===cc(x.currency)&&z.account===x.issuer)||{balance:0}).balance);
@@ -996,7 +1011,7 @@ async function pegStep(manual){
       const full=pool.ru-ru2; const du=Math.min(full,pool.ru*cap); if(du<1) return;
       const dx=(ro2-pool.ro)*(du/full), sendMax=dx/(1-pool.fee)*(1+slip);
       if(otherInv<sendMax) throw new Error(`Treasury needs about ${fmt(sendMax,2)} ${nm} to defend the peg and holds ${fmt(Math.max(0,otherInv),2)}.`);
-      klog('USDX below $1','Buying '+fmt(du,2)+' USDX with up to '+fmt(sendMax,2)+' '+nm,'act');
+      klog('USDX below $1 · '+PAIRS[kind].label,'Buying '+fmt(du,2)+' USDX with up to '+fmt(sendMax,2)+' '+nm,'act');
       const h=await submit({TransactionType:'Payment',Account:w.address,Destination:w.address,Amount:{...uAsset(),value:du.toFixed(6)},SendMax:otherAmt(kind,sendMax),Memos:[memo('USDX/PEG',{v:1,side:'buy',usdx:du,price,pool:kind})]},w);
       const b=await submit({TransactionType:'Payment',Account:w.address,Destination:S.cfg.uIss,Amount:{...uAsset(),value:du.toFixed(6)},Memos:[memo('USDX/PEGBURN',{v:1,usdx:du})]},w);
       K.log.shift(); klog('Bought and retired '+fmt(du,2)+' USDX','Was $'+price.toFixed(4)+' · buy '+h.slice(0,8)+'… · retire '+b.slice(0,8)+'…');
@@ -1004,11 +1019,22 @@ async function pegStep(manual){
       const full=ru2-pool.ru; const dux=Math.min(full,pool.ru*cap); if(dux<1) return;
       const out=(pool.ro-ro2)*(dux/full)*(1-slip), sendMax=dux/(1-pool.fee)*(1+slip);
       if(usdxInv<sendMax) throw new Error(`USDX is above $1 but the treasury holds ${fmt(usdxInv,2)} USDX and needs ${fmt(sendMax,2)}. Use Burn & mint to stock it.`);
-      klog('USDX above $1','Selling up to '+fmt(sendMax,2)+' USDX for '+fmt(out,2)+' '+nm,'act');
+      klog('USDX above $1 · '+PAIRS[kind].label,'Selling up to '+fmt(sendMax,2)+' USDX for '+fmt(out,2)+' '+nm,'act');
       const h=await submit({TransactionType:'Payment',Account:w.address,Destination:w.address,Amount:otherAmt(kind,out),SendMax:{...uAsset(),value:sendMax.toFixed(6)},Memos:[memo('USDX/PEG',{v:1,side:'sell',usdx:dux,price,pool:kind})]},w);
       K.log.shift(); klog('Sold USDX into the pool','Was $'+price.toFixed(4)+' · '+h.slice(0,8)+'…');
     }
-  }catch(e){ if(K.log[0]&&K.log[0].s==='act') K.log.shift(); klog('Keeper',e.message||String(e),'err'); }
+  }catch(e){ if(K.log[0]&&K.log[0].s==='act') K.log.shift(); klog('Keeper · '+PAIRS[kind].label,e.message||String(e),'err'); }
+}
+// the keeper defends BOTH pools every cycle, the one furthest from $1.00 first
+async function pegStep(manual){
+  if(K.busy||!S.w.recv||!cfgReady()) { if(manual&&!S.w.recv) openWallet('recv'); return; }
+  K.busy=true;
+  try{
+    await getPrice();
+    const kinds=['bonsai','xrp'], pools=await Promise.all(kinds.map(k=>poolInfo(k).catch(()=>null)));
+    const order=kinds.map((k,i)=>({k,d:pools[i]?Math.abs(pools[i].ro/pools[i].ru*unitUsd(k)-1):-1})).sort((a,b)=>b.d-a.d);
+    for(const o of order) await pegOne(o.k,manual);
+  }catch(e){ klog('Keeper',e.message||String(e),'err'); }
   K.busy=false; refreshAll();
 }
 async function prepReceiver(){
@@ -1052,6 +1078,56 @@ $('#coverBtn').onclick=coverFlow; $('#tmBtn').onclick=treasuryMint; $('#kNow').o
 $('#aCreate').onclick=()=>poolAction('create'); $('#aDeposit').onclick=()=>poolAction('deposit'); $('#aWithdraw').onclick=()=>poolAction('withdraw');
 $('#kPool').onchange=()=>renderPeg().catch(()=>{}); $('#prepRecv').onclick=prepReceiver; $('#verifyBtn').onclick=verifySetup;
 setInterval(()=>{ if($('#kOn').checked&&S.w.recv&&!S.busy) keeperStep(false); },30000);
+
+
+/* ---------- peg monitor: watches both pools on its own timer, with or without a key loaded ---------- */
+const MON={hist:[],last:0,busy:false,err:null};
+try{ MON.hist=JSON.parse(localStorage.getItem('usdx-peghist')||'[]'); }catch(e){}
+const FLOOR=0.99, TITLE0=document.title;
+function spark(kind){
+  const pts=MON.hist.filter(h=>h[kind]!=null).slice(-80); if(pts.length<2) return '<div class="s" style="color:var(--mute);font-size:12px">Collecting history…</div>';
+  const lo=Math.min(0.985,...pts.map(h=>h[kind])), hi=Math.max(1.015,...pts.map(h=>h[kind])), W=260, H=54, y=v=>H-(v-lo)/(hi-lo)*H, x=i=>i/(pts.length-1)*W;
+  const path=pts.map((h,i)=>(i?'L':'M')+x(i).toFixed(1)+' '+y(h[kind]).toFixed(1)).join('');
+  return `<svg viewBox="0 0 ${W} ${H}" width="100%" height="54" preserveAspectRatio="none" role="img" aria-label="USDX price history in the ${PAIRS[kind].label} pool"><line x1="0" x2="${W}" y1="${y(1)}" y2="${y(1)}" stroke="var(--jade,#3fbf8f)" stroke-opacity=".45" stroke-dasharray="3 4"/><line x1="0" x2="${W}" y1="${y(FLOOR)}" y2="${y(FLOOR)}" stroke="#d9694a" stroke-opacity=".6" stroke-dasharray="2 3"/><path d="${path}" fill="none" stroke="var(--brass,#d9b66c)" stroke-width="1.6" vector-effect="non-scaling-stroke"/></svg>`;
+}
+function renderMonitor(){
+  const box=$('#monRows'); if(!box) return;
+  const tol=(+$('#kTol').value||50)/1e4, last=MON.hist[MON.hist.length-1], bad=[];
+  box.innerHTML=['bonsai','xrp'].map(k=>{
+    const v=last?last[k]:null, p=S.pools&&S.pools[k];
+    let st,cls;
+    if(!p||v==null){ st='No pool yet'; cls='brass'; }
+    else if(v<FLOOR){ st='BELOW THE $0.99 FLOOR'; cls='brass'; bad.push(`${PAIRS[k].label} is $${v.toFixed(4)}, below the $0.99 floor`); }
+    else if(Math.abs(v-1)>tol){ st=(v>1?'Above':'Below')+' the band, keeper will '+(v>1?'sell USDX into the pool':'buy back USDX'); cls='brass'; if(Math.abs(v-1)>0.01) bad.push(`${PAIRS[k].label} is $${v.toFixed(4)}`); }
+    else { st='In band'; cls='jade'; }
+    const dev=v==null?'':((v-1)*1e4).toFixed(0)+' bps';
+    const tvl=p&&S.px?p.ro*unitUsd(k)+p.ru:null;
+    return `<div class="leg"><div class="u">${PAIRS[k].label}</div>
+      <div class="row" style="justify-content:space-between;align-items:baseline"><b class="mono ${cls}" style="font-size:26px">${v==null?'—':'$'+v.toFixed(4)}</b><span class="s mono" style="color:var(--mute)">${dev}</span></div>
+      <div class="s ${cls}" style="margin:2px 0 8px">${st}</div>${spark(k)}
+      <div class="row" style="justify-content:space-between;margin-top:6px"><span style="color:var(--mute)">Pool value</span><b class="mono">${tvl==null?'—':'$'+fmt(tvl,2)}</b></div>
+      ${tvl!=null&&tvl<200?'<div class="s brass" style="font-size:12px">Shallow pool: small trades will move the price a lot.</div>':''}</div>`;
+  }).join('');
+  const cv=coverage(); if(cv&&cv.shortBonsai>1e-6) bad.push(`USDX is under-covered by $${fmt(cv.shortUsd,2)}, burn the shortfall`);
+  const age=last?(Date.now()-last.t)/1000:null; if(MON.err) bad.push('Monitor error: '+MON.err); else if(age!=null&&age>120) bad.push('Price check is stale ('+Math.round(age)+' s old)');
+  $('#monAlert').innerHTML=bad.length?`<div class="note err-note">${bad.join('<br>')}</div>`:'';
+  const armed=!!S.w.recv;
+  $('#monMeta').textContent=(last?'Last check '+new Date(last.t).toLocaleTimeString()+' · ':'Waiting for the first check · ')+'peg band ±'+(tol*1e4).toFixed(0)+' bps · floor $0.99 · '+(armed&&$('#kOn').checked?'keeper armed, will rebalance both pools':'keeper NOT armed: load the receiver key and tick auto-rebalance, or run the Node keeper, otherwise prices are only watched');
+  const worst=last?['bonsai','xrp'].map(k=>last[k]).filter(v=>v!=null).reduce((a,v)=>Math.abs(v-1)>Math.abs(a-1)?v:a,1):1;
+  document.title = (worst<FLOOR||Math.abs(worst-1)>0.01)? '⚠ USDX $'+worst.toFixed(4)+' · '+TITLE0 : TITLE0;
+}
+async function monitorStep(){
+  if(MON.busy||!cfgReady()) return; MON.busy=true;
+  try{
+    await getPrice(); const row={t:Date.now()}; S.pools=S.pools||{};
+    for(const k of ['bonsai','xrp']){ const p=await poolInfo(k); S.pools[k]=p; row[k]=p&&p.ru>0?p.ro/p.ru*unitUsd(k):null; }
+    MON.hist.push(row); MON.hist=MON.hist.slice(-240); MON.err=null;
+    try{ localStorage.setItem('usdx-peghist',JSON.stringify(MON.hist.slice(-120))); }catch(e){}
+  }catch(e){ MON.err=e.message; }
+  MON.busy=false; renderMonitor();
+}
+setInterval(()=>monitorStep(),30000);
+setInterval(renderMonitor,15000);
 
 /* ---------- BONSAI supply and burn tracking ---------- */
 const BS={rows:[],seen:new Set(),marker:undefined,done:false,init:false,busy:false};
@@ -1182,7 +1258,7 @@ $('#pdKind').onchange=renderPoolRows; $('#pdRefresh').onclick=renderPoolData;
 /* ---------- genesis mint, DEX quotes, one-sided pool actions ---------- */
 const genesisDone=()=> (S.supply.u||0)>0 || (S.ledger&&S.ledger.mints.some(m=>String(m.dep).startsWith('GENESIS')));
 function genesisNeed(){ const u=parseFloat($('#gAmt').value); if(!(u>0)||!S.px) return null; return Math.ceil(u*ratio()/100/S.px.usd*1e6)/1e6; }
-function renderGenesis(){
+function renderGenesis(){ renderLaunch();
   const done=genesisDone();
   $('#gForm').style.display=done?'none':'';
   $('#gState').textContent=done?'Genesis complete. USDX exists, so the app now tracks supply and mints only against BONSAI burns.':'USDX has not been minted yet.';
@@ -1202,6 +1278,43 @@ async function genesisMint(){
     const bh=await submit({TransactionType:'Payment',Account:S.cfg.recv,Destination:S.cfg.bIss,Amount:{...bAsset(),value:need2.toFixed(6)},Memos:[memo('USDX/BURN',{v:1,dep,bonsai:need2,genesis:true})]},S.w.recv);
     const mh=await submit({TransactionType:'Payment',Account:S.cfg.uIss,Destination:S.cfg.recv,Amount:{...uAsset(),value:u.toFixed(6)},Memos:[memo('USDX/RECEIPT',{v:1,dep,burn:bh,bonsai:need2,rateUsd:px.usd,ratio:ratio(),usdx:u,genesis:true})]},S.w.iss);
     toast('Genesis minted '+fmt(u,2)+' USDX · '+mh.slice(0,10)+'…'); refreshAll();
+  }catch(e){ toast(e.message); }
+}
+async function launchNeed(){
+  const bu=parseFloat($('#lBU').value)||0, xu=parseFloat($('#lXU').value)||0; if(!S.px) return {bu,xu,b:null,x:null};
+  return {bu,xu,b:bu/unitUsd('bonsai'),x:xu/unitUsd('xrp')};
+}
+async function renderLaunch(){
+  if(!$('#lState')) return;
+  try{
+    const [pb,px]=await Promise.all([poolInfo('bonsai').catch(()=>null),poolInfo('xrp').catch(()=>null)]);
+    const have=k=>k?'<b class="jade">live</b>':'<b class="brass">not created</b>';
+    $('#lState').innerHTML='BONSAI/USDX pool: '+have(pb)+' &nbsp;·&nbsp; XRP/USDX pool: '+have(px);
+    $('#lForm').style.display=(pb&&px)?'none':'';
+    const n=await launchNeed();
+    $('#lNeed').textContent=n.b==null?'—':[(!pb&&n.bu>0?fmt(n.b,2)+' BONSAI':''),(!px&&n.xu>0?fmt(n.x,2)+' XRP':'')].filter(Boolean).join(' + ')||'—';
+  }catch(e){}
+}
+async function launchPools(){
+  const w=S.w.recv; if(!w) return openWallet('recv');
+  try{
+    if(!genesisDone()) return toast('Run the genesis mint first, so the receiver holds USDX.');
+    await getPrice();
+    const [pb,px]=await Promise.all([poolInfo('bonsai'),poolInfo('xrp')]), n=await launchNeed();
+    const plan=[]; if(!pb&&n.bu>0) plan.push(['bonsai',n.bu,n.b]); if(!px&&n.xu>0) plan.push(['xrp',n.xu,n.x]);
+    if(!plan.length) return toast(pb&&px?'Both pools already exist.':'Enter a USDX amount for each pool you want to create.');
+    const rl=await lines(w.address), xb=(await xrpBal(w.address))||0, bal=a=>Number((rl.find(z=>cc(z.currency)===cc(a.currency)&&z.account===a.issuer)||{balance:0}).balance);
+    const needU=plan.reduce((a,x)=>a+x[1],0), needB=plan.filter(x=>x[0]==='bonsai').reduce((a,x)=>a+x[2],0), needX=plan.filter(x=>x[0]==='xrp').reduce((a,x)=>a+x[2],0);
+    if(bal(uAsset())<needU) return toast(`The receiver holds ${fmt(bal(uAsset()),2)} USDX and needs ${fmt(needU,2)}.`);
+    if(bal(bAsset())<needB) return toast(`The receiver holds ${fmt(bal(bAsset()),2)} BONSAI and needs ${fmt(needB,2)}. Note that BONSAI used for the genesis burn is gone.`);
+    if(xb-needX<8) return toast(`The receiver holds ${fmt(xb,2)} XRP. It needs ${fmt(needX,2)} for the pool plus about 8 XRP for the pool creation fee and reserves.`);
+    const list=plan.map(([k,u,o])=>`<div>${PAIRS[k].label}: <b class="mono">${fmt(u,2)} USDX</b> + <b class="mono">${fmt(o,k==='xrp'?4:2)} ${PAIRS[k].name}</b></div>`).join('');
+    if(!await confirmBox(`<div>Create these pools from the receiver wallet at USDX = $1.00:</div>${list}<div class="note">Each pool creation costs a network fee of about one owner reserve in XRP. Pools open at the live price, so a stale price means a pool that needs re-pegging.</div>`)) return;
+    for(const [k,u,o] of plan){
+      const hash=await submit({TransactionType:'AMMCreate',Account:w.address,Amount:otherAmt(k,o),Amount2:{...uAsset(),value:u.toFixed(6)},TradingFee:300,Memos:[memo('USDX/PEG',{v:1,launch:true,pool:k,usdx:u,other:o})]},w);
+      toast(PAIRS[k].label+' pool created · '+hash.slice(0,10)+'…');
+    }
+    refreshAll();
   }catch(e){ toast(e.message); }
 }
 function offerSide(o,kind){
@@ -1291,7 +1404,7 @@ async function poolAction(act){
     toast('Done'); refreshAll();
   }catch(e){ toast(e.message); }
 }
-$('#gBtn').onclick=genesisMint; $('#gAmt').oninput=renderGenesis; $('#dCancel').onclick=cancelQuotes;
+$('#gBtn').onclick=genesisMint; $('#lBtn').onclick=launchPools; $('#lBU').oninput=renderLaunch; $('#lXU').oninput=renderLaunch; $('#gAmt').oninput=renderGenesis; $('#dCancel').onclick=cancelQuotes;
 $('#aActor').onchange=renderActor; $('#aKind').onchange=renderActor;
 
 /* ---------- operator keys: encrypted on this device (AES-GCM, key derived from your passphrase) ---------- */
@@ -1337,7 +1450,7 @@ $('#saveCfg').onclick=async()=>{
 };
 (async function init(){
   if(!window.xrpl){ document.body.insertAdjacentHTML('afterbegin','<div class="note" style="position:fixed;top:10px;left:270px;z-index:99">The xrpl.js library could not load. Check your connection and reload.</div>'); return; }
-  await loadFileCfg(); await refreshAll(); setInterval(()=>{ if(!S.busy&&!document.hidden) refreshAll(); },120000);
+  await loadFileCfg(); await refreshAll(); monitorStep(); setInterval(()=>{ if(!S.busy&&!document.hidden) refreshAll(); },120000);
 })();
 </script>
 </body>

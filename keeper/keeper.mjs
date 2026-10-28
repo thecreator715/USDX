@@ -18,7 +18,8 @@ for (const f of [new URL('./.env', import.meta.url), new URL('../.env', import.m
 const E = process.env, LIVE = E.LIVE === '1';
 const K = {
   band: (+E.BAND_BPS || 50) / 1e4, maxPct: (+E.MAX_TRADE_PCT || 20) / 100, slip: (+E.SLIP_BPS || 100) / 1e4,
-  every: (+E.INTERVAL_SEC || 30) * 1000, pool: E.PEG_POOL || 'bonsai',
+  every: (+E.INTERVAL_SEC || 30) * 1000, pool: E.DEX_POOL || E.PEG_POOL_PRIMARY || 'bonsai', pegPools: (!E.PEG_POOL || E.PEG_POOL === 'both') ? ['bonsai', 'xrp'] : [E.PEG_POOL],
+  hook: E.ALERT_WEBHOOK || '', floor: +E.PEG_FLOOR || 0.99,
   dexSize: +E.DEX_SIZE_USD || 500, dexSp: (+E.DEX_SPREAD_BPS || 30) / 1e4, ratio: +C.collateralRatioPercent || 100,
 };
 const log = (...a) => console.log(new Date().toISOString(), ...a);
@@ -93,10 +94,17 @@ async function poolInfo(kind) {
   } catch { return null; }
 }
 
-async function pegStep(px) {
-  const kind = K.pool, uu = kind === 'xrp' ? px.xrpUsd : px.bonsaiUsd, pool = await poolInfo(kind);
+const lastAlert = {};
+// log loudly and, if ALERT_WEBHOOK is set (Slack/Discord style {content}), post it. Same message is throttled to once per 15 min.
+async function alert(msg) {
+  log('ALERT:', msg); const now = Date.now(); if (lastAlert[msg] && now - lastAlert[msg] < 900000) return; lastAlert[msg] = now;
+  if (K.hook) { try { await fetch(K.hook, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ content: 'USDX Treasury: ' + msg, text: 'USDX Treasury: ' + msg }) }); } catch (e) { log('webhook failed:', e.message); } }
+}
+async function pegStep(px, kind) {
+  const uu = kind === 'xrp' ? px.xrpUsd : px.bonsaiUsd, pool = await poolInfo(kind);
   if (!pool) return log(`no ${kind}/USDX pool yet`);
-  const price = pool.ro / pool.ru * uu; log(`USDX = $${price.toFixed(5)} in the ${kind} pool`);
+  const price = pool.ro / pool.ru * uu; log(`USDX = $${price.toFixed(5)} in the ${kind} pool (${((price - 1) * 1e4).toFixed(0)} bps)`);
+  if (price < K.floor) await alert(`USDX is $${price.toFixed(4)} in the ${kind}/USDX pool, below the $${K.floor} floor`);
   if (Math.abs(price - 1) <= K.band) return;
   const pStar = 1 / uu, k = pool.ro * pool.ru, ru2 = Math.sqrt(k / pStar), ro2 = Math.sqrt(k * pStar);
   const cap = price < 0.99 ? Math.min(0.5, K.maxPct * 2) : K.maxPct, ls = await lines(recv.address);
@@ -162,9 +170,9 @@ async function processDeposits(px) {
 async function cycle() {
   const px = await prices(); log(`BONSAI $${px.bonsaiUsd.toPrecision(6)} · XRP $${px.xrpUsd.toFixed(4)}`);
   await processDeposits(px).catch(e => log('processor:', e.message));
-  await pegStep(px).catch(e => log('peg:', e.message));
+  for (const kind of K.pegPools) await pegStep(px, kind).catch(async e => { log(`peg ${kind}:`, e.message); await alert(`peg defence failed in the ${kind} pool: ${e.message}`); });
   await dexStep(px).catch(e => log('dex:', e.message));
 }
 log(LIVE ? 'LIVE mode: transactions will be submitted' : 'DRY RUN: nothing is submitted. Set LIVE=1 to trade.');
-log(`receiver ${RECV}${iss ? ' · issuer key loaded, deposits will be processed' : ' · no issuer key, deposits are not processed'} · peg pool ${K.pool}`);
+log(`receiver ${RECV}${iss ? ' · issuer key loaded, deposits will be processed' : ' · no issuer key, deposits are not processed'} · defending pools ${K.pegPools.join(' + ')} · DEX quotes in ${K.pool}`);
 for (;;) { try { await cycle(); } catch (e) { log('cycle error:', e.message); } await new Promise(r => setTimeout(r, K.every)); }
