@@ -160,7 +160,7 @@ async function pegStep(px, kind, depth = 0) {
   const uu = kind === 'xrp' ? px.xrpUsd : px.bonsaiUsd, pool = await poolInfo(kind), nm = kind === 'xrp' ? 'XRP' : 'BONSAI';
   if (!pool) return log(`no ${kind}/USDX pool yet`);
   const price = pool.ro / pool.ru * uu;
-  log(`${kind}/USDX pool: USDX $${price.toFixed(5)} (${((price - 1) * 1e4).toFixed(0)} bps) · reserves ${pool.ro.toFixed(2)} ${nm} / ${pool.ru.toFixed(2)} USDX`);
+  if (OFFBAND || Math.abs(price - 1) > K.band || Date.now() - (pegStep.last || 0) > 60000) { pegStep.last = Date.now(); log(`${kind}/USDX pool: USDX $${price.toFixed(5)} (${((price - 1) * 1e4).toFixed(0)} bps) · reserves ${pool.ro.toFixed(2)} ${nm} / ${pool.ru.toFixed(2)} USDX`); }
   if (price < K.floor) await alert(`USDX is $${price.toFixed(4)} in the ${kind}/USDX pool, below the $${K.floor} floor`);
   if (Math.abs(price - 1) <= K.band) return 'ok';
   OFFBAND = true;
@@ -249,6 +249,11 @@ async function dexFail(side, e) {
 }
 async function dexStep(px) {
   if (K.dexPause && Date.now() < K.dexPause) return;
+  try {   // skip quoting (and its failing, fee-wasting offers) while the receiver has no XRP above its reserve
+    const ai = (await req({ command: 'account_info', account: recv.address, ledger_index: 'current' })).account_data, si = (await req({ command: 'server_info' })).info.validated_ledger || {};
+    const need = (si.reserve_base_xrp || 1) + (si.reserve_inc_xrp || 0.2) * (ai.OwnerCount + 2);
+    if (Number(ai.Balance) / 1e6 < need) { K.dexPause = Date.now() + 10 * 60000; return log(`DEX quotes skipped: receiver has ${(Number(ai.Balance) / 1e6).toFixed(2)} XRP, needs ${need.toFixed(2)} XRP to hold another offer. Add XRP to the receiver.`); }
+  } catch {}
   const kind = K.pool, uu = kind === 'xrp' ? px.xrpUsd : px.bonsaiUsd, sellP = (1 + K.dexSp) / uu, buyP = (1 - K.dexSp) / uu, size = K.dexSize;
   const ls = await lines(recv.address), usdxInv = bal(ls, USDX), otherInv = kind === 'xrp' ? (await xrpBal(recv.address)) - 5 : bal(ls, BONSAI);
   const offers = (await req({ command: 'account_offers', account: recv.address, limit: 200 })).offers || [], keep = { sell: false, buy: false };
@@ -404,7 +409,19 @@ async function cycle() {
 }
 log(LIVE ? 'LIVE mode: transactions will be submitted' : 'DRY RUN: nothing is submitted. Set LIVE=1 to trade.');
 log(`receiver ${RECV}${iss ? ' · issuer key loaded, deposits will be processed' : ' · no issuer key, deposits are not processed'} · defending pools ${K.pegPools.join(' + ')} · DEX quotes in ${K.pool}`);
+// Main loop. The peg is checked every few seconds (and every 2 s while a pool is off the peg); deposits, yield and DEX quotes are heavier on the public
+// servers' rate limit, so they run once a minute and never while a correction is under way.
+const POLL = (+E.PEG_POLL_SEC || 8) * 1000, HEAVY = (+E.HEAVY_SEC || 60) * 1000; let lastHeavy = 0;
 for (;;) {
-  try { if (OFFBAND) { const px = await prices(); await repeg(px); } else await cycle(); } catch (e) { log('cycle error:', e.message); }
-  await new Promise(r => setTimeout(r, OFFBAND ? 4000 : K.every));   // off the peg: re-check every 4 s without the heavy history reads
+  try {
+    const px = await prices(), heavy = !OFFBAND && Date.now() - lastHeavy >= HEAVY;
+    if (heavy) {
+      lastHeavy = Date.now(); log(`BONSAI $${px.bonsaiUsd.toFixed(10)} (${px.how}) · XRP $${px.xrpUsd.toFixed(4)}`);
+      await processDeposits(px).catch(e => log('processor:', e.message));
+      await yieldStep(px).catch(e => log('yield:', e.message));
+    }
+    await repeg(px);
+    if (heavy && !OFFBAND) await dexStep(px).catch(e => log('dex:', e.message));
+  } catch (e) { log('cycle error:', e.message); }
+  await new Promise(r => setTimeout(r, OFFBAND ? 2000 : POLL));
 }

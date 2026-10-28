@@ -20,44 +20,35 @@ permissions:
 jobs:
   keep:
     runs-on: ubuntu-latest
-    timeout-minutes: 7
+    timeout-minutes: 26
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 20
+      - name: Queue the next run now, so it starts the moment this one ends
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run keeper.yml --repo "$GITHUB_REPOSITORY" --ref "${{ github.ref_name }}" || true
       - name: Install
         working-directory: keeper
         run: npm ci --omit=dev
-      - name: Run keeper (about 4.5 minutes, then the next run takes over)
+      - name: Run keeper (20 minutes; the log is published every 30 seconds)
         working-directory: keeper
         env:
           RECEIVER_SEED: ${{ secrets.RECEIVER_SEED || secrets.RECIEVER || secrets.RECEIVER }}
           ISSUER_SEED: ${{ secrets.ISSUER_SEED || secrets.ISSUER }}
           ALERT_WEBHOOK: ${{ secrets.ALERT_WEBHOOK }}
+          GH_TOKEN: ${{ github.token }}
           LIVE: '1'
-          INTERVAL_SEC: '30'
         run: |
           set +e
-          timeout 270 node keeper.mjs 2>&1 | tee run.log
-          rc=${PIPESTATUS[0]}
-          [ $rc -eq 0 ] || [ $rc -eq 124 ]
-      - name: Publish the run log (branch keeper-log, secrets scrubbed)
-        if: always()
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          set +e
-          URL="https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
-          rm -rf /tmp/kl
-          git clone -q --depth 1 -b keeper-log "$URL" /tmp/kl 2>/dev/null || { mkdir /tmp/kl && cd /tmp/kl && git init -q -b keeper-log; }
-          cd /tmp/kl && git config user.name github-actions && git config user.email actions@users.noreply.github.com
-          touch last-run.log
-          { cat last-run.log; echo "--- run $GITHUB_RUN_ID $(date -u +%FT%TZ) ---"; grep -v '^    at ' "$GITHUB_WORKSPACE/keeper/run.log" | sed -E 's/s[A-Za-z0-9]{24,}/[hidden]/g' | cut -c1-400; } | tail -n 900 > next.log
-          mv next.log last-run.log
-          git add -A && git commit -qm "keeper run $GITHUB_RUN_ID" && git push -qf "$URL" keeper-log || true
-      - name: Start the next run (keeps the keeper going even when GitHub delays the schedule)
-        if: always()
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: gh workflow run keeper.yml --repo "$GITHUB_REPOSITORY" --ref "${{ github.ref_name }}" || true
+          timeout 1200 node keeper.mjs > run.log 2>&1 &
+          PID=$!
+          while kill -0 $PID 2>/dev/null; do
+            sleep 30
+            bash "$GITHUB_WORKSPACE/.github/scripts/publish-log.sh" "$PWD/run.log"
+          done
+          wait $PID
+          bash "$GITHUB_WORKSPACE/.github/scripts/publish-log.sh" "$PWD/run.log"
+          exit 0
