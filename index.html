@@ -101,6 +101,35 @@ td{padding:11px 10px;border-bottom:1px solid #132a20;font-size:13px;white-space:
 .bar{height:8px;border-radius:99px;background:var(--bg2);overflow:hidden;border:1px solid var(--line)}
 .bar i{display:block;height:100%;background:linear-gradient(90deg,var(--jade-d),var(--brass))}
 .toast{position:fixed;right:20px;bottom:20px;background:var(--panel2);border:1px solid var(--brass);border-radius:12px;padding:12px 16px;z-index:60;max-width:380px;display:none}
+/* home */
+.hero{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,.8fr);gap:28px;align-items:center;padding:34px;border:1px solid var(--line);border-radius:26px;background:radial-gradient(700px 320px at 85% 40%,rgba(79,209,161,.12),transparent 70%),linear-gradient(180deg,#0e2018,#091510)}
+.hero h2{margin:8px 0 16px;font:400 clamp(34px,5vw,58px)/1.05 var(--display);text-wrap:balance}
+.hero h2 em{color:var(--brass);font-style:italic}
+.hero p{color:var(--mute);font-size:16px;max-width:54ch;margin:0 0 22px}
+.kicker{color:var(--brass);letter-spacing:.24em;text-transform:uppercase;font-size:11px;font-weight:700}
+.hero-art{max-width:320px;justify-self:center;width:100%}
+.sect{margin-top:14px}.sect h2{margin:6px 0 0;font:400 30px/1.15 var(--display);text-wrap:balance}
+.steps4 .card{position:relative}
+.steps4 h4{margin:16px 0 8px;font:600 18px var(--display)}
+.steps4 p,.wl{margin:0;color:var(--mute)}
+.num{width:36px;height:36px;border-radius:50%;border:1px solid var(--brass);display:grid;place-items:center;color:var(--brass);font:600 15px var(--mono)}
+.lead{margin:0;font:400 20px/1.4 var(--display)}
+.formula{background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:14px 16px;color:var(--jade);font-size:13px;overflow-wrap:anywhere}
+.band{position:relative;height:64px;margin:6px 6px 22px}
+.band .floor{position:absolute;left:0;right:0;top:50%;border-top:1px dashed var(--line)}
+.band .bandbox{position:absolute;left:35%;right:35%;top:8px;bottom:8px;border:1px solid var(--jade);border-radius:10px;background:rgba(79,209,161,.12)}
+.band .tick{position:absolute;left:50%;top:0;bottom:0;border-left:2px solid var(--brass)}
+.bl{position:absolute;top:60px;font-size:12px;color:var(--mute)}.bl.l{left:0}.bl.c{left:50%;transform:translateX(-50%);color:var(--brass)}.bl.r{right:0}
+@media(max-width:800px){.hero{grid-template-columns:1fr;padding:22px}.hero-art{max-width:200px}}
+/* supply + burns */
+.stack{display:flex;height:22px;border-radius:99px;overflow:hidden;border:1px solid var(--line);background:var(--bg2)}
+.legend{display:flex;gap:18px;flex-wrap:wrap;margin-top:14px;font-size:12px;color:var(--mute)}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px}
+.days{display:flex;align-items:flex-end;gap:6px;height:130px}
+.days div{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:6px;height:100%}
+.days b{display:block;width:100%;border-radius:5px 5px 0 0;background:linear-gradient(180deg,var(--brass),var(--jade-d));min-height:2px}
+.days span{font-size:10px;color:var(--mute)}
+.kv{display:flex;justify-content:space-between;gap:12px;padding:7px 0;border-bottom:1px solid #132a20}.kv span{color:var(--mute)}.kv b{text-align:right;overflow-wrap:anywhere}
 </style>
 </head>
 <body>
@@ -110,10 +139,13 @@ td{padding:11px 10px;border-bottom:1px solid #132a20;font-size:13px;white-space:
     <div><b>USDX Treasury</b><small>on the XRP Ledger</small></div>
   </div>
   <nav id="nav">
-    <button data-p="overview" class="on"><svg viewBox="0 0 24 24"><path d="M4 13h6V4H4zM14 20h6V4h-6zM4 20h6v-3H4z"/></svg><span>Overview</span></button>
+    <button data-p="home" class="on"><svg viewBox="0 0 24 24"><path d="M4 11l8-7 8 7v9h-5v-6H9v6H4z"/></svg><span>Home</span></button>
+    <button data-p="overview"><svg viewBox="0 0 24 24"><path d="M4 13h6V4H4zM14 20h6V4h-6zM4 20h6v-3H4z"/></svg><span>Dashboard</span></button>
     <button data-p="forge"><svg viewBox="0 0 24 24"><path d="M12 3c1 4 5 5 5 10a5 5 0 0 1-10 0c0-2 1-3 2-4 0 2 1 3 2 3 0-3-1-5 1-9Z"/></svg><span>Burn &amp; Mint</span></button>
-    <button data-p="ledger"><svg viewBox="0 0 24 24"><path d="M5 4h14v16H5zM9 9h6M9 13h6M9 17h3"/></svg><span>Treasury Ledger</span></button>
+    <button data-p="burns"><svg viewBox="0 0 24 24"><path d="M12 3v12m0 0l-4-4m4 4l4-4M5 20h14"/></svg><span>Supply &amp; Burns</span></button>
     <button data-p="peg"><svg viewBox="0 0 24 24"><path d="M3 12h18M3 8h18M3 16h18" stroke-dasharray="2 3"/><path d="M12 4v16"/></svg><span>Peg &amp; Pools</span></button>
+    <button data-p="pools"><svg viewBox="0 0 24 24"><circle cx="9" cy="12" r="6"/><circle cx="15" cy="12" r="6"/></svg><span>Pool Data</span></button>
+    <button data-p="ledger"><svg viewBox="0 0 24 24"><path d="M5 4h14v16H5zM9 9h6M9 13h6M9 17h3"/></svg><span>Treasury Ledger</span></button>
     <button data-p="operator"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/></svg><span>Operator</span></button>
     <button data-p="wallets"><svg viewBox="0 0 24 24"><path d="M3 7h16a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2zM3 7l12-3v3M17 14h2"/></svg><span>Wallets</span></button>
     <button data-p="settings"><svg viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg><span>Settings</span></button>
@@ -134,8 +166,76 @@ td{padding:11px 10px;border-bottom:1px solid #132a20;font-size:13px;white-space:
   </div>
   <div class="wrap">
 
+  <!-- HOME -->
+  <section class="page on" id="p-home">
+    <div class="hero">
+      <div class="hero-copy">
+        <div class="kicker">XRP Ledger · Mainnet</div>
+        <h2>A dollar,<br><em>backed by burned BONSAI.</em></h2>
+        <p>USDX is a USD stablecoin that exists only because BONSAI was destroyed for it. Burn BONSAI, receive the same dollar value in USDX, and watch every step on the public ledger. A pool-trading keeper holds the price at $1.00.</p>
+        <div class="row"><button class="btn brass" data-go="forge">Burn BONSAI</button><button class="btn ghost" data-go="burns">See the burn record</button></div>
+      </div>
+      <div class="hero-art" aria-hidden="true">
+        <svg viewBox="0 0 320 320" width="100%"><defs><radialGradient id="hg" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#e0b867" stop-opacity=".35"/><stop offset="1" stop-color="#e0b867" stop-opacity="0"/></radialGradient></defs>
+          <circle cx="160" cy="160" r="150" fill="url(#hg)"/>
+          <circle cx="160" cy="160" r="118" fill="none" stroke="#1d3a2e" stroke-width="1.5"/><circle cx="160" cy="160" r="86" fill="none" stroke="#2a8f6d" stroke-width="1.5" stroke-dasharray="3 7"/><circle cx="160" cy="160" r="54" fill="none" stroke="#e0b867" stroke-width="1.5"/>
+          <path d="M160 214v-62m0 0c0-26 20-40 46-40-5 26-20 40-46 40Zm0 20c0-20-15-30-36-30 3 20 15 30 36 30Z" fill="none" stroke="#4fd1a1" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M122 214h76" stroke="#e0b867" stroke-width="3" stroke-linecap="round"/>
+          <text x="160" y="258" text-anchor="middle" fill="#e0b867" font-family="Fraunces,serif" font-size="22" letter-spacing="3">$1.00</text></svg>
+      </div>
+    </div>
+    <div class="grid g4">
+      <div class="card stat"><h3>USDX in circulation</h3><div class="v jade mono" id="hUsdx">—</div><div class="s">Read from the issuer wallet</div></div>
+      <div class="card stat"><h3>BONSAI burned</h3><div class="v brass mono" id="hBurned">—</div><div class="s">Everything sent to the BONSAI issuer</div></div>
+      <div class="card stat"><h3>USDX price</h3><div class="v mono" id="hPrice">—</div><div class="s">From the AMM pool</div></div>
+      <div class="card stat"><h3>Backing</h3><div class="v mono" id="hBack">—</div><div class="s">Burned value ÷ USDX outstanding</div></div>
+    </div>
+
+    <div class="sect"><div class="kicker">The process</div><h2>From BONSAI to a dollar in four moves</h2></div>
+    <div class="grid g4 steps4">
+      <div class="card"><div class="num">1</div><h4>Send BONSAI</h4><p>You pay BONSAI to the receiver wallet. A memo marks the payment as a USDX mint request.</p></div>
+      <div class="card"><div class="num">2</div><h4>It is burned</h4><p>The receiver returns that BONSAI to its issuer. On XRPL, tokens sent back to the issuer stop existing, so BONSAI supply falls.</p></div>
+      <div class="card"><div class="num">3</div><h4>USDX is minted</h4><p>The USDX issuer pays you USDX worth the burned BONSAI at its market price. The receipt memo links to the burn.</p></div>
+      <div class="card"><div class="num">4</div><h4>The peg is held</h4><p>The keeper trades the USDX pools whenever the price drifts from $1.00 and never lets it rest below $0.99.</p></div>
+    </div>
+
+    <div class="grid g2">
+      <div class="card col">
+        <h3>The backing rule</h3>
+        <p class="lead">Every USDX outstanding must be matched by burned BONSAI worth the same dollars.</p>
+        <div class="formula mono">USDX minted = BONSAI burned × BONSAI price in USD</div>
+        <p style="margin:0;color:var(--mute)">Example: at $0.02 per BONSAI, burning 5,000 BONSAI mints 100 USDX. If BONSAI later falls in price, the coverage card shows the gap and one button burns the missing amount.</p>
+        <div><button class="btn ghost sm" data-go="peg">Open Peg &amp; Pools</button></div>
+      </div>
+      <div class="card col">
+        <h3>How the price stays at $1.00</h3>
+        <div class="band"><i class="floor"></i><i class="bandbox"></i><i class="tick"></i><span class="bl l mono">$0.99</span><span class="bl c mono">$1.00</span><span class="bl r mono">$1.01</span></div>
+        <p style="margin:0;color:var(--mute)"><b style="color:var(--fg)">Below $1:</b> the treasury buys USDX from the pool and sends it back to the issuer, which retires it.<br><b style="color:var(--fg)">Above $1:</b> the treasury sells its own USDX into the pool. Trades are sized with constant-product math and carry on-chain memos.</p>
+        <div><button class="btn ghost sm" data-go="pools">See live pool data</button></div>
+      </div>
+    </div>
+
+    <div class="sect"><div class="kicker">Where it is tracked</div><h2>Four wallets, all public</h2></div>
+    <div class="grid g4">
+      <div class="card"><h3>USDX issuer</h3><p class="wl">Mints USDX. Its obligations are the USDX supply.</p><div class="addr" id="hIss"></div></div>
+      <div class="card"><h3>USDX receiver</h3><p class="wl">Takes BONSAI deposits, burns them, and holds the pool inventory.</p><div class="addr" id="hRecv"></div></div>
+      <div class="card"><h3>BONSAI issuer · burn address</h3><p class="wl">Every BONSAI sent here is destroyed and recorded.</p><div class="addr" id="hBIss"></div></div>
+      <div class="card"><h3>BONSAI receiver</h3><p class="wl">Tracked for BONSAI holdings, inflows and burns.</p><div class="addr" id="hTrack"></div></div>
+    </div>
+
+    <div class="card">
+      <h3>Good to know</h3>
+      <div class="grid g2" style="gap:18px">
+        <div><b>Is the burn reversible?</b><p style="margin:4px 0 0;color:var(--mute)">No. Burned BONSAI is gone from supply for good.</p></div>
+        <div><b>What does it cost?</b><p style="margin:4px 0 0;color:var(--mute)">No treasury fee, only the tiny XRPL network fee per transaction.</p></div>
+        <div><b>Who can mint?</b><p style="margin:4px 0 0;color:var(--mute)">Anyone with BONSAI and a USDX trust line. The operator&rsquo;s processor signs the burn and mint.</p></div>
+        <div><b>Where are the keys?</b><p style="margin:4px 0 0;color:var(--mute)">Typed in at runtime, held in the tab&rsquo;s memory only, never saved or sent anywhere.</p></div>
+      </div>
+    </div>
+  </section>
+
   <!-- OVERVIEW -->
-  <section class="page on" id="p-overview">
+  <section class="page" id="p-overview">
     <div class="grid g4">
       <div class="card stat"><h3>USDX in circulation</h3><div class="v jade mono" id="sUsdx">—</div><div class="s">Issuer obligations on ledger</div></div>
       <div class="card stat"><h3>BONSAI supply</h3><div class="v mono" id="sBonsai">—</div><div class="s" id="sBonsaiSub">Issuer obligations on ledger</div></div>
@@ -200,6 +300,37 @@ td{padding:11px 10px;border-bottom:1px solid #132a20;font-size:13px;white-space:
         </div>
       </div>
     </div>
+  </section>
+
+  <!-- BURNS -->
+  <section class="page" id="p-burns">
+    <div class="grid g4">
+      <div class="card stat"><h3>BONSAI supply</h3><div class="v mono" id="bOut">—</div><div class="s">Outstanding at the issuer today</div></div>
+      <div class="card stat"><h3>Total burned</h3><div class="v brass mono" id="bTot">—</div><div class="s" id="bTotSub">Every payment into the issuer</div></div>
+      <div class="card stat"><h3>Burned for USDX</h3><div class="v mono" id="bTre">—</div><div class="s">By the USDX receiver</div></div>
+      <div class="card stat"><h3>Burned by others</h3><div class="v mono" id="bOth">—</div><div class="s">Holders and the BONSAI receiver</div></div>
+    </div>
+    <div class="card"><h3>Where the supply sits</h3>
+      <div class="stack" id="supplyBar"></div><div class="legend" id="supplyLegend"></div></div>
+    <div class="grid g2">
+      <div class="card"><h3>Top burners</h3><div class="tw"><table><thead><tr><th>Wallet</th><th>Burns</th><th>BONSAI</th></tr></thead><tbody id="topBurners"></tbody></table></div></div>
+      <div class="card"><h3>Burned per day · last 14 days</h3><div class="days" id="burnDays"></div></div>
+    </div>
+    <div class="card"><h3>Burn events · every BONSAI payment into the issuer</h3>
+      <div class="tw"><table><thead><tr><th>Time</th><th>From</th><th>Source</th><th>BONSAI</th><th>Tx</th></tr></thead><tbody id="burnRows"></tbody></table></div>
+      <div class="row" style="margin-top:14px"><button class="btn ghost sm" id="burnMore">Load older history</button><span class="s" id="burnMeta" style="color:var(--mute)"></span></div></div>
+    <div class="card"><h3>BONSAI receiver wallet</h3>
+      <div class="addr" id="trAddr"></div>
+      <div class="grid g4" style="margin:12px 0"><div><label>XRP</label><b class="mono" id="trXrp">—</b></div><div><label>BONSAI</label><b class="mono" id="trB">—</b></div><div><label>USDX</label><b class="mono" id="trU">—</b></div><div><label>BONSAI in · out (loaded)</label><b class="mono" id="trIO">—</b></div></div>
+      <div class="tw"><table><thead><tr><th>Time</th><th>Direction</th><th>Counterparty</th><th>BONSAI</th><th>Tx</th></tr></thead><tbody id="trRows"></tbody></table></div></div>
+  </section>
+
+  <!-- POOL DATA -->
+  <section class="page" id="p-pools">
+    <div class="grid g2" id="pdCards"></div>
+    <div class="card"><h3>Price impact · what a trade does to the pool</h3><div class="tw"><table><thead><tr><th>USDX traded</th><th>BONSAI/USDX sell</th><th>BONSAI/USDX buy</th><th>XRP/USDX sell</th><th>XRP/USDX buy</th></tr></thead><tbody id="impRows"></tbody></table></div><p class="s" style="color:var(--mute);font-size:12px;margin:10px 0 0">Impact is the gap between the average price you get and the pool&rsquo;s spot price, including the trading fee. Sell means you give the pool USDX.</p></div>
+    <div class="card"><div class="row" style="justify-content:space-between"><h3 style="margin:0">Recent pool activity</h3><div class="row"><select id="pdKind" style="width:auto"><option value="bonsai">BONSAI / USDX</option><option value="xrp">XRP / USDX</option></select><button class="btn ghost sm" id="pdRefresh">Refresh</button></div></div>
+      <div class="tw" style="margin-top:12px"><table><thead><tr><th>Time</th><th>Type</th><th>Wallet</th><th>Other asset</th><th>USDX</th><th>Tx</th></tr></thead><tbody id="pdRows"></tbody></table></div><div class="s" id="pdMeta" style="color:var(--mute);margin-top:10px"></div></div>
   </section>
 
   <!-- LEDGER -->
@@ -291,7 +422,8 @@ td{padding:11px 10px;border-bottom:1px solid #132a20;font-size:13px;white-space:
         <div><label>BONSAI issuer address</label><input id="cBIss" placeholder="r…"></div>
         <div><label>USDX currency code</label><input id="cUCur"></div>
         <div><label>USDX issuer wallet</label><input id="cUIss"></div>
-        <div><label>Receiver wallet</label><input id="cRecv"></div>
+        <div><label>USDX receiver wallet</label><input id="cRecv"></div>
+        <div><label>BONSAI receiver wallet (tracked)</label><input id="cTrack"></div>
         <div><label>Collateral ratio %</label><input id="cRatio" inputmode="decimal"></div>
       </div>
       <p class="s" style="color:var(--mute);margin:0">A ratio of 100 means $1 of burned BONSAI mints 1 USDX. Use a higher number to over-collateralize. Codes longer than 3 characters are converted to the 40-character hex form XRPL requires (USDX = 5553445800000000000000000000000000000000).</p>
@@ -318,7 +450,7 @@ td{padding:11px 10px;border-bottom:1px solid #132a20;font-size:13px;white-space:
 <script>
 const X = window.xrpl;
 const $ = s => document.querySelector(s);
-const DEF = { server:'wss://xrplcluster.com', bCur:'BONSAI', bIss:'r3TWS5XpLUTSA2zeXzRZoQshzc26CwjUyu', uCur:'USDX', uIss:'rKxBBMmY969Ph1y63ddVfYyN7xmxwDfVq6', recv:'rphatRpwXcPAo7CVm46dC78JAQ6kLMqb2M', ratio:'100' };
+const DEF = { server:'wss://xrplcluster.com', bCur:'BONSAI', bIss:'r3TWS5XpLUTSA2zeXzRZoQshzc26CwjUyu', uCur:'USDX', uIss:'rKxBBMmY969Ph1y63ddVfYyN7xmxwDfVq6', recv:'rphatRpwXcPAo7CVm46dC78JAQ6kLMqb2M', bTrack:'raua5HFoko5LjP7TgNUbMnrRXV54outSE2', ratio:'100' };
 const S = { cfg:{...DEF}, client:null, w:{user:null,recv:null,iss:null}, px:null, ledger:null, busy:false, supply:{u:null,b:null}, slot:null };
 S.saved={}; try{ S.saved=JSON.parse(localStorage.getItem('usdx-cfg')||'{}'); }catch(e){}
 Object.assign(S.cfg,S.saved); if(!S.cfg.bIss) S.cfg.bIss=DEF.bIss;
@@ -330,6 +462,7 @@ async function loadFileCfg(){
     if(j.bonsai){ f.bCur=j.bonsai.currency; f.bIss=j.bonsai.issuer; }
     if(j.usdx){ f.uCur=j.usdx.currency; f.uIss=j.usdx.issuer; }
     if(j.receiver) f.recv=j.receiver;
+    if(j.bonsaiReceiver) f.bTrack=j.bonsaiReceiver;
     if(j.collateralRatioPercent) f.ratio=String(j.collateralRatioPercent);
     S.cfg={...DEF,...f,...S.saved};
     Object.entries(F).forEach(([id,k])=>$('#'+id).value=S.cfg[k]);
@@ -484,6 +617,9 @@ function renderAll(){
   $('#ledgerMeta').textContent = L? (L.truncated?'History capped at the most recent transactions, so older burns may be missing. ':'Full history loaded. ')+L.at.toLocaleTimeString():'';
   const pend = L? L.deposits.filter(d=>!d.minted):[];
   $('#pendCount').textContent = pend.length+' pending deposit'+(pend.length===1?'':'s');
+  $('#hUsdx').textContent=fmt(u,2); $('#hBack').textContent=$('#sBack').textContent;
+  [['hIss',S.cfg.uIss],['hRecv',S.cfg.recv],['hBIss',S.cfg.bIss],['hTrack',S.cfg.bTrack]].forEach(([id,a])=>{ if($('#'+id)) $('#'+id).innerHTML=`<a href="https://livenet.xrpl.org/accounts/${a}" target="_blank" rel="noopener" style="color:var(--mute)">${a}</a>`; });
+  renderBurns().catch(()=>{}); if($('#p-pools').classList.contains('on')) renderPoolData().catch(()=>{});
   renderQuote(); renderWalletUI(); renderPeg().catch(()=>{}); $('#forgeWarn').innerHTML = cfgReady()?'':'<div class="note">Set the BONSAI issuer address in Settings to go live.</div>';
 }
 function renderQuote(){
@@ -656,7 +792,7 @@ async function poolInfo(kind){
   try{
     const r=await req({command:'amm_info',asset:PAIRS[kind].other(),asset2:uAsset(),ledger_index:'validated'}); const a=r.amm;
     const uIsFirst=isUsdx(a.amount), u=uIsFirst?a.amount:a.amount2, o=uIsFirst?a.amount2:a.amount;
-    return {kind,ro:aval(o),ru:aval(u),fee:a.trading_fee/100000,lp:a.lp_token,acct:a.account};
+    return {kind,ro:aval(o),ru:aval(u),fee:a.trading_fee/100000,lp:a.lp_token,acct:a.account,auction:a.auction_slot,vote:a.vote_slots};
   }catch(e){ return null; }
 }
 function poolPrice(p){ return p.ro/p.ru*unitUsd(p.kind); }   // USD per USDX implied by the pool
@@ -672,7 +808,7 @@ async function renderPeg(){
   const kind=$('#kPool').value, kp=S.pools[kind];
   if(kp&&S.px){
     const price=poolPrice(kp); S.peg={price,kind};
-    $('#gPrice').textContent='$'+price.toFixed(4);
+    $('#gPrice').textContent='$'+price.toFixed(4); $('#hPrice').textContent='$'+price.toFixed(4);
     $('#gPrice').className='v mono '+(Math.abs(price-1)<=tol?'jade':'brass');
     $('#gPriceSub').textContent=(price>=1?'+':'')+((price-1)*1e4).toFixed(0)+' bps from $1.00 · '+PAIRS[kind].label+' pool';
     $('#pegAlert').innerHTML= price<0.99? '<div class="note err-note">USDX is below the $0.99 floor. The keeper buys back and retires USDX as fast as its trade limit allows. Check that the treasury holds enough '+PAIRS[kind].name+'.</div>':'';
@@ -836,15 +972,141 @@ $('#aCreate').onclick=()=>poolAction('create'); $('#aDeposit').onclick=()=>poolA
 $('#kPool').onchange=()=>renderPeg().catch(()=>{}); $('#prepRecv').onclick=prepReceiver; $('#verifyBtn').onclick=verifySetup;
 setInterval(()=>{ if($('#kOn').checked&&S.w.recv&&!S.busy) keeperStep(false); },30000);
 
+/* ---------- BONSAI supply and burn tracking ---------- */
+const BS={rows:[],seen:new Set(),marker:undefined,done:false,init:false,busy:false};
+const acctUrl=a=>`https://livenet.xrpl.org/accounts/${a}`;
+const alink=a=>`<a class="mono" href="${acctUrl(a)}" target="_blank" rel="noopener">${short(a)}</a>`;
+async function scanBurns(deeper){
+  if(BS.busy||!X.isValidClassicAddress(S.cfg.bIss||'')) return; BS.busy=true;
+  try{
+    const bc=cc(S.cfg.bCur);
+    const page=m=>req({command:'account_tx',account:S.cfg.bIss,limit:200,marker:m,ledger_index_min:-1,ledger_index_max:-1});
+    const take=e=>{
+      const p=parseTx(e); if(BS.seen.has(p.hash)) return false; BS.seen.add(p.hash);
+      if(p.ok&&p.t.TransactionType==='Payment'&&p.t.Destination===S.cfg.bIss){ const d=p.delivered; if(d&&typeof d==='object'&&cc(d.currency)===bc&&d.issuer===S.cfg.bIss) BS.rows.push({hash:p.hash,from:p.t.Account,value:Number(d.value),time:p.time,mt:p.mt}); }
+      return true;
+    };
+    if(!BS.init){ let m,n=0; while(n<4000){ const r=await page(m); r.transactions.forEach(e=>{take(e);n++;}); m=r.marker; if(!m){BS.done=true;break;} } BS.marker=m; BS.init=true; }
+    else if(deeper){ if(!BS.done){ let m=BS.marker,n=0; while(m&&n<4000){ const r=await page(m); r.transactions.forEach(e=>{take(e);n++;}); m=r.marker; } BS.marker=m; if(!m) BS.done=true; } }
+    else { let m; for(let i=0;i<5;i++){ const r=await page(m); let fresh=0; r.transactions.forEach(e=>{ if(take(e)) fresh++; }); if(fresh<r.transactions.length||!r.marker) break; m=r.marker; } }
+  }catch(e){ toast('Burn history: '+e.message); }
+  BS.busy=false;
+}
+const burnSource=r=> r.from===S.cfg.recv?(r.mt==='USDX/COVER'?'Coverage burn':'USDX mint burn'): r.from===S.cfg.bTrack?'BONSAI receiver':'Holder';
+async function renderBurns(){
+  await scanBurns(false);
+  const rows=BS.rows.slice().sort((a,b)=>(b.time||0)-(a.time||0));
+  const tot=rows.reduce((s,r)=>s+r.value,0), tre=rows.filter(r=>r.from===S.cfg.recv).reduce((s,r)=>s+r.value,0), oth=tot-tre;
+  $('#bOut').textContent=fmt(S.supply.b,2); $('#bTot').textContent=fmt(tot,2); $('#bTre').textContent=fmt(tre,2); $('#bOth').textContent=fmt(oth,2);
+  $('#bTotSub').textContent=BS.done?'Full issuer history loaded':'Most recent issuer history loaded';
+  $('#sBurned').textContent=fmt(tot,2); $('#sBurnedSub').textContent=rows.length+' burn payments to the issuer'; $('#hBurned').textContent=fmt(tot,2);
+  $('#burnMeta').textContent=(BS.done?'All history loaded. ':'Older burns may exist. ')+BS.seen.size+' issuer transactions read';
+  $('#burnMore').disabled=BS.done;
+  $('#burnRows').innerHTML=rows.slice(0,100).map(r=>`<tr><td>${r.time?r.time.toLocaleString():''}</td><td>${alink(r.from)}</td><td><span class="tag ${r.from===S.cfg.recv?'ok':'wait'}">${burnSource(r)}</span></td><td class="mono brass">${fmt(r.value,4)}</td><td>${txl(r.hash)}</td></tr>`).join('')||'<tr><td colspan="5" style="color:var(--mute)">No burns found yet.</td></tr>';
+  const by={}; rows.forEach(r=>{ (by[r.from]=by[r.from]||{n:0,v:0}); by[r.from].n++; by[r.from].v+=r.value; });
+  $('#topBurners').innerHTML=Object.entries(by).sort((a,b)=>b[1].v-a[1].v).slice(0,8).map(([a,x])=>`<tr><td>${alink(a)}</td><td class="mono">${x.n}</td><td class="mono">${fmt(x.v,2)}</td></tr>`).join('')||'<tr><td colspan="3" style="color:var(--mute)">None yet.</td></tr>';
+  const days=[]; for(let i=13;i>=0;i--){ const d=new Date(); d.setHours(0,0,0,0); d.setDate(d.getDate()-i); days.push({d,v:0}); }
+  rows.forEach(r=>{ if(!r.time) return; const t=new Date(r.time); t.setHours(0,0,0,0); const x=days.find(z=>z.d.getTime()===t.getTime()); if(x) x.v+=r.value; });
+  const mx=Math.max(...days.map(x=>x.v),1e-9);
+  $('#burnDays').innerHTML=days.map(x=>`<div title="${x.d.toLocaleDateString()}: ${fmt(x.v,2)} BONSAI"><b style="height:${Math.max(2,x.v/mx*100)}%"></b><span>${x.d.getDate()}</span></div>`).join('');
+  // supply breakdown
+  let tb=0; try{ const tl=await lines(S.cfg.bTrack); const x=tl.find(l=>cc(l.currency)===cc(S.cfg.bCur)&&l.account===S.cfg.bIss); tb=x?Number(x.balance):0; S.trackB=tb; }catch(e){}
+  const parts=[['BONSAI receiver',tb,'#e0b867'],['USDX receiver',S.recvInv?S.recvInv.bonsai:0,'#4fd1a1'],['USDX pool',S.pools&&S.pools.bonsai?S.pools.bonsai.ro:0,'#7aa2f7']];
+  const used=parts.reduce((s,p)=>s+p[1],0), other=Math.max(0,S.supply.b-used); parts.push(['Other holders',other,'#86a094']);
+  const T=Math.max(S.supply.b,1e-9);
+  $('#supplyBar').innerHTML=parts.map(p=>`<i style="width:${p[1]/T*100}%;background:${p[2]}" title="${p[0]}"></i>`).join('');
+  $('#supplyLegend').innerHTML=parts.map(p=>`<span><i style="background:${p[2]}"></i>${p[0]} · <b class="mono" style="color:var(--fg)">${fmt(p[1],2)}</b> (${fmt(p[1]/T*100,2)}%)</span>`).join('');
+  if($('#p-burns').classList.contains('on')) renderTracker();
+}
+async function renderTracker(){
+  const a=S.cfg.bTrack; if(!X.isValidClassicAddress(a||'')) return;
+  $('#trAddr').innerHTML=`<a href="${acctUrl(a)}" target="_blank" rel="noopener" class="mono">${a}</a>`;
+  try{
+    const [x,ls,txs]=await Promise.all([xrpBal(a),lines(a),acctTx(a,400)]);
+    const b=ls.find(l=>cc(l.currency)===cc(S.cfg.bCur)&&l.account===S.cfg.bIss), u=ls.find(l=>cc(l.currency)===cc(S.cfg.uCur)&&l.account===S.cfg.uIss);
+    $('#trXrp').textContent=fmt(x,2); $('#trB').textContent=fmt(b?Number(b.balance):0,2); $('#trU').textContent=fmt(u?Number(u.balance):0,2);
+    const bc=cc(S.cfg.bCur); let inn=0,out=0; const rows=[];
+    txs.map(parseTx).forEach(p=>{ if(!p.ok||p.t.TransactionType!=='Payment') return; const d=p.delivered; if(!(d&&typeof d==='object'&&cc(d.currency)===bc&&d.issuer===S.cfg.bIss)) return;
+      const v=Number(d.value); if(p.t.Destination===a){ inn+=v; rows.push({p,dir:'In',cp:p.t.Account,v}); } else if(p.t.Account===a){ out+=v; rows.push({p,dir:p.t.Destination===S.cfg.bIss?'Burned':'Out',cp:p.t.Destination,v}); } });
+    $('#trIO').textContent=fmt(inn,2)+' · '+fmt(out,2);
+    $('#trRows').innerHTML=rows.slice(0,40).map(r=>`<tr><td>${r.p.time?r.p.time.toLocaleString():''}</td><td><span class="tag ${r.dir==='In'?'ok':r.dir==='Burned'?'bad':'wait'}">${r.dir}</span></td><td>${alink(r.cp)}</td><td class="mono">${fmt(r.v,4)}</td><td>${txl(r.p.hash)}</td></tr>`).join('')||'<tr><td colspan="5" style="color:var(--mute)">No BONSAI payments in the loaded history.</td></tr>';
+  }catch(e){ toast(e.message); }
+}
+$('#burnMore').onclick=async()=>{ $('#burnMore').disabled=true; await scanBurns(true); renderBurns(); };
+
+/* ---------- pool data ---------- */
+function deltaFor(meta,acct,asset){
+  for(const n of (meta.AffectedNodes||[])){
+    const m=n.ModifiedNode||n.CreatedNode||n.DeletedNode; if(!m) continue;
+    const ff=m.FinalFields||m.NewFields||{}, pf=m.PreviousFields||{};
+    if(asset==='XRP'){ if(m.LedgerEntryType==='AccountRoot'&&ff.Account===acct){ const a=Number(ff.Balance), b=pf.Balance!==undefined?Number(pf.Balance):(n.CreatedNode?0:a); return (a-b)/1e6; } }
+    else if(m.LedgerEntryType==='RippleState'&&ff.Balance&&ff.HighLimit&&ff.LowLimit&&cc(ff.Balance.currency)===cc(asset.currency)){
+      const isLo=ff.LowLimit.issuer===acct, isHi=ff.HighLimit.issuer===acct; if(!(isLo||isHi)) continue;
+      if((isLo?ff.HighLimit.issuer:ff.LowLimit.issuer)!==asset.issuer) continue;
+      const after=Number(ff.Balance.value), before=pf.Balance?Number(pf.Balance.value):(n.CreatedNode?0:after); return (after-before)*(isLo?1:-1);
+    }
+  } return 0;
+}
+const PD={};
+async function loadPoolActivity(kind){
+  const p=S.pools&&S.pools[kind]; if(!p) return null;
+  const txs=await acctTx(p.acct,400), rows=[];
+  const TY={Payment:'Swap',OfferCreate:'Swap',AMMDeposit:'Deposit',AMMWithdraw:'Withdraw',AMMCreate:'Create',AMMVote:'Vote',AMMBid:'Bid'};
+  txs.map(parseTx).forEach(q=>{
+    if(!q.ok||!TY[q.t.TransactionType]) return;
+    const du=deltaFor(q.meta,p.acct,uAsset()), dox=deltaFor(q.meta,p.acct,kind==='xrp'?'XRP':bAsset());
+    if(TY[q.t.TransactionType]==='Swap'&&du===0&&dox===0) return;
+    let ty=TY[q.t.TransactionType]; if(ty==='Swap') ty=du>0?'Sell USDX':'Buy USDX';
+    rows.push({time:q.time,ty,who:q.t.Account,du,dox,hash:q.hash});
+  });
+  const now=Date.now(), sw=rows.filter(r=>/USDX$/.test(r.ty));
+  const vol=ms=>sw.filter(r=>r.time&&now-r.time<ms).reduce((s,r)=>s+Math.abs(r.du),0);
+  PD[kind]={rows,vol24:vol(864e5),vol7:vol(6048e5),n24:sw.filter(r=>r.time&&now-r.time<864e5).length,oldest:txs.length?parseTx(txs[txs.length-1]).time:null,count:txs.length,capped:txs.truncated};
+  return PD[kind];
+}
+const impact=(p,T,sell)=>{ const f=p.fee, spot=p.ro/p.ru; if(sell){ const out=p.ro*(T*(1-f))/(p.ru+T*(1-f)); return 1-(out/T)/spot; } if(T>=p.ru*0.999) return null; const inn=p.ro*T/((p.ru-T)*(1-f)); return (inn/T)/spot-1; };
+async function renderPoolData(){
+  if(!S.px) await getPrice().catch(()=>{});
+  if(!S.px) return toast('Prices unavailable right now.');
+  if(!S.pools) await renderPeg();
+  const tol=(+$('#kTol').value||50)/1e4; const cards=[];
+  for(const k of ['bonsai','xrp']){
+    const p=S.pools&&S.pools[k];
+    if(!p){ cards.push(`<div class="card"><h3>${PAIRS[k].label}</h3><p style="color:var(--mute)">No pool yet. Create it on the Peg &amp; Pools page.</p></div>`); continue; }
+    const a=await loadPoolActivity(k).catch(()=>null), uu=unitUsd(k), price=p.ro/p.ru*uu, tvl=p.ro*uu+p.ru;
+    const rl=await lines(S.cfg.recv).catch(()=>[]), lp=rl.find(l=>l.currency===p.lp.currency&&l.account===p.acct), mine=lp?Number(lp.balance):0, share=Number(p.lp.value)>0?mine/Number(p.lp.value):0;
+    const slot=p.auction, vs=p.vote||[];
+    const kv=[['USDX price',`<span class="${Math.abs(price-1)<=tol?'jade':'brass'}">$${price.toFixed(5)}</span>`],
+      ['Pool value','$'+fmt(tvl,2)],
+      [PAIRS[k].name+' reserve',fmt(p.ro,4)],['USDX reserve',fmt(p.ru,4)],
+      [PAIRS[k].name+' per USDX',(p.ro/p.ru).toPrecision(7)],['USDX per '+PAIRS[k].name,(p.ru/p.ro).toPrecision(7)],
+      ['Trading fee',(p.fee*100).toFixed(3)+'%'],['LP tokens outstanding',Number(p.lp.value).toPrecision(10)],
+      ['Treasury share',(share*100).toFixed(3)+'% · $'+fmt(tvl*share,2)],
+      ['Volume 24h',a?'$'+fmt(a.vol24,2):'—'],['Volume 7d (loaded)',a?'$'+fmt(a.vol7,2):'—'],['Swaps 24h',a?a.n24:'—'],['Fees earned 24h',a?'$'+fmt(a.vol24*p.fee,2):'—'],
+      ['Auction slot',slot?`${short(slot.account)} · fee ${(slot.discounted_fee/1000).toFixed(3)}%`:'None'],['Fee voters',vs.length],['Pool account',alink(p.acct)]];
+    cards.push(`<div class="card"><h3>${PAIRS[k].label}${$('#kPool').value===k?' · peg pool':''}</h3>${kv.map(x=>`<div class="kv"><span>${x[0]}</span><b class="mono">${x[1]}</b></div>`).join('')}</div>`);
+  }
+  $('#pdCards').innerHTML=cards.join('');
+  $('#impRows').innerHTML=[100,1000,10000].map(T=>{ const c=(k,sell)=>{ const p=S.pools&&S.pools[k]; if(!p) return '—'; const v=impact(p,T,sell); return v==null?'Exceeds pool':(v*100).toFixed(2)+'%'; }; return `<tr><td class="mono">${fmt(T,0)}</td><td class="mono">${c('bonsai',true)}</td><td class="mono">${c('bonsai',false)}</td><td class="mono">${c('xrp',true)}</td><td class="mono">${c('xrp',false)}</td></tr>`; }).join('');
+  renderPoolRows();
+}
+function renderPoolRows(){
+  const k=$('#pdKind').value, a=PD[k];
+  if(!a){ $('#pdRows').innerHTML='<tr><td colspan="6" style="color:var(--mute)">No pool activity loaded.</td></tr>'; $('#pdMeta').textContent=''; return; }
+  $('#pdRows').innerHTML=a.rows.slice(0,40).map(r=>`<tr><td>${r.time?r.time.toLocaleString():''}</td><td><span class="tag ${/Sell/.test(r.ty)?'bad':/Buy/.test(r.ty)?'ok':'wait'}">${r.ty}</span></td><td>${alink(r.who)}</td><td class="mono">${(r.dox>0?'+':'')+fmt(r.dox,4)} ${PAIRS[k].name}</td><td class="mono">${(r.du>0?'+':'')+fmt(r.du,4)}</td><td>${txl(r.hash)}</td></tr>`).join('')||'<tr><td colspan="6" style="color:var(--mute)">No activity yet.</td></tr>';
+  $('#pdMeta').textContent=`Read from the pool account's last ${a.count} transactions${a.oldest?', back to '+a.oldest.toLocaleDateString():''}. Volumes cover that window. Amounts are the pool's change: plus means the pool received it.`;
+}
+$('#pdKind').onchange=renderPoolRows; $('#pdRefresh').onclick=renderPoolData;
+
 /* ---------- nav / settings / init ---------- */
-const TITLES={overview:'USDX <em>Treasury</em>',peg:'Peg <em>&amp; Pools</em>',forge:'Burn <em>&amp; Mint</em>',ledger:'Treasury <em>Ledger</em>',operator:'<em>Operator</em>',wallets:'<em>Wallets</em>',settings:'<em>Settings</em>'};
-function go(p){ document.querySelectorAll('.page').forEach(x=>x.classList.toggle('on',x.id==='p-'+p)); document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('on',b.dataset.p===p)); $('#title').innerHTML=TITLES[p]; if(p==='wallets') renderWalletUI(); }
+const TITLES={home:'USDX <em>Treasury</em>',overview:'<em>Dashboard</em>',burns:'Supply <em>&amp; Burns</em>',pools:'Pool <em>Data</em>',peg:'Peg <em>&amp; Pools</em>',forge:'Burn <em>&amp; Mint</em>',ledger:'Treasury <em>Ledger</em>',operator:'<em>Operator</em>',wallets:'<em>Wallets</em>',settings:'<em>Settings</em>'};
+function go(p){ document.querySelectorAll('.page').forEach(x=>x.classList.toggle('on',x.id==='p-'+p)); document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('on',b.dataset.p===p)); $('#title').innerHTML=TITLES[p]; if(p==='wallets') renderWalletUI(); if(p==='burns') renderTracker(); if(p==='pools') renderPoolData(); }
 document.querySelectorAll('#nav button').forEach(b=>b.onclick=()=>go(b.dataset.p));
 $('#amt').oninput=renderQuote;
 $('#maxBtn').onclick=()=>{ $('#amt').value=S.userBonsai||''; renderQuote(); };
 $('#burnBtn').onclick=burnFlow;
 $('#refreshLedger').onclick=refreshAll;
-const F={cServer:'server',cBCur:'bCur',cBIss:'bIss',cUCur:'uCur',cUIss:'uIss',cRecv:'recv',cRatio:'ratio'};
+const F={cServer:'server',cBCur:'bCur',cBIss:'bIss',cUCur:'uCur',cUIss:'uIss',cRecv:'recv',cTrack:'bTrack',cRatio:'ratio'};
 Object.entries(F).forEach(([id,k])=>$('#'+id).value=S.cfg[k]);
 $('#saveCfg').onclick=async()=>{
   Object.entries(F).forEach(([id,k])=>S.cfg[k]=$('#'+id).value.trim());
