@@ -62,9 +62,17 @@ const req = async r => {
 };
 async function submit(tx, wallet) {
   if (!LIVE) { log('DRY RUN', tx.TransactionType, JSON.stringify(tx.Amount || tx.TakerGets || tx.OfferSequence || '')); return 'dryrun'; }
-  const c = await connect(); const r = await c.submitAndWait(tx, { wallet, autofill: true });
-  const code = r.result.meta.TransactionResult; if (code !== 'tesSUCCESS') throw new Error(code + ' ' + tx.TransactionType);
-  return r.result.hash;
+  const c = await connect(), busy = /rate limit|slowDown|too much load|units quota/i;
+  let prep; for (let a = 0; ; a++) { try { prep = await c.autofill(tx); break; } catch (e) { if (busy.test(String(e.message || e)) && a < 10) { await sleep(3000 + Math.random() * 1000); continue; } throw e; } }
+  const signed = wallet.sign(prep), sub = await req({ command: 'submit', tx_blob: signed.tx_blob }), er = sub.engine_result || '';
+  if (/^(tem|tef|tel)/.test(er) && er !== 'tefALREADY' && er !== 'tefPAST_SEQ') throw new Error(er + ' ' + tx.TransactionType);
+  for (let i = 0; i < 90; i++) {
+    await sleep(i ? 2000 : 1200); let r = null;
+    try { r = await req({ command: 'tx', transaction: signed.hash }); } catch (e) { if (!/txnNotFound/.test(String(e.message || e))) throw e; }
+    if (r && r.validated) { const code = (r.meta || r.metaData || {}).TransactionResult; if (code !== 'tesSUCCESS') throw new Error(code + ' ' + tx.TransactionType); return signed.hash; }
+    if (!r && prep.LastLedgerSequence && (await req({ command: 'ledger_current' })).ledger_current_index > prep.LastLedgerSequence + 2) throw new Error('transaction expired before validation, nothing applied');
+  }
+  throw new Error('timed out waiting for validation of ' + signed.hash);
 }
 const lines = async a => (await req({ command: 'account_lines', account: a, ledger_index: 'validated', limit: 400 })).lines;
 const xrpBal = async a => { try { return Number((await req({ command: 'account_info', account: a, ledger_index: 'validated' })).account_data.Balance) / 1e6; } catch { return 0; } };

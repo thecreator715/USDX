@@ -492,10 +492,12 @@ td{padding:11px 10px;border-bottom:1px solid #132a20;font-size:13px;white-space:
 <div class="modal" id="wm"><div class="sheet">
   <h2 id="wmTitle">Connect wallet</h2>
   <div class="tabs"><button class="on" data-t="imp">Import</button><button data-t="gen" id="genTab">Generate</button></div>
-  <div id="wmImp" class="col"><div><label>Family seed (starts with s)</label><input id="seedIn" type="password" autocomplete="off" placeholder="sEd…"></div><div class="s" style="color:var(--mute);font-size:12px">The seed stays in this tab&rsquo;s memory. It is never saved or sent anywhere except to sign transactions locally.</div><button class="btn" id="seedGo">Import wallet</button></div>
+  <div id="wmImp" class="col"><div><label>Family seed (starts with s)</label><input id="seedIn" type="password" autocomplete="off" placeholder="sEd…"></div><div class="s" style="color:var(--mute);font-size:12px">The seed is only used to sign transactions inside this browser. It is never sent anywhere. With the box below ticked it is also kept, encrypted, on this device.</div><button class="btn" id="seedGo">Import wallet</button></div>
   <div id="wmGen" class="col" hidden><div class="note">A new wallet needs at least 1 XRP (base reserve) plus 0.2 XRP per trust line before it can transact. Write the seed down now. It will not be shown again.</div><button class="btn" id="genGo">Generate wallet</button><div id="genOut" class="col" hidden><div><label>Address</label><div class="addr" id="gAddr"></div></div><div><label>Seed</label><div class="addr" id="gSeed" style="color:var(--brass)"></div></div><button class="btn ghost sm" id="gCopy">Copy seed</button></div></div>
   <div class="err-note note" id="wmErr" hidden></div>
-  <button class="btn ghost sm" id="wmClose">Close</button>
+  <label id="wmKeepRow" class="row" style="gap:8px;text-transform:none;letter-spacing:0;font-size:13px;color:var(--fg)"><input type="checkbox" id="wmKeep" style="width:auto" checked> Keep this wallet signed in on this device</label>
+  <div class="s" id="wmKeepNote" style="color:var(--mute);font-size:12px">The seed is stored encrypted in this browser only. Untick to keep it in memory for this tab. Anyone using this browser profile could sign with it, so skip this on shared computers.</div>
+  <div class="row"><button class="btn ghost sm" id="wmClose">Close</button><button class="btn ghost sm" id="wmOut" hidden>Disconnect and forget</button></div>
 </div></div>
 <!-- confirm modal -->
 <div class="modal" id="bm"><div class="sheet" style="width:min(760px,100%)">
@@ -592,14 +594,42 @@ async function req(r){
 /* short-lived cache so one refresh never asks the ledger the same thing twice */
 const CACHE=new Map();
 function cached(key,fn,ttl=12000){ const h=CACHE.get(key); if(h&&Date.now()-h.t<ttl) return h.p; const p=fn(); CACHE.set(key,{t:Date.now(),p}); p.catch(()=>CACHE.delete(key)); return p; }
+const isBusy=m=>/rate limit|slowDown|too much load|units quota|noNetwork|Not connected|timeout/i.test(m);
+async function withRetry(fn,label){
+  for(let a=0;;a++){
+    try{ return await fn(); }
+    catch(e){
+      const msg=String(e&&e.message||e)+' '+JSON.stringify(e&&e.data||{});
+      if(isBusy(msg)&&a<10){
+        const m=/retry in ~?(\d+)\s*ms/i.exec(msg), wait=(m?+m[1]:2500)+400+Math.random()*600;
+        const note='Server is busy, retrying in '+Math.round(wait/1000)+' s'+(label?' ('+label+')':''); $('#nettxt').textContent='Server busy, retrying'; if(S.note) S.note(note);
+        if(a>=2&&(S.cfg.servers||[]).length>1){ S.skip=((S.skip||0)+1)%S.cfg.servers.length; try{ await S.client.disconnect(); }catch(_){} S.client=null; }
+        await sleep(wait); continue;
+      }
+      throw e;
+    }
+  }
+}
+// autofill, sign locally, submit, then poll until validated. Safe to retry: the same signed blob can only apply once.
 async function submit(tx,wallet){
   const c = await connect();
-  const r = await c.submitAndWait(tx,{wallet,autofill:true});
-  CACHE.clear();
-  const code = r.result.meta.TransactionResult;
-  if(code!=='tesSUCCESS') throw new Error(code+' · '+tx.TransactionType);
-  S.last={hash:r.result.hash,ledger:r.result.ledger_index||(r.result.tx_json&&r.result.tx_json.ledger_index)||null};
-  return r.result.hash;
+  const prep = await withRetry(()=>c.autofill(tx),'preparing '+tx.TransactionType);
+  const signed = wallet.sign(prep), hash = signed.hash, last = prep.LastLedgerSequence;
+  const sub = await req({command:'submit',tx_blob:signed.tx_blob});
+  const er = sub.engine_result||'';
+  if(/^(tem|tef|tel)/.test(er) && er!=='tefALREADY' && er!=='tefPAST_SEQ') throw new Error(er+' · '+tx.TransactionType+(sub.engine_result_message?': '+sub.engine_result_message:''));
+  for(let i=0;i<90;i++){
+    await sleep(i?2000:1200);
+    let r=null;
+    try{ r=await req({command:'tx',transaction:hash}); }catch(e){ if(!/txnNotFound/.test(String(e&&e.message||e)+JSON.stringify(e&&e.data||{}))) throw e; }
+    if(r&&r.validated){
+      const code=(r.meta||r.metaData||{}).TransactionResult; S.last={hash,ledger:r.ledger_index}; CACHE.clear();
+      if(code!=='tesSUCCESS') throw new Error(code+' · '+tx.TransactionType);
+      return hash;
+    }
+    if(!r&&last){ const lc=(await req({command:'ledger_current'})).ledger_current_index; if(lc>last+2) throw new Error('The transaction expired before it was validated, so nothing was applied. Try again.'); }
+  }
+  throw new Error('Timed out waiting for validation of '+hash.slice(0,10)+'…. Check it on the explorer before retrying.');
 }
 
 /* ---------- prices ---------- */
@@ -810,15 +840,45 @@ async function renderWalletUI(){
   $('#walletCards').innerHTML=html.join('');
 }
 
+
+/* ---------- keep the last connected wallet signed in on this device ----------
+   The seed is encrypted with a non-extractable AES key that lives in IndexedDB; only the ciphertext goes in localStorage.
+   Operator keys (receiver, issuer) are never remembered this way, they use the passphrase vault. */
+const IDB={
+  open(){ return new Promise((res,rej)=>{ const r=indexedDB.open('usdx-keys',1); r.onupgradeneeded=()=>r.result.createObjectStore('k'); r.onsuccess=()=>res(r.result); r.onerror=()=>rej(r.error); }); },
+  async get(k){ const d=await this.open(); return new Promise((res,rej)=>{ const q=d.transaction('k').objectStore('k').get(k); q.onsuccess=()=>res(q.result); q.onerror=()=>rej(q.error); }); },
+  async set(k,v){ const d=await this.open(); return new Promise((res,rej)=>{ const q=d.transaction('k','readwrite').objectStore('k').put(v,k); q.onsuccess=()=>res(); q.onerror=()=>rej(q.error); }); }
+};
+async function devKey(){ let k=await IDB.get('dk'); if(!k){ k=await crypto.subtle.generateKey({name:'AES-GCM',length:256},false,['encrypt','decrypt']); await IDB.set('dk',k); } return k; }
+async function rememberUser(w){
+  try{
+    if(!$('#wmKeep').checked||!w.seed) return;
+    const iv=crypto.getRandomValues(new Uint8Array(12)), ct=await crypto.subtle.encrypt({name:'AES-GCM',iv},await devKey(),new TextEncoder().encode(w.seed));
+    localStorage.setItem('usdx-last',JSON.stringify({a:w.address,i:b64(iv),c:b64(new Uint8Array(ct))}));
+  }catch(e){ console.warn('remember',e); }
+}
+async function restoreUser(){
+  try{
+    const raw=localStorage.getItem('usdx-last'); if(!raw) return false; const v=JSON.parse(raw);
+    const pt=await crypto.subtle.decrypt({name:'AES-GCM',iv:unb64(v.i)},await devKey(),unb64(v.c));
+    const w=X.Wallet.fromSeed(new TextDecoder().decode(pt)); if(w.address!==v.a) return false;
+    S.w.user=w; return true;
+  }catch(e){ console.warn('restore',e); return false; }
+}
+function forgetUser(){
+  try{ localStorage.removeItem('usdx-last'); }catch(e){}
+  S.w.user=null; S.userBonsai=0; $('#wm').classList.remove('on'); $('#maxBtn').textContent='—'; renderWalletUI(); renderQuote(); toast('Disconnected. This device no longer keeps the wallet.');
+}
+
 /* ---------- wallet modal ---------- */
 function openWallet(slot){
   S.slot=slot; $('#wmTitle').textContent = {user:'Connect wallet',recv:'Import receiver key',iss:'Import issuer key'}[slot];
-  $('#genTab').style.display = slot==='user'?'':'none'; $('#wmErr').hidden=true; $('#seedIn').value=''; setTab('imp'); $('#genOut').hidden=true; $('#wm').classList.add('on');
+  $('#genTab').style.display = slot==='user'?'':'none'; $('#wmKeepRow').style.display=$('#wmKeepNote').style.display=slot==='user'?'':'none'; $('#wmOut').hidden=!(slot==='user'&&S.w.user); $('#wmErr').hidden=true; $('#seedIn').value=''; setTab('imp'); $('#genOut').hidden=true; $('#wm').classList.add('on');
 }
 function setTab(t){ document.querySelectorAll('.tabs button').forEach(b=>b.classList.toggle('on',b.dataset.t===t)); $('#wmImp').hidden=t!=='imp'; $('#wmGen').hidden=t!=='gen'; }
 function wmErr(m){ const e=$('#wmErr'); e.textContent=m; e.hidden=false; }
 function attach(slot,wallet){
-  S.w[slot]=wallet; $('#wm').classList.remove('on'); if(slot==='user') loadUserBal(); renderWalletUI(); renderQuote(); updateWatch(); renderPeg().catch(()=>{}); if(slot==='recv'&&$('#kOn').checked) setTimeout(()=>keeperStep(false),1500);
+  S.w[slot]=wallet; if(slot==='user') rememberUser(wallet); $('#wm').classList.remove('on'); if(slot==='user') loadUserBal(); renderWalletUI(); renderQuote(); updateWatch(); renderPeg().catch(()=>{}); if(slot==='recv'&&$('#kOn').checked) setTimeout(()=>keeperStep(false),1500);
   toast((slot==='user'?'Wallet connected: ':slot==='recv'?'Receiver key loaded: ':'Issuer key loaded: ')+short(wallet.address));
 }
 $('#seedGo').onclick=()=>{
@@ -833,7 +893,7 @@ $('#genGo').onclick=()=>{ const w=X.Wallet.generate(); S.gen=w; $('#gAddr').text
 $('#gCopy').onclick=()=>navigator.clipboard.writeText(S.gen.seed).then(()=>toast('Seed copied'));
 $('#wmClose').onclick=()=>$('#wm').classList.remove('on');
 document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>setTab(b.dataset.t));
-$('#walletBtn').onclick=()=>openWallet('user');
+$('#walletBtn').onclick=()=>openWallet('user'); $('#wmOut').onclick=forgetUser;
 document.addEventListener('click',e=>{ const b=e.target.closest('[data-slot]'); if(b) openWallet(b.dataset.slot); const g=e.target.closest('[data-go]'); if(g) go(g.dataset.go); });
 
 function confirmBox(html){ return new Promise(res=>{ $('#cmBody').innerHTML=html; $('#cm').classList.add('on'); $('#cmYes').onclick=()=>{$('#cm').classList.remove('on');res(true)}; $('#cmNo').onclick=()=>{$('#cm').classList.remove('on');res(false)}; }); }
@@ -927,7 +987,7 @@ async function bmRun(){
   BM.running=true; BM.abort=false; BM.t0=Date.now(); BM.st=[]; BM.log=[]; BM.dep=null; bmShow('run');
   $('#bmHead').textContent='Burning BONSAI for USDX'; $('#bmDone').hidden=true; $('#bmStop').hidden=false; $('#bmClose').textContent='Keep running in the background'; $('#bmSum').innerHTML='';
   clearInterval(BM.timer); BM.timer=setInterval(bmTick,500); bmDraw();
-  let cur=0; const at=(i,s,m,h)=>{ cur=i; bmStage(i,s,m,h); };
+  S.note=m=>bmLog(m); let cur=0; const at=(i,s,m,h)=>{ cur=i; bmStage(i,s,m,h); };
   try{
     at(0,'act','Refreshing the price');
     const px=await getPrice(); at(0,'act','Price $'+fp(px.usd,6)+' · reading balances'); await loadUserBal();
@@ -1603,7 +1663,7 @@ $('#saveCfg').onclick=async()=>{
 };
 (async function init(){
   if(!window.xrpl){ document.body.insertAdjacentHTML('afterbegin','<div class="note" style="position:fixed;top:10px;left:270px;z-index:99">The xrpl.js library could not load. Check your connection and reload.</div>'); return; }
-  await loadFileCfg(); await refreshAll(); monitorStep(); setInterval(()=>{ if(!S.busy&&!document.hidden) refreshAll(); },120000);
+  await loadFileCfg(); await restoreUser(); renderWalletUI(); renderQuote(); await refreshAll(); monitorStep(); setInterval(()=>{ if(!S.busy&&!document.hidden) refreshAll(); },120000);
 })();
 </script>
 </body>
