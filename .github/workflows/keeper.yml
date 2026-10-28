@@ -26,8 +26,8 @@ jobs:
       - name: Run keeper (about 4.5 minutes, then the next run takes over)
         working-directory: keeper
         env:
-          RECEIVER_SEED: ${{ secrets.RECEIVER_SEED }}
-          ISSUER_SEED: ${{ secrets.ISSUER_SEED }}
+          RECEIVER_SEED: ${{ secrets.RECEIVER_SEED || secrets.RECIEVER || secrets.RECEIVER }}
+          ISSUER_SEED: ${{ secrets.ISSUER_SEED || secrets.ISSUER }}
           ALERT_WEBHOOK: ${{ secrets.ALERT_WEBHOOK }}
           LIVE: '1'
           INTERVAL_SEC: '30'

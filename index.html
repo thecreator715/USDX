@@ -148,7 +148,6 @@ td{padding:11px 10px;border-bottom:1px solid #132a20;font-size:13px;white-space:
     <button data-p="peg"><svg viewBox="0 0 24 24"><path d="M3 12h18M3 8h18M3 16h18" stroke-dasharray="2 3"/><path d="M12 4v16"/></svg><span>Peg &amp; Pools</span></button>
     <button data-p="pools"><svg viewBox="0 0 24 24"><circle cx="9" cy="12" r="6"/><circle cx="15" cy="12" r="6"/></svg><span>Pool Data</span></button>
     <button data-p="ledger"><svg viewBox="0 0 24 24"><path d="M5 4h14v16H5zM9 9h6M9 13h6M9 17h3"/></svg><span>Treasury Ledger</span></button>
-    <button data-p="operator"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/></svg><span>Operator</span></button>
     <button data-p="wallets"><svg viewBox="0 0 24 24"><path d="M3 7h16a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2zM3 7l12-3v3M17 14h2"/></svg><span>Wallets</span></button>
     <button data-p="settings"><svg viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg><span>Settings</span></button>
   </nav>
@@ -757,7 +756,7 @@ async function scanLedger(force){
 }
 
 /* ---------- render ---------- */
-const BUILD='20261027-2406';
+const BUILD='20261027-2412';
 const LIVE_URL='https://thecreator715.github.io/USDX/';
 function sandboxNote(){
   setNet(false); if(document.getElementById('sbNote')) return;
@@ -1741,7 +1740,7 @@ vaultState();
 
 /* ---------- nav / settings / init ---------- */
 const TITLES={home:'USDX <em>Treasury</em>',overview:'<em>Dashboard</em>',burns:'Supply <em>&amp; Burns</em>',pools:'Pool <em>Data</em>',peg:'Peg <em>&amp; Pools</em>',forge:'Burn <em>&amp; Mint</em>',ledger:'Treasury <em>Ledger</em>',operator:'<em>Operator</em>',wallets:'<em>Wallets</em>',settings:'<em>Settings</em>'};
-function go(p){ document.querySelectorAll('.page').forEach(x=>x.classList.toggle('on',x.id==='p-'+p)); document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('on',b.dataset.p===p)); $('#title').innerHTML=TITLES[p]; if(p==='wallets') renderWalletUI(); if(p==='burns') renderTracker(); if(p==='pools') renderPoolData(); }
+function go(p){ if(p==='operator') p='home'; document.querySelectorAll('.page').forEach(x=>x.classList.toggle('on',x.id==='p-'+p)); document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('on',b.dataset.p===p)); $('#title').innerHTML=TITLES[p]; if(p==='wallets') renderWalletUI(); if(p==='burns') renderTracker(); if(p==='pools') renderPoolData(); }
 document.querySelectorAll('#nav button').forEach(b=>b.onclick=()=>go(b.dataset.p));
 $('#amt').oninput=renderQuote;
 $('#maxBtn').onclick=()=>{ if(S.userBonsai) $('#amt').value=S.userBonsai; else loadUserBal(); renderQuote(); };
@@ -1758,7 +1757,6 @@ $('#saveCfg').onclick=async()=>{
 (async function init(){
   if(!window.xrpl){ document.body.insertAdjacentHTML('afterbegin','<div class="note" style="position:fixed;top:10px;left:270px;z-index:99">The xrpl.js library could not load. Check your connection and reload.</div>'); return; }
   $('#buildTag').textContent='build '+BUILD;
-  if(!/operator/.test(location.hash+location.search)){ const ob=document.querySelector('button[data-p="operator"]'); if(ob) ob.hidden=true; }
   const stale=()=>fetch(location.pathname+'?v='+Date.now(),{cache:'no-store'}).then(r=>r.text()).then(t=>{ const m=/const BUILD='([^']+)'/.exec(t); if(m&&m[1]!==BUILD){ let n=0; try{ n=+sessionStorage.getItem('usdx-rl')||0; }catch(e){}
     if(n<2&&!BM.running&&!$('#bm').classList.contains('on')){ try{ sessionStorage.setItem('usdx-rl',n+1); }catch(e){} location.replace(location.pathname+'?v='+m[1]+location.hash); return; }
     if(!document.getElementById('newVer')){ const d=document.createElement('div'); d.id='newVer'; d.className='note'; d.style.cssText='position:fixed;z-index:70;right:16px;bottom:16px;max-width:360px;box-shadow:0 10px 40px #0008'; d.innerHTML='A newer version is available (build '+m[1]+'). <a href="#" id="newVerGo" style="color:var(--brass,#d9b66c);font-weight:600">Reload now</a>'; document.body.appendChild(d); $('#newVerGo').onclick=e=>{ e.preventDefault(); location.replace(location.pathname+'?v='+m[1]+location.hash); }; } } else { try{ sessionStorage.removeItem('usdx-rl'); }catch(e){} } }).catch(()=>{});
