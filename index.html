@@ -91,6 +91,7 @@ td{padding:11px 10px;border-bottom:1px solid #132a20;font-size:13px;white-space:
 @media(prefers-reduced-motion:reduce){*{animation:none!important}}
 .note{border:1px solid #4a3d18;background:#1b1707;color:#e6cf93;border-radius:12px;padding:12px 14px;font-size:12.5px}
 .err-note{border-color:#5a2420;background:#1e0e0c;color:#f3b3ab}
+[hidden]{display:none!important}
 .modal{position:fixed;inset:0;background:rgba(2,8,5,.8);display:none;align-items:center;justify-content:center;z-index:50;padding:16px;backdrop-filter:blur(6px)}
 .modal.on{display:flex}
 .sheet{background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:26px;width:min(520px,100%);max-height:92vh;overflow-y:auto;display:flex;flex-direction:column;gap:16px}
@@ -152,7 +153,7 @@ td{padding:11px 10px;border-bottom:1px solid #132a20;font-size:13px;white-space:
   </nav>
   <div class="side-foot">
     <div class="pill"><i class="dot" id="netdot"></i><span id="nettxt">Connecting…</span></div>
-    <div>XRPL Mainnet · real funds</div>
+    <div>XRPL Mainnet · real funds</div><div id="buildTag" style="opacity:.5;font-size:11px"></div>
   </div>
 </aside>
 
@@ -730,6 +731,7 @@ async function scanLedger(){
 }
 
 /* ---------- render ---------- */
+const BUILD='20261027-2225';
 const LIVE_URL='https://thecreator715.github.io/USDX/';
 function sandboxNote(){
   setNet(false); if(document.getElementById('sbNote')) return;
@@ -961,7 +963,13 @@ async function bmReview(v){
     if(i.thin) warn.push({t:`The BONSAI price comes from a thin market (${px.how}). The treasury will not mint USDX against a price like this unless the operator sets a manual price, so your BONSAI may wait in the receiver wallet, and a burn cannot be undone.`,ack:true});
     if(i.spread>3) warn.push({t:`Price sources disagree by ${i.spread.toFixed(1)}x.`,ack:true});
     if(tr>1) warn.push({t:`BONSAI has a ${((tr-1)*100).toFixed(2)}% transfer fee. Your wallet sends a little extra to cover it.`,ack:false});
-    BM.rev={v,px,usdx,hasU,tr,block,warn};
+    const self=w.address===S.cfg.recv;
+    if(self){
+      const i2=block.findIndex(x=>/receiver wallet has no BONSAI trust line/.test(x)); if(i2>=0) block.splice(i2,1);
+      if(!S.w.iss) block.push('You are signed in as the receiver (treasury) wallet, so the burn and the mint happen together. Load the USDX issuer key first: Operator page, "Import issuer key".');
+      if(i.thin&&!(Number(S.cfg.priceXrp)>0)) block.push('The only BONSAI market is too thin to mint against. Enter the BONSAI price in XRP below and press "Use this price".');
+    }
+    BM.rev={v,px,usdx,hasU,tr,block,warn,self};
     const row=(k,val,c)=>`<div class="row" style="justify-content:space-between"><span style="color:var(--mute)">${k}</span><b class="mono ${c||''}">${val}</b></div>`;
     $('#bmBody').innerHTML=`<div class="col" style="gap:8px">
       ${row('You burn',fmt(v,4)+' BONSAI','brass')}
@@ -971,20 +979,24 @@ async function bmReview(v){
       ${row('Value of the burn','$'+(v*px.usd<0.01?fp(v*px.usd,4):fmt(v*px.usd,2)))}
       ${row('Collateral ratio',ratio()+'%')}
       ${row('You receive (estimate)',(usdx>0&&usdx<0.01?fp(usdx,4):fmt(usdx,4))+' USDX','jade')}
-      ${row('Price source',px.how)}
+      ${row('Price source',px.how)}${self?row('Mode','Treasury wallet, burn and mint in one go','brass'):''}
       ${row('Your BONSAI after',fmt(Math.max(0,bal-v),4))}
       ${row('Your XRP',xb==null?'—':fmt(xb,2)+' XRP')}
       ${row('Network fees','about 0.00002 XRP per transaction')}
-      <div class="addr">${short(w.address)} → ${S.cfg.recv}</div></div>
+      <div class="addr">${self?short(w.address)+' · treasury wallet':short(w.address)+' → '+S.cfg.recv}</div></div>
+      ${(i.thin||px.how==='manual price')?`<div class="col" style="gap:6px"><label>${px.how==='manual price'?'Manual BONSAI price in XRP (in use)':'Set the BONSAI price in XRP yourself'}</label><div class="row" style="flex-wrap:nowrap"><input id="bmMan" inputmode="decimal" placeholder="e.g. 0.00002" value="${Number(S.cfg.priceXrp)>0?S.cfg.priceXrp:''}"><button class="btn sm" id="bmManGo" style="white-space:nowrap">Use this price</button>${Number(S.cfg.priceXrp)>0?'<button class="btn ghost sm" id="bmManClr" style="white-space:nowrap">Use the market</button>':''}</div></div>`:''}
       ${block.map(x=>`<div class="note err-note">${x}</div>`).join('')}${warn.map(x=>`<div class="note">${x.t}</div>`).join('')}
-      <div class="s" style="color:var(--mute)">What happens next: your wallet sends the BONSAI to the receiver, the treasury burns it back to the BONSAI issuer, and the USDX issuer pays your wallet the USDX with a receipt. The final amount uses the price at the moment the treasury processes your deposit.</div>`;
+      <div class="s" style="color:var(--mute)">${self?'What happens next: you are signed in as the treasury wallet, so no deposit is needed. The receiver wallet burns the BONSAI back to the BONSAI issuer, then the USDX issuer pays the USDX to the same wallet with a receipt. Both steps use the price shown here.':'What happens next: your wallet sends the BONSAI to the receiver, the treasury burns it back to the BONSAI issuer, and the USDX issuer pays your wallet the USDX with a receipt. The final amount uses the price at the moment the treasury processes your deposit.'}</div>`;
+    const setMan=v2=>{ S.cfg.priceXrp=v2; try{ localStorage.setItem('usdx-cfg',JSON.stringify(S.cfg)); }catch(e){} const f=$('#cPx'); if(f) f.value=v2; CACHE.clear(); bmReview(v); };
+    if($('#bmManGo')) $('#bmManGo').onclick=()=>{ const n=parseFloat($('#bmMan').value); if(!(n>0)) return toast('Enter a price above zero.'); setMan(String(n)); };
+    if($('#bmManClr')) $('#bmManClr').onclick=()=>setMan('');
     const need=warn.some(x=>x.ack); $('#bmAck').hidden=!need; $('#bmAckBox').checked=false;
     const upd=()=>{ $('#bmGo').disabled=block.length>0||(need&&!$('#bmAckBox').checked); }; $('#bmAckBox').onchange=upd; upd();
   }catch(e){ $('#bmBody').innerHTML=`<div class="note err-note">${e.message}</div>`; }
 }
 async function bmRun(){
   const R=BM.rev; if(!R||BM.running) return; const w=S.w.user, v=R.v;
-  BM.running=true; BM.abort=false; BM.t0=Date.now(); BM.st=[]; BM.log=[]; BM.dep=null; bmShow('run');
+  BM.running=true; BM.abort=false; BM.t0=Date.now(); BM.st=[]; BM.log=[]; BM.dep=null; BM.self=false; bmShow('run');
   $('#bmHead').textContent='Burning BONSAI for USDX'; $('#bmDone').hidden=true; $('#bmStop').hidden=false; $('#bmClose').textContent='Keep running in the background'; $('#bmSum').innerHTML='';
   clearInterval(BM.timer); BM.timer=setInterval(bmTick,500); bmDraw();
   S.note=m=>bmLog(m); let cur=0; const at=(i,s,m,h)=>{ cur=i; bmStage(i,s,m,h); };
@@ -992,25 +1004,33 @@ async function bmRun(){
     at(0,'act','Refreshing the price');
     const px=await getPrice(); at(0,'act','Price $'+fp(px.usd,6)+' · reading balances'); await loadUserBal();
     if(v>(S.userBonsai||0)+1e-9) throw new Error('Balance changed: your wallet no longer holds that much BONSAI.');
-    at(0,'done',`Balance ${fmt(S.userBonsai,4)} BONSAI · price $${fp(px.usd,6)} · receiver trust line ok`);
+    if(R.self){ assertPriceSafe(px); if(!S.w.recv) S.w.recv=w; if(!S.w.iss) throw new Error('Load the USDX issuer key on the Operator page first.'); }
+    at(0,'done',`Balance ${fmt(S.userBonsai,4)} BONSAI · price $${fp(px.usd,6)}${R.self?' · treasury wallet mode':' · receiver trust line ok'}`);
     if(R.hasU){ at(1,'skip','Already exists'); }
     else{
       at(1,'act','Signing a TrustSet for USDX'); const th=await submit({TransactionType:'TrustSet',Account:w.address,LimitAmount:{currency:cc(S.cfg.uCur),issuer:S.cfg.uIss,value:'1000000000'}},w);
       at(1,'done','USDX trust line created',th);
     }
-    at(2,'act','Signing the payment in this browser, nothing leaves it unsigned');
+    if(R.self){ at(2,'skip','Treasury wallet: the BONSAI is already in the receiver, no deposit needed'); at(3,'skip','Not needed'); }
+    else at(2,'act','Signing the payment in this browser, nothing leaves it unsigned');
+    let dep; if(R.self){ dep='TREASURY-'+Date.now(); BM.dep=null; BM.self=true; } else {
     const val=v.toFixed(6), usdx=Math.floor(v*px.usd*100/ratio()*1e6)/1e6;
     const tx={TransactionType:'Payment',Account:w.address,Destination:S.cfg.recv,Amount:{...bAsset(),value:val},Memos:[memo('USDX/MINT',{v:1,bonsai:+val,quote:usdx})]};
     if(R.tr>1) tx.SendMax={...bAsset(),value:(v*R.tr*1.000001).toFixed(6)};
-    const dep=await submit(tx,w); BM.dep=dep; S.watchDep=dep; const li=S.last&&S.last.ledger;
+    dep=await submit(tx,w); BM.dep=dep; S.watchDep=dep; const li=S.last&&S.last.ledger;
     at(2,'done','Sent '+fmt(v,4)+' BONSAI to the receiver',dep);
     at(3,'done','Validated'+(li?' in ledger #'+li:'')+' · tesSUCCESS');
+    }
     CACHE.clear(); loadUserBal();
     // wait for the treasury
     at(4,'act','Looking for the treasury burn');
     let minted=null, n=0; const canProcess=!!(S.w.recv&&S.w.iss);
+    if(R.self){
+      await scanLedger(); await mintForDeposit({hash:dep,from:w.address,value:v},(k,m,h)=>at(k,m.s,m.t,h));
+      for(let q=0;q<12&&!minted;q++){ await scanLedger(); minted=S.ledger.mints.find(x=>x.dep===dep); if(!minted) await sleep(2500); }
+    }
     if(canProcess){ bmLog('Both operator keys are loaded in this tab, so this tab is the treasury processor.'); }
-    for(; n<100&&!BM.abort; n++){
+    for(; !minted&&n<100&&!BM.abort; n++){
       await scanLedger(); const d=S.ledger.deposits.find(x=>x.hash===dep);
       if(d&&!d.minted&&canProcess&&!S.busy){
         try{ at(4,'act','Burning '+fmt(d.value,4)+' BONSAI from the receiver'); await mintForDeposit(d,(k,m,h)=>at(k,m.s,m.t,h)); await scanLedger(); }catch(e){ throw e; }
@@ -1041,22 +1061,25 @@ async function bmRun(){
       <div class="row" style="justify-content:space-between"><span style="color:var(--mute)">Rate used</span><b class="mono">$${fp(minted.rate||px.usd,6)} per BONSAI</b></div>
       <div class="row" style="justify-content:space-between"><span style="color:var(--mute)">USDX outstanding now</span><b class="mono">${fmt(S.supply.u,2)}</b></div>
       <div class="row" style="justify-content:space-between"><span style="color:var(--mute)">Your BONSAI now</span><b class="mono">${fmt(S.userBonsai,4)}</b></div>
-      <div class="row" style="justify-content:space-between"><span style="color:var(--mute)">Receipts</span><span>${exTx(dep)} · ${S.ledger.burns[dep]?exTx(S.ledger.burns[dep].hash):''} · ${exTx(minted.hash)}</span></div></div>`;
+      <div class="row" style="justify-content:space-between"><span style="color:var(--mute)">Receipts</span><span>${R.self?'':exTx(dep)+' · '}${S.ledger.burns[dep]?exTx(S.ledger.burns[dep].hash)+' · ':''}${exTx(minted.hash)}</span></div></div>`;
     toast('USDX minted: '+fmt(minted.usdx,4));
   }catch(e){
     BM.running=false; clearInterval(BM.timer); const o=BM.st[cur]||(BM.st[cur]={}); o.s='err'; o.m=e.message; bmLog('FAILED: '+e.message); bmDraw();
     $('#bmHead').textContent='Stopped'; $('#bmStop').hidden=true; $('#bmDone').hidden=false; $('#bmClose').textContent='Close';
-    $('#bmSum').innerHTML=`<div class="note err-note">${e.message}${BM.dep?'<br>The deposit '+exTx(BM.dep)+' was already sent. It stays on the ledger and will be processed by the treasury.':'<br>Nothing was burned.'}</div>`;
+    $('#bmSum').innerHTML=`<div class="note err-note">${e.message}${BM.dep?'<br>The deposit '+exTx(BM.dep)+' was already sent. It stays on the ledger and will be processed by the treasury.':(BM.self?'<br>If the BONSAI burn already went through, it still counts as backing on the Treasury Ledger page. Check there before trying again.':'<br>Nothing was burned.')}</div>`;
     refreshAll();
   }
 }
 async function burnFlow(){
-  if(BM.running){ bmShow('run'); bmDraw(); return; }
-  const w=S.w.user, v=parseFloat($('#amt').value);
-  if(!w) return openWallet('user');
-  if(!cfgReady()) return go('settings');
-  if(!(v>0)) return toast('Enter how much BONSAI to burn.');
-  bmReview(v);
+  try{
+    if(BM.running){ bmShow('run'); bmDraw(); return; }
+    const w=S.w.user, v=parseFloat($('#amt').value);
+    if(!w) return openWallet('user');
+    if(!cfgReady()) return go('settings');
+    if(!(v>0)) return toast('Enter how much BONSAI to burn.');
+    bmShow('review'); $('#bmHead').textContent='Review your burn'; $('#bmBody').innerHTML='<div class="s" style="color:var(--mute)">Opening…</div>';
+    await bmReview(v);
+  }catch(e){ console.error(e); toast('Burn could not start: '+e.message); try{ bmShow('review'); $('#bmBody').innerHTML='<div class="note err-note">'+e.message+'</div>'; }catch(_){} }
 }
 
 
@@ -1663,6 +1686,8 @@ $('#saveCfg').onclick=async()=>{
 };
 (async function init(){
   if(!window.xrpl){ document.body.insertAdjacentHTML('afterbegin','<div class="note" style="position:fixed;top:10px;left:270px;z-index:99">The xrpl.js library could not load. Check your connection and reload.</div>'); return; }
+  $('#buildTag').textContent='build '+BUILD;
+  fetch(location.href.split('#')[0].split('?')[0],{cache:'no-store'}).then(r=>r.text()).then(t=>{ const m=/const BUILD='([^']+)'/.exec(t); if(m&&m[1]!==BUILD&&!document.getElementById('newVer')){ const d=document.createElement('div'); d.id='newVer'; d.className='note'; d.style.cssText='position:fixed;z-index:70;right:16px;bottom:16px;max-width:360px;box-shadow:0 10px 40px #0008'; d.innerHTML='A newer version of this app is available. <a href="#" id="newVerGo" style="color:var(--brass,#d9b66c);font-weight:600">Reload now</a>'; document.body.appendChild(d); $('#newVerGo').onclick=e=>{ e.preventDefault(); location.reload(); }; } }).catch(()=>{});
   await loadFileCfg(); await restoreUser(); renderWalletUI(); renderQuote(); await refreshAll(); monitorStep(); setInterval(()=>{ if(!S.busy&&!document.hidden) refreshAll(); },120000);
 })();
 </script>
