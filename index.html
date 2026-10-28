@@ -186,7 +186,6 @@ td{padding:11px 10px;border-bottom:1px solid #132a20;font-size:13px;white-space:
     <button data-p="pools"><svg viewBox="0 0 24 24"><circle cx="9" cy="12" r="6"/><circle cx="15" cy="12" r="6"/></svg><span>Pool Data</span></button>
     <button data-p="ledger"><svg viewBox="0 0 24 24"><path d="M5 4h14v16H5zM9 9h6M9 13h6M9 17h3"/></svg><span>Treasury Ledger</span></button>
     <button data-p="wallets"><svg viewBox="0 0 24 24"><path d="M3 7h16a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2zM3 7l12-3v3M17 14h2"/></svg><span>Wallets</span></button>
-    <button data-p="settings"><svg viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg><span>Settings</span></button>
   </nav>
   <div class="side-foot">
     <div class="pill"><i class="dot" id="netdot"></i><span id="nettxt">Connecting…</span></div>
@@ -514,7 +513,7 @@ td{padding:11px 10px;border-bottom:1px solid #132a20;font-size:13px;white-space:
   </section>
 
   <!-- SETTINGS -->
-  <section class="page" id="p-settings">
+  <section class="page" id="p-settings" hidden style="display:none!important">
     <div class="card col">
       <h3>Network &amp; tokens</h3>
       <div><label>XRPL websocket</label><input id="cServer"></div>
@@ -807,7 +806,7 @@ async function scanLedger(force){
 }
 
 /* ---------- render ---------- */
-const BUILD='20261028-0131';
+const BUILD='20261028-1105';
 const LIVE_URL='https://thecreator715.github.io/USDX/';
 function sandboxNote(){
   setNet(false); if(document.getElementById('sbNote')) return;
@@ -1904,7 +1903,7 @@ vaultState();
 
 /* ---------- nav / settings / init ---------- */
 const TITLES={home:'USDX <em>Treasury</em>',overview:'<em>Dashboard</em>',burns:'Supply <em>&amp; Burns</em>',pools:'Pool <em>Data</em>',peg:'Peg <em>&amp; Pools</em>',forge:'Burn <em>&amp; Mint</em>',ledger:'Treasury <em>Ledger</em>',operator:'<em>Operator</em>',wallets:'<em>Wallets</em>',settings:'<em>Settings</em>'};
-function go(p){ if(p==='operator') p='home'; document.querySelectorAll('.page').forEach(x=>x.classList.toggle('on',x.id==='p-'+p)); document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('on',b.dataset.p===p)); $('#title').innerHTML=TITLES[p]; if(p==='wallets') renderWalletUI(); if(p==='burns') renderTracker(); if(p==='pools') renderPoolData(); }
+function go(p){ if(p==='operator'||p==='settings') p='home'; document.querySelectorAll('.page').forEach(x=>x.classList.toggle('on',x.id==='p-'+p)); document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('on',b.dataset.p===p)); $('#title').innerHTML=TITLES[p]; if(p==='wallets') renderWalletUI(); if(p==='burns') renderTracker(); if(p==='pools') renderPoolData(); }
 document.querySelectorAll('#nav button').forEach(b=>b.onclick=()=>go(b.dataset.p));
 $('#amt').oninput=renderQuote;
 $('#maxBtn').onclick=()=>{ if(S.userBonsai) $('#amt').value=S.userBonsai; else loadUserBal(); renderQuote(); };
