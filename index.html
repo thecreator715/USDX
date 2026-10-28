@@ -263,6 +263,7 @@ td{padding:11px 10px;border-bottom:1px solid #132a20;font-size:13px;white-space:
         <p style="margin:14px 0 0"><button class="btn" data-go="forge">Start a burn</button></p>
       </div>
     </div>
+    <div class="card"><h3>Latest burns · BONSAI sent to the issuer</h3><div class="tw"><table><thead><tr><th>Time</th><th>From</th><th>Source</th><th>BONSAI burned</th><th>Tx</th></tr></thead><tbody id="recentBurns"><tr><td colspan="5" style="color:var(--mute)">Loading from ledger…</td></tr></tbody></table></div></div>
     <div class="card"><h3>Latest mints</h3><div class="tw"><table><thead><tr><th>Time</th><th>Recipient</th><th>BONSAI burned</th><th>USD rate</th><th>USDX minted</th><th>Tx</th></tr></thead><tbody id="recentMints"><tr><td colspan="6" style="color:var(--mute)">Loading from ledger…</td></tr></tbody></table></div></div>
   </section>
 
@@ -752,7 +753,7 @@ async function scanLedger(force){
 }
 
 /* ---------- render ---------- */
-const BUILD='20261027-2336';
+const BUILD='20261027-2352';
 const LIVE_URL='https://thecreator715.github.io/USDX/';
 function sandboxNote(){
   setNet(false); if(document.getElementById('sbNote')) return;
@@ -795,7 +796,7 @@ function renderConfigWarn(){
   $('#forgeWarn').innerHTML = `<div class="note">Set the BONSAI issuer address in Settings to go live. Currency code, USDX issuer and receiver are already filled in.</div>`;
 }
 function renderAll(){
-  const {u,b}=S.supply, L=S.ledger, px=S.px;
+  const {u,b}=S.supply||{u:0,b:0}, L=S.ledger, px=S.px;
   $('#sUsdx').textContent = fmt(u,2);
   $('#sBonsai').textContent = fmt(b,0);
   const burned = L? L.burnList.reduce((s,x)=>s+x.value,0):0;
@@ -1156,8 +1157,8 @@ let streamOn=false;
 async function watchStream(){
   if(streamOn||!cfgReady()) return; streamOn=true;
   try{
-    const c=await clientFor(serverList()[0]); await c.request({command:'subscribe',accounts:[S.cfg.recv,S.cfg.uIss]});
-    let t=null; c.on('transaction',()=>{ S.ledgerDirty=true; clearTimeout(t); t=setTimeout(async()=>{ try{ await scanLedger(true); renderAll(); }catch(e){} },2500); });
+    const c=await clientFor(serverList()[0]); await c.request({command:'subscribe',accounts:[S.cfg.recv,S.cfg.uIss,S.cfg.bIss]});
+    let t=null; c.on('transaction',()=>{ S.ledgerDirty=true; BS.last=0; clearTimeout(t); t=setTimeout(async()=>{ try{ CACHE.clear(); const [u,b]=await Promise.all([supplyOf(S.cfg.uIss,S.cfg.uCur),supplyOf(S.cfg.bIss,S.cfg.bCur)]); S.supply={u,b}; await scanLedger(true); renderAll(); }catch(e){} },2500); });
     c.on('disconnected',()=>{ streamOn=false; });
   }catch(e){ streamOn=false; }
 }
@@ -1430,6 +1431,8 @@ const burnSource=r=> r.from===S.cfg.recv?(r.mt==='USDX/COVER'?'Coverage burn':'U
 async function renderBurns(){
   await scanBurns(false);
   const rows=BS.rows.slice().sort((a,b)=>(b.time||0)-(a.time||0));
+  const rb=$('#recentBurns'); if(rb&&(BS.init||rows.length)) rb.innerHTML=rows.slice(0,8).map(r=>`<tr><td>${r.time?r.time.toLocaleString():''}</td><td>${alink(r.from)}</td><td><span class="tag ${r.from===S.cfg.recv?'ok':'wait'}">${burnSource(r)}</span></td><td class="mono brass">${fmt(r.value,4)}</td><td>${txl(r.hash)}</td></tr>`).join('')||'<tr><td colspan="5" style="color:var(--mute)">No burns recorded yet.</td></tr>';
+  if(!BS.init&&!rows.length) return;
   const tot=rows.reduce((s,r)=>s+r.value,0), tre=rows.filter(r=>r.from===S.cfg.recv).reduce((s,r)=>s+r.value,0), oth=tot-tre;
   $('#bOut').textContent=fmt(S.supply.b,2); $('#bTot').textContent=fmt(tot,2); $('#bTre').textContent=fmt(tre,2); $('#bOth').textContent=fmt(oth,2);
   $('#bTotSub').textContent=BS.done?'Full issuer history loaded':'Most recent issuer history loaded';
