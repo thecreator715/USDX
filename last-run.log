@@ -1,5 +1,3 @@
-2026-10-29T01:23:41.572Z DEX quotes skipped: receiver has 77.58 XRP, needs 77.60 XRP to hold another offer. Add XRP to the receiver.
-2026-10-29T01:24:26.610Z bonsai/USDX pool: USDX $0.99742 (-26 bps) · reserves 34421.28 BONSAI / 0.23 USDX
 2026-10-29T01:24:34.909Z BONSAI $0.0000067972 (thin AMM pool (0.64 XRP)) · XRP $1.3146
 2026-10-29T01:24:34.909Z note: the BONSAI price comes from a thin AMM pool (0.64 XRP); minting at the live market price anyway.
 2026-10-29T01:25:34.029Z bonsai/USDX pool: USDX $0.99822 (-18 bps) · reserves 34421.28 BONSAI / 0.23 USDX
@@ -867,7 +865,7 @@ RippledError: rate limit: units quota (10000 per 60s) exhausted, retry in ~57503
 2026-10-29T06:39:02.346Z bonsai/USDX pool: USDX $0.99765 (-24 bps) · reserves 34510.90 BONSAI / 0.23 USDX
 2026-10-29T06:39:10.815Z BONSAI $0.0000066907 (thin AMM pool (0.64 XRP)) · XRP $1.2939
 2026-10-29T06:39:10.815Z note: the BONSAI price comes from a thin AMM pool (0.64 XRP); minting at the live market price anyway.
---- run 40828537822 2026-10-29T06:49:03Z ---
+--- run 40828537822 2026-10-29T06:49:34Z ---
 2026-10-29T06:40:06.701Z LIVE mode: transactions will be submitted
 2026-10-29T06:40:06.702Z receiver rphatRpwXcPAo7CVm46dC78JAQ6kLMqb2M · issuer key loaded, deposits will be processed · defending pools bonsai + xrp · DEX quotes in bonsai
 2026-10-29T06:40:07.639Z BONSAI $0.0000066907 (thin AMM pool (0.64 XRP)) · XRP $1.2939
@@ -898,3 +896,5 @@ RippledError: rate limit: units quota (10000 per 60s) exhausted, retry in ~57503
 2026-10-29T06:48:26.445Z BONSAI $0.0000066768 (thin AMM pool (0.64 XRP)) · XRP $1.2913
 2026-10-29T06:48:26.445Z note: the BONSAI price comes from a thin AMM pool (0.64 XRP); minting at the live market price anyway.
 2026-10-29T06:49:02.177Z bonsai/USDX pool: USDX $0.99557 (-44 bps) · reserves 34510.90 BONSAI / 0.23 USDX
+2026-10-29T06:49:28.914Z BONSAI $0.0000066744 (thin AMM pool (0.64 XRP)) · XRP $1.2908
+2026-10-29T06:49:28.914Z note: the BONSAI price comes from a thin AMM pool (0.64 XRP); minting at the live market price anyway.
