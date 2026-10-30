@@ -1,5 +1,3 @@
-2026-10-29T22:58:23.302Z note: the BONSAI price comes from a thin AMM pool (0.64 XRP); minting at the live market price anyway.
-2026-10-29T22:59:18.572Z bonsai/USDX pool: USDX $0.99903 (-10 bps) · reserves 34510.90 BONSAI / 0.22 USDX
 2026-10-29T22:59:26.948Z BONSAI $0.0000064335 (thin AMM pool (0.64 XRP)) · XRP $1.2442
 2026-10-29T22:59:26.949Z note: the BONSAI price comes from a thin AMM pool (0.64 XRP); minting at the live market price anyway.
 2026-10-29T23:00:25.213Z bonsai/USDX pool: USDX $0.99839 (-16 bps) · reserves 34510.90 BONSAI / 0.22 USDX
@@ -879,7 +877,7 @@ RippledError: rate limit: units quota (10000 per 60s) exhausted, retry in ~27174
 2026-10-30T04:59:19.647Z bonsai/USDX pool: USDX $1.00196 (20 bps) · reserves 34300.43 BONSAI / 0.22 USDX
 2026-10-30T04:59:27.897Z BONSAI $0.0000064710 (thin AMM pool (0.64 XRP)) · XRP $1.2514
 2026-10-30T04:59:27.897Z note: the BONSAI price comes from a thin AMM pool (0.64 XRP); minting at the live market price anyway.
---- run 41004123151 2026-10-30T05:05:29Z ---
+--- run 41004123151 2026-10-30T05:06:00Z ---
 2026-10-30T05:00:16.708Z LIVE mode: transactions will be submitted
 2026-10-30T05:00:16.710Z receiver rphatRpwXcPAo7CVm46dC78JAQ6kLMqb2M · issuer key loaded, deposits will be processed · defending pools bonsai + xrp · DEX quotes in bonsai
 2026-10-30T05:00:17.686Z BONSAI $0.0000064681 (thin AMM pool (0.64 XRP)) · XRP $1.2509
@@ -898,3 +896,5 @@ RippledError: rate limit: units quota (10000 per 60s) exhausted, retry in ~27174
 2026-10-30T05:04:34.181Z BONSAI $0.0000064826 (thin AMM pool (0.64 XRP)) · XRP $1.2537
 2026-10-30T05:04:34.181Z note: the BONSAI price comes from a thin AMM pool (0.64 XRP); minting at the live market price anyway.
 2026-10-30T05:05:18.025Z bonsai/USDX pool: USDX $1.00432 (43 bps) · reserves 34300.43 BONSAI / 0.22 USDX
+2026-10-30T05:05:35.838Z BONSAI $0.0000064878 (thin AMM pool (0.64 XRP)) · XRP $1.2547
+2026-10-30T05:05:35.838Z note: the BONSAI price comes from a thin AMM pool (0.64 XRP); minting at the live market price anyway.
