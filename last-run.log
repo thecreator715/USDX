@@ -1,6 +1,3 @@
-2026-10-30T07:40:20.088Z bonsai/USDX pool: USDX $0.99681 (-32 bps) · reserves 34300.43 BONSAI / 0.22 USDX
-2026-10-30T07:40:28.530Z BONSAI $0.0000064684 (thin AMM pool (0.64 XRP)) · XRP $1.2510
-2026-10-30T07:40:28.530Z note: the BONSAI price comes from a thin AMM pool (0.64 XRP); minting at the live market price anyway.
 2026-10-30T07:41:28.742Z bonsai/USDX pool: USDX $0.99741 (-26 bps) · reserves 34300.43 BONSAI / 0.22 USDX
 2026-10-30T07:41:37.098Z BONSAI $0.0000064710 (thin AMM pool (0.64 XRP)) · XRP $1.2514
 2026-10-30T07:41:37.098Z note: the BONSAI price comes from a thin AMM pool (0.64 XRP); minting at the live market price anyway.
@@ -852,7 +849,7 @@
 2026-10-30T12:53:25.742Z bonsai/USDX pool: USDX $0.99936 (-6 bps) · reserves 34300.43 BONSAI / 0.22 USDX
 2026-10-30T12:53:33.942Z BONSAI $0.0000064436 (thin AMM pool (0.64 XRP)) · XRP $1.2462
 2026-10-30T12:53:33.942Z note: the BONSAI price comes from a thin AMM pool (0.64 XRP); minting at the live market price anyway.
---- run 41056272896 2026-10-30T13:10:07Z ---
+--- run 41056272896 2026-10-30T13:10:39Z ---
 2026-10-30T12:54:24.329Z LIVE mode: transactions will be submitted
 2026-10-30T12:54:24.331Z receiver rphatRpwXcPAo7CVm46dC78JAQ6kLMqb2M · issuer key loaded, deposits will be processed · defending pools bonsai + xrp · DEX quotes in bonsai
 2026-10-30T12:54:25.322Z BONSAI $0.0000064448 (thin AMM pool (0.64 XRP)) · XRP $1.2464
@@ -898,3 +895,6 @@
 2026-10-30T13:09:15.692Z bonsai/USDX pool: USDX $0.99563 (-44 bps) · reserves 34300.43 BONSAI / 0.22 USDX
 2026-10-30T13:09:24.107Z BONSAI $0.0000064216 (thin AMM pool (0.64 XRP)) · XRP $1.2419
 2026-10-30T13:09:24.107Z note: the BONSAI price comes from a thin AMM pool (0.64 XRP); minting at the live market price anyway.
+2026-10-30T13:10:18.947Z bonsai/USDX pool: USDX $0.99595 (-40 bps) · reserves 34300.43 BONSAI / 0.22 USDX
+2026-10-30T13:10:27.366Z BONSAI $0.0000064229 (thin AMM pool (0.64 XRP)) · XRP $1.2422
+2026-10-30T13:10:27.366Z note: the BONSAI price comes from a thin AMM pool (0.64 XRP); minting at the live market price anyway.
