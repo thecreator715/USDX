@@ -1,5 +1,3 @@
-2026-10-30T05:09:30.641Z BATCH re-peg: bonsai AMMDeposit 0.001109 + xrp AMMDeposit 0.001486 in one transaction
-2026-10-30T05:09:36.809Z bonsai/USDX pool: USDX $1.00000 (-0 bps) · reserves 34300.43 BONSAI / 0.22 USDX
 2026-10-30T05:09:54.521Z BONSAI $0.0000064947 (thin AMM pool (0.64 XRP)) · XRP $1.2561
 2026-10-30T05:09:54.521Z note: the BONSAI price comes from a thin AMM pool (0.64 XRP); minting at the live market price anyway.
 2026-10-30T05:12:01.512Z bonsai/USDX pool: USDX $1.00068 (7 bps) · reserves 34300.43 BONSAI / 0.22 USDX
@@ -860,7 +858,7 @@ RippledError: rate limit: units quota (10000 per 60s) exhausted, retry in ~27885
 2026-10-30T10:49:01.835Z bonsai/USDX pool: USDX $0.99881 (-12 bps) · reserves 34300.43 BONSAI / 0.22 USDX
 2026-10-30T10:49:10.184Z BONSAI $0.0000064787 (thin AMM pool (0.64 XRP)) · XRP $1.2530
 2026-10-30T10:49:10.184Z note: the BONSAI price comes from a thin AMM pool (0.64 XRP); minting at the live market price anyway.
---- run 41041181736 2026-10-30T11:03:41Z ---
+--- run 41041181736 2026-10-30T11:04:12Z ---
 2026-10-30T10:50:38.707Z LIVE mode: transactions will be submitted
 2026-10-30T10:50:38.708Z receiver rphatRpwXcPAo7CVm46dC78JAQ6kLMqb2M · issuer key loaded, deposits will be processed · defending pools bonsai + xrp · DEX quotes in bonsai
 2026-10-30T10:50:39.507Z BONSAI $0.0000064785 (thin AMM pool (0.64 XRP)) · XRP $1.2529
@@ -898,3 +896,5 @@ RippledError: rate limit: units quota (10000 per 60s) exhausted, retry in ~27885
 2026-10-30T11:02:34.572Z note: the BONSAI price comes from a thin AMM pool (0.64 XRP); minting at the live market price anyway.
 2026-10-30T11:02:40.863Z DEX quotes skipped: receiver has 77.62 XRP, needs 77.80 XRP to hold another offer. Add XRP to the receiver.
 2026-10-30T11:03:34.319Z bonsai/USDX pool: USDX $0.99968 (-3 bps) · reserves 34300.43 BONSAI / 0.22 USDX
+2026-10-30T11:03:42.683Z BONSAI $0.0000064862 (thin AMM pool (0.64 XRP)) · XRP $1.2544
+2026-10-30T11:03:42.683Z note: the BONSAI price comes from a thin AMM pool (0.64 XRP); minting at the live market price anyway.
