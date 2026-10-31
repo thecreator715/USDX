@@ -1,10 +1,3 @@
-2026-10-31T02:25:09.767Z BONSAI $0.0000064862 (thin AMM pool (0.64 XRP)) · XRP $1.2544
-2026-10-31T02:25:09.767Z note: the BONSAI price comes from a thin AMM pool (0.64 XRP); minting at the live market price anyway.
-2026-10-31T02:28:00.908Z bonsai/USDX pool: USDX $1.00004 (0 bps) · reserves 34388.45 BONSAI / 0.22 USDX
-2026-10-31T02:28:09.107Z BONSAI $0.0000064792 (thin AMM pool (0.64 XRP)) · XRP $1.2530
-2026-10-31T02:28:09.107Z note: the BONSAI price comes from a thin AMM pool (0.64 XRP); minting at the live market price anyway.
-2026-10-31T02:30:01.017Z bonsai/USDX pool: USDX $0.99896 (-10 bps) · reserves 34388.45 BONSAI / 0.22 USDX
-2026-10-31T02:30:09.259Z BONSAI $0.0000064823 (thin AMM pool (0.64 XRP)) · XRP $1.2536
 2026-10-31T02:30:09.259Z note: the BONSAI price comes from a thin AMM pool (0.64 XRP); minting at the live market price anyway.
 RippledError: rate limit: units quota (2000 per 10s) exhausted, retry in ~19142ms
   data: {
@@ -898,3 +891,10 @@ RippledError: rate limit: units quota (10000 per 60s) exhausted, retry in ~48682
 2026-10-31T07:31:37.559Z bonsai/USDX pool: USDX $1.00250 (25 bps) · reserves 34388.45 BONSAI / 0.22 USDX
 2026-10-31T07:31:45.848Z BONSAI $0.0000064366 (thin AMM pool (0.64 XRP)) · XRP $1.2448
 2026-10-31T07:31:45.848Z note: the BONSAI price comes from a thin AMM pool (0.64 XRP); minting at the live market price anyway.
+--- run 41179691028 2026-10-31T07:33:41Z ---
+2026-10-31T07:33:11.006Z LIVE mode: transactions will be submitted
+2026-10-31T07:33:11.008Z receiver rphatRpwXcPAo7CVm46dC78JAQ6kLMqb2M · issuer key loaded, deposits will be processed · defending pools bonsai + xrp · DEX quotes in bonsai
+2026-10-31T07:33:12.962Z BONSAI $0.0000064288 (thin AMM pool (0.64 XRP)) · XRP $1.2433
+2026-10-31T07:33:12.962Z note: the BONSAI price comes from a thin AMM pool (0.64 XRP); minting at the live market price anyway.
+2026-10-31T07:33:21.449Z bonsai/USDX pool: USDX $1.00129 (13 bps) · reserves 34388.45 BONSAI / 0.22 USDX
+2026-10-31T07:33:21.914Z DEX quotes skipped: receiver has 77.62 XRP, needs 77.80 XRP to hold another offer. Add XRP to the receiver.
