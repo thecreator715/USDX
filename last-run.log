@@ -1,6 +1,3 @@
-2026-10-31T15:50:40.908Z BONSAI $0.0000064671 (thin AMM pool (0.64 XRP)) · XRP $1.2507
-2026-10-31T15:50:40.908Z note: the BONSAI price comes from a thin AMM pool (0.64 XRP); minting at the live market price anyway.
-2026-10-31T15:50:59.750Z bonsai/USDX pool: USDX $1.00208 (21 bps) · reserves 34388.45 BONSAI / 0.22 USDX
 2026-10-31T15:51:42.986Z BONSAI $0.0000064679 (thin AMM pool (0.64 XRP)) · XRP $1.2509
 2026-10-31T15:51:42.986Z note: the BONSAI price comes from a thin AMM pool (0.64 XRP); minting at the live market price anyway.
 2026-10-31T15:52:08.194Z bonsai/USDX pool: USDX $1.00256 (26 bps) · reserves 34388.45 BONSAI / 0.22 USDX
@@ -876,7 +873,7 @@
 2026-10-31T20:54:55.263Z bonsai/USDX pool: USDX $1.00076 (8 bps) · reserves 34388.45 BONSAI / 0.22 USDX
 2026-10-31T20:55:03.607Z BONSAI $0.0000064567 (thin AMM pool (0.64 XRP)) · XRP $1.2487
 2026-10-31T20:55:03.607Z note: the BONSAI price comes from a thin AMM pool (0.64 XRP); minting at the live market price anyway.
---- run 41239645728 2026-10-31T21:02:08Z ---
+--- run 41239645728 2026-10-31T21:02:40Z ---
 2026-10-31T20:56:26.138Z LIVE mode: transactions will be submitted
 2026-10-31T20:56:26.140Z receiver rphatRpwXcPAo7CVm46dC78JAQ6kLMqb2M · issuer key loaded, deposits will be processed · defending pools bonsai + xrp · DEX quotes in bonsai
 2026-10-31T20:56:27.260Z BONSAI $0.0000064549 (thin AMM pool (0.64 XRP)) · XRP $1.2484
@@ -898,3 +895,6 @@
 2026-10-31T21:01:44.915Z BONSAI $0.0000064529 (thin AMM pool (0.64 XRP)) · XRP $1.2479
 2026-10-31T21:01:44.915Z note: the BONSAI price comes from a thin AMM pool (0.64 XRP); minting at the live market price anyway.
 2026-10-31T21:02:02.395Z bonsai/USDX pool: USDX $1.00016 (2 bps) · reserves 34388.45 BONSAI / 0.22 USDX
+2026-10-31T21:02:30.312Z xrp/USDX pool: USDX $0.99485 (-52 bps) · reserves 0.24 XRP / 0.30 USDX
+2026-10-31T21:02:30.835Z USDX below $1: withdrawing 0.001533 USDX from the pool with the treasury's LP tokens (100.00% of the pool)
+2026-10-31T21:02:36.482Z after rebalancing: USDX $1.00000 in the xrp pool
