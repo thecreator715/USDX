@@ -1,5 +1,3 @@
-2026-10-31T02:39:36.722Z note: the BONSAI price comes from a thin AMM pool (0.64 XRP); minting at the live market price anyway.
-2026-10-31T02:41:01.375Z bonsai/USDX pool: USDX $0.99988 (-1 bps) · reserves 34388.45 BONSAI / 0.22 USDX
 2026-10-31T02:41:09.591Z BONSAI $0.0000064847 (thin AMM pool (0.64 XRP)) · XRP $1.2541
 2026-10-31T02:41:09.591Z note: the BONSAI price comes from a thin AMM pool (0.64 XRP); minting at the live market price anyway.
 2026-10-31T02:43:00.954Z bonsai/USDX pool: USDX $0.99980 (-2 bps) · reserves 34388.45 BONSAI / 0.22 USDX
@@ -854,7 +852,7 @@ RippledError: rate limit: units quota (10000 per 60s) exhausted, retry in ~48682
 2026-10-31T07:31:37.559Z bonsai/USDX pool: USDX $1.00250 (25 bps) · reserves 34388.45 BONSAI / 0.22 USDX
 2026-10-31T07:31:45.848Z BONSAI $0.0000064366 (thin AMM pool (0.64 XRP)) · XRP $1.2448
 2026-10-31T07:31:45.848Z note: the BONSAI price comes from a thin AMM pool (0.64 XRP); minting at the live market price anyway.
---- run 41179691028 2026-10-31T07:46:45Z ---
+--- run 41179691028 2026-10-31T07:47:17Z ---
 2026-10-31T07:33:11.006Z LIVE mode: transactions will be submitted
 2026-10-31T07:33:11.008Z receiver rphatRpwXcPAo7CVm46dC78JAQ6kLMqb2M · issuer key loaded, deposits will be processed · defending pools bonsai + xrp · DEX quotes in bonsai
 2026-10-31T07:33:12.962Z BONSAI $0.0000064288 (thin AMM pool (0.64 XRP)) · XRP $1.2433
@@ -898,3 +896,5 @@ RippledError: rate limit: units quota (10000 per 60s) exhausted, retry in ~48682
 2026-10-31T07:46:03.560Z BONSAI $0.0000064257 (thin AMM pool (0.64 XRP)) · XRP $1.2427
 2026-10-31T07:46:03.560Z note: the BONSAI price comes from a thin AMM pool (0.64 XRP); minting at the live market price anyway.
 2026-10-31T07:46:38.696Z bonsai/USDX pool: USDX $1.00077 (8 bps) · reserves 34388.45 BONSAI / 0.22 USDX
+2026-10-31T07:47:05.382Z BONSAI $0.0000064252 (thin AMM pool (0.64 XRP)) · XRP $1.2426
+2026-10-31T07:47:05.382Z note: the BONSAI price comes from a thin AMM pool (0.64 XRP); minting at the live market price anyway.
