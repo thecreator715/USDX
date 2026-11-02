@@ -1,6 +1,3 @@
-2026-11-02T13:46:19.026Z note: the BONSAI price comes from a thin AMM pool (0.64 XRP); minting at the live market price anyway.
---- run 41453164256 2026-11-02T14:08:50Z ---
-2026-11-02T13:48:26.100Z LIVE mode: transactions will be submitted
 2026-11-02T13:48:26.101Z receiver rphatRpwXcPAo7CVm46dC78JAQ6kLMqb2M · issuer key loaded, deposits will be processed · defending pools bonsai + xrp · DEX quotes in bonsai
 2026-11-02T13:48:26.891Z BONSAI $0.0000065043 (thin AMM pool (0.64 XRP)) · XRP $1.2579
 2026-11-02T13:48:26.891Z note: the BONSAI price comes from a thin AMM pool (0.64 XRP); minting at the live market price anyway.
@@ -852,7 +849,7 @@
 2026-11-02T19:15:26.507Z bonsai/USDX pool: USDX $0.99931 (-7 bps) · reserves 34388.45 BONSAI / 0.22 USDX
 2026-11-02T19:15:34.777Z BONSAI $0.0000064128 (thin AMM pool (0.64 XRP)) · XRP $1.2402
 2026-11-02T19:15:34.777Z note: the BONSAI price comes from a thin AMM pool (0.64 XRP); minting at the live market price anyway.
---- run 41505261055 2026-11-02T19:31:59Z ---
+--- run 41505261055 2026-11-02T19:32:30Z ---
 2026-11-02T19:16:46.269Z LIVE mode: transactions will be submitted
 2026-11-02T19:16:46.270Z receiver rphatRpwXcPAo7CVm46dC78JAQ6kLMqb2M · issuer key loaded, deposits will be processed · defending pools bonsai + xrp · DEX quotes in bonsai
 2026-11-02T19:16:46.837Z BONSAI $0.0000064118 (thin AMM pool (0.64 XRP)) · XRP $1.2400
@@ -898,3 +895,6 @@
 2026-11-02T19:31:04.822Z bonsai/USDX pool: USDX $1.00342 (34 bps) · reserves 34388.45 BONSAI / 0.22 USDX
 2026-11-02T19:31:13.098Z BONSAI $0.0000064371 (thin AMM pool (0.64 XRP)) · XRP $1.2449
 2026-11-02T19:31:13.098Z note: the BONSAI price comes from a thin AMM pool (0.64 XRP); minting at the live market price anyway.
+2026-11-02T19:32:04.844Z xrp/USDX pool: USDX $1.00258 (26 bps) · reserves 0.24 XRP / 0.29 USDX
+2026-11-02T19:32:21.683Z BONSAI $0.0000064309 (thin AMM pool (0.64 XRP)) · XRP $1.2437
+2026-11-02T19:32:21.683Z note: the BONSAI price comes from a thin AMM pool (0.64 XRP); minting at the live market price anyway.
