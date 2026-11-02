@@ -1,7 +1,3 @@
-2026-11-02T12:32:14.334Z BONSAI $0.0000064619 (thin AMM pool (0.64 XRP)) · XRP $1.2497
-2026-11-02T12:32:14.334Z note: the BONSAI price comes from a thin AMM pool (0.64 XRP); minting at the live market price anyway.
-2026-11-02T12:33:10.807Z bonsai/USDX pool: USDX $1.00148 (15 bps) · reserves 34388.45 BONSAI / 0.22 USDX
-2026-11-02T12:33:19.197Z BONSAI $0.0000064663 (thin AMM pool (0.64 XRP)) · XRP $1.2506
 2026-11-02T12:33:19.197Z note: the BONSAI price comes from a thin AMM pool (0.64 XRP); minting at the live market price anyway.
 2026-11-02T12:34:10.912Z bonsai/USDX pool: USDX $1.00108 (11 bps) · reserves 34388.45 BONSAI / 0.22 USDX
 2026-11-02T12:34:19.212Z BONSAI $0.0000064637 (thin AMM pool (0.64 XRP)) · XRP $1.2501
@@ -893,8 +889,12 @@
 2026-11-02T18:14:01.855Z bonsai/USDX pool: USDX $1.00076 (8 bps) · reserves 34388.45 BONSAI / 0.22 USDX
 2026-11-02T18:14:10.296Z BONSAI $0.0000064218 (thin AMM pool (0.64 XRP)) · XRP $1.2420
 2026-11-02T18:14:10.296Z note: the BONSAI price comes from a thin AMM pool (0.64 XRP); minting at the live market price anyway.
---- run 41495675711 2026-11-02T18:16:50Z ---
+--- run 41495675711 2026-11-02T18:17:22Z ---
 2026-11-02T18:15:48.815Z LIVE mode: transactions will be submitted
 2026-11-02T18:15:48.816Z receiver rphatRpwXcPAo7CVm46dC78JAQ6kLMqb2M · issuer key loaded, deposits will be processed · defending pools bonsai + xrp · DEX quotes in bonsai
 2026-11-02T18:15:49.686Z BONSAI $0.0000064138 (thin AMM pool (0.64 XRP)) · XRP $1.2404
 2026-11-02T18:15:49.687Z note: the BONSAI price comes from a thin AMM pool (0.64 XRP); minting at the live market price anyway.
+2026-11-02T18:17:01.827Z bonsai/USDX pool: USDX $0.99939 (-6 bps) · reserves 34388.45 BONSAI / 0.22 USDX
+2026-11-02T18:17:02.282Z DEX quotes skipped: receiver has 77.62 XRP, needs 77.80 XRP to hold another offer. Add XRP to the receiver.
+2026-11-02T18:17:10.508Z BONSAI $0.0000064156 (thin AMM pool (0.64 XRP)) · XRP $1.2408
+2026-11-02T18:17:10.508Z note: the BONSAI price comes from a thin AMM pool (0.64 XRP); minting at the live market price anyway.
