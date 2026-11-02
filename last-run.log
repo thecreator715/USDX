@@ -1,10 +1,3 @@
-2026-11-02T09:47:24.781Z BONSAI $0.0000064671 (thin AMM pool (0.64 XRP)) · XRP $1.2507
-2026-11-02T09:47:24.781Z note: the BONSAI price comes from a thin AMM pool (0.64 XRP); minting at the live market price anyway.
-2026-11-02T09:48:25.203Z bonsai/USDX pool: USDX $1.00216 (22 bps) · reserves 34388.45 BONSAI / 0.22 USDX
-2026-11-02T09:48:33.609Z BONSAI $0.0000064707 (thin AMM pool (0.64 XRP)) · XRP $1.2514
-2026-11-02T09:48:33.609Z note: the BONSAI price comes from a thin AMM pool (0.64 XRP); minting at the live market price anyway.
-2026-11-02T09:49:27.051Z bonsai/USDX pool: USDX $1.00276 (28 bps) · reserves 34388.45 BONSAI / 0.22 USDX
-2026-11-02T09:49:35.489Z BONSAI $0.0000064746 (thin AMM pool (0.64 XRP)) · XRP $1.2522
 2026-11-02T09:49:35.490Z note: the BONSAI price comes from a thin AMM pool (0.64 XRP); minting at the live market price anyway.
 2026-11-02T09:50:35.524Z bonsai/USDX pool: USDX $1.00236 (24 bps) · reserves 34388.45 BONSAI / 0.22 USDX
 2026-11-02T09:50:43.883Z BONSAI $0.0000064720 (thin AMM pool (0.64 XRP)) · XRP $1.2516
@@ -898,3 +891,10 @@
 2026-11-02T15:09:10.117Z BONSAI $0.0000064754 (thin AMM pool (0.64 XRP)) · XRP $1.2523
 2026-11-02T15:09:10.117Z note: the BONSAI price comes from a thin AMM pool (0.64 XRP); minting at the live market price anyway.
 2026-11-02T15:10:01.842Z bonsai/USDX pool: USDX $1.00136 (14 bps) · reserves 34388.45 BONSAI / 0.22 USDX
+--- run 41465712905 2026-11-02T15:11:26Z ---
+2026-11-02T15:10:56.153Z LIVE mode: transactions will be submitted
+2026-11-02T15:10:56.155Z receiver rphatRpwXcPAo7CVm46dC78JAQ6kLMqb2M · issuer key loaded, deposits will be processed · defending pools bonsai + xrp · DEX quotes in bonsai
+2026-11-02T15:10:57.111Z BONSAI $0.0000064888 (thin AMM pool (0.64 XRP)) · XRP $1.2549
+2026-11-02T15:10:57.111Z note: the BONSAI price comes from a thin AMM pool (0.64 XRP); minting at the live market price anyway.
+2026-11-02T15:11:00.632Z bonsai/USDX pool: USDX $1.00344 (34 bps) · reserves 34388.45 BONSAI / 0.22 USDX
+2026-11-02T15:11:01.140Z DEX quotes skipped: receiver has 77.62 XRP, needs 77.80 XRP to hold another offer. Add XRP to the receiver.
