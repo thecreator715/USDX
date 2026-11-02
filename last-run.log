@@ -1,6 +1,3 @@
-2026-11-02T16:41:12.533Z BONSAI $0.0000064554 (thin AMM pool (0.64 XRP)) · XRP $1.2485
-2026-11-02T16:41:12.533Z note: the BONSAI price comes from a thin AMM pool (0.64 XRP); minting at the live market price anyway.
-2026-11-02T16:42:10.695Z bonsai/USDX pool: USDX $0.99816 (-18 bps) · reserves 34388.45 BONSAI / 0.22 USDX
 2026-11-02T16:42:18.911Z BONSAI $0.0000064547 (thin AMM pool (0.64 XRP)) · XRP $1.2483
 2026-11-02T16:42:18.911Z note: the BONSAI price comes from a thin AMM pool (0.64 XRP); minting at the live market price anyway.
 2026-11-02T16:43:12.412Z bonsai/USDX pool: USDX $0.99916 (-8 bps) · reserves 34388.45 BONSAI / 0.22 USDX
@@ -851,7 +848,7 @@
 2026-11-02T22:05:15.081Z bonsai/USDX pool: USDX $1.00084 (8 bps) · reserves 34388.45 BONSAI / 0.22 USDX
 2026-11-02T22:05:23.645Z BONSAI $0.0000064554 (thin AMM pool (0.64 XRP)) · XRP $1.2485
 2026-11-02T22:05:23.645Z note: the BONSAI price comes from a thin AMM pool (0.64 XRP); minting at the live market price anyway.
---- run 41531239596 2026-11-02T22:20:29Z ---
+--- run 41531239596 2026-11-02T22:21:00Z ---
 2026-11-02T22:05:49.284Z LIVE mode: transactions will be submitted
 2026-11-02T22:05:49.285Z receiver rphatRpwXcPAo7CVm46dC78JAQ6kLMqb2M · issuer key loaded, deposits will be processed · defending pools bonsai + xrp · DEX quotes in bonsai
 2026-11-02T22:05:50.065Z BONSAI $0.0000064554 (thin AMM pool (0.64 XRP)) · XRP $1.2485
@@ -898,3 +895,6 @@
 2026-11-02T22:19:43.097Z BONSAI $0.0000064655 (thin AMM pool (0.64 XRP)) · XRP $1.2504
 2026-11-02T22:19:43.097Z note: the BONSAI price comes from a thin AMM pool (0.64 XRP); minting at the live market price anyway.
 2026-11-02T22:20:27.738Z bonsai/USDX pool: USDX $1.00245 (24 bps) · reserves 34388.45 BONSAI / 0.22 USDX
+2026-11-02T22:20:45.149Z BONSAI $0.0000064658 (thin AMM pool (0.64 XRP)) · XRP $1.2505
+2026-11-02T22:20:45.149Z note: the BONSAI price comes from a thin AMM pool (0.64 XRP); minting at the live market price anyway.
+2026-11-02T22:20:58.670Z cycle error: no BONSAI/XRP market found
