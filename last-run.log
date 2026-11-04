@@ -1,6 +1,3 @@
-2026-11-03T19:04:54.935Z note: the BONSAI price comes from a thin AMM pool (0.64 XRP); minting at the live market price anyway.
-2026-11-03T19:05:37.446Z bonsai/USDX pool: USDX $0.99673 (-33 bps) · reserves 34388.45 BONSAI / 0.23 USDX
-2026-11-03T19:05:56.395Z BONSAI $0.0000066082 (thin AMM pool (0.64 XRP)) · XRP $1.2780
 2026-11-03T19:05:56.395Z note: the BONSAI price comes from a thin AMM pool (0.64 XRP); minting at the live market price anyway.
 2026-11-03T19:07:01.759Z bonsai/USDX pool: USDX $0.99653 (-35 bps) · reserves 34388.45 BONSAI / 0.23 USDX
 2026-11-03T19:07:10.451Z BONSAI $0.0000066044 (thin AMM pool (0.64 XRP)) · XRP $1.2772
@@ -848,7 +845,7 @@ RippledError: rate limit: units quota (2000 per 10s) exhausted, retry in ~8843ms
 2026-11-04T00:17:09.735Z bonsai/USDX pool: USDX $0.99863 (-14 bps) · reserves 34388.45 BONSAI / 0.23 USDX
 2026-11-04T00:17:17.994Z BONSAI $0.0000065824 (thin AMM pool (0.64 XRP)) · XRP $1.2730
 2026-11-04T00:17:17.994Z note: the BONSAI price comes from a thin AMM pool (0.64 XRP); minting at the live market price anyway.
---- run 41743227727 2026-11-04T00:37:54Z ---
+--- run 41743227727 2026-11-04T00:38:26Z ---
 2026-11-04T00:18:38.434Z LIVE mode: transactions will be submitted
 2026-11-04T00:18:38.435Z receiver rphatRpwXcPAo7CVm46dC78JAQ6kLMqb2M · issuer key loaded, deposits will be processed · defending pools bonsai + xrp · DEX quotes in bonsai
 2026-11-04T00:18:39.315Z BONSAI $0.0000065684 (thin AMM pool (0.64 XRP)) · XRP $1.2703
@@ -898,3 +895,6 @@ RippledError: rate limit: units quota (2000 per 10s) exhausted, retry in ~8843ms
 2026-11-04T00:36:02.722Z batch re-peg failed, falling back to single transactions: telCAN_NOT_QUEUE Batch
 2026-11-04T00:36:02.869Z bonsai/USDX pool: USDX $0.99263 (-74 bps) · reserves 34388.45 BONSAI / 0.22 USDX
 2026-11-04T00:36:03.422Z USDX below $1: withdrawing 0.001653 USDX from the pool with the treasury's LP tokens (100.00% of the pool)
+2026-11-04T00:38:17.062Z ERROR AMMWithdraw USDX (attempt 1/4): timed out waiting for validation of 4B62D75D3C6A3FEFDB451A72D857BB7B5284B041789745F2CFBA2300C40FCD2B
+2026-11-04T00:38:17.062Z LP withdraw failed: timed out waiting for validation of 4B62D75D3C6A3FEFDB451A72D857BB7B5284B041789745F2CFBA2300C40FCD2B
+2026-11-04T00:38:17.062Z USDX below $1: buying 0.000828 USDX with up to 129.0141 BONSAI
