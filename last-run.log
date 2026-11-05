@@ -1,6 +1,3 @@
-2026-11-05T05:09:32.472Z BONSAI $0.0000066282 (thin AMM pool (0.63 XRP)) · XRP $1.3048
-2026-11-05T05:09:32.472Z note: the BONSAI price comes from a thin AMM pool (0.63 XRP); minting at the live market price anyway.
-2026-11-05T05:09:41.137Z bonsai/USDX pool: USDX $0.99516 (-48 bps) · reserves 34517.11 BONSAI / 0.23 USDX
 2026-11-05T05:10:34.257Z BONSAI $0.0000066297 (thin AMM pool (0.63 XRP)) · XRP $1.3051
 2026-11-05T05:10:34.257Z note: the BONSAI price comes from a thin AMM pool (0.63 XRP); minting at the live market price anyway.
 2026-11-05T05:10:41.184Z bonsai/USDX pool: USDX $0.99539 (-46 bps) · reserves 34517.11 BONSAI / 0.23 USDX
@@ -888,7 +885,7 @@
 2026-11-05T10:14:46.058Z BONSAI $0.0000065957 (thin AMM pool (0.63 XRP)) · XRP $1.3166
 2026-11-05T10:14:46.058Z note: the BONSAI price comes from a thin AMM pool (0.63 XRP); minting at the live market price anyway.
 2026-11-05T10:15:08.363Z bonsai/USDX pool: USDX $0.99848 (-15 bps) · reserves 34517.11 BONSAI / 0.23 USDX
---- run 42006365012 2026-11-05T10:18:00Z ---
+--- run 42006365012 2026-11-05T10:18:31Z ---
 2026-11-05T10:15:56.745Z LIVE mode: transactions will be submitted
 2026-11-05T10:15:56.747Z receiver rphatRpwXcPAo7CVm46dC78JAQ6kLMqb2M · issuer key loaded, deposits will be processed · defending pools bonsai + xrp · DEX quotes in bonsai
 2026-11-05T10:15:57.332Z BONSAI $0.0000065937 (thin AMM pool (0.63 XRP)) · XRP $1.3162
@@ -898,3 +895,6 @@
 2026-11-05T10:17:01.273Z BONSAI $0.0000065952 (thin AMM pool (0.63 XRP)) · XRP $1.3165
 2026-11-05T10:17:01.273Z note: the BONSAI price comes from a thin AMM pool (0.63 XRP); minting at the live market price anyway.
 2026-11-05T10:17:11.084Z bonsai/USDX pool: USDX $0.99871 (-13 bps) · reserves 34517.11 BONSAI / 0.23 USDX
+2026-11-05T10:18:03.861Z BONSAI $0.0000065997 (thin AMM pool (0.63 XRP)) · XRP $1.3174
+2026-11-05T10:18:03.862Z note: the BONSAI price comes from a thin AMM pool (0.63 XRP); minting at the live market price anyway.
+2026-11-05T10:18:21.122Z bonsai/USDX pool: USDX $0.99939 (-6 bps) · reserves 34517.11 BONSAI / 0.23 USDX
