@@ -1,6 +1,3 @@
-2026-11-05T04:44:16.879Z bonsai/USDX pool: USDX $1.00027 (3 bps) · reserves 34517.11 BONSAI / 0.23 USDX
-2026-11-05T04:44:25.344Z BONSAI $0.0000066653 (thin AMM pool (0.63 XRP)) · XRP $1.3121
-2026-11-05T04:44:25.344Z note: the BONSAI price comes from a thin AMM pool (0.63 XRP); minting at the live market price anyway.
 --- run 41967662351 2026-11-05T05:05:57Z ---
 2026-11-05T04:45:38.491Z LIVE mode: transactions will be submitted
 2026-11-05T04:45:38.492Z receiver rphatRpwXcPAo7CVm46dC78JAQ6kLMqb2M · issuer key loaded, deposits will be processed · defending pools bonsai + xrp · DEX quotes in bonsai
@@ -842,7 +839,7 @@
 2026-11-05T09:33:14.419Z BONSAI $0.0000065954 (thin AMM pool (0.63 XRP)) · XRP $1.3166
 2026-11-05T09:33:14.419Z note: the BONSAI price comes from a thin AMM pool (0.63 XRP); minting at the live market price anyway.
 2026-11-05T09:33:30.055Z bonsai/USDX pool: USDX $0.99875 (-13 bps) · reserves 34517.11 BONSAI / 0.23 USDX
---- run 42000686908 2026-11-05T09:52:57Z ---
+--- run 42000686908 2026-11-05T09:53:29Z ---
 2026-11-05T09:34:46.754Z LIVE mode: transactions will be submitted
 2026-11-05T09:34:46.756Z receiver rphatRpwXcPAo7CVm46dC78JAQ6kLMqb2M · issuer key loaded, deposits will be processed · defending pools bonsai + xrp · DEX quotes in bonsai
 2026-11-05T09:34:47.442Z BONSAI $0.0000065972 (thin AMM pool (0.63 XRP)) · XRP $1.3169
@@ -898,3 +895,6 @@
 2026-11-05T09:52:01.153Z BONSAI $0.0000066092 (thin AMM pool (0.63 XRP)) · XRP $1.3193
 2026-11-05T09:52:01.153Z note: the BONSAI price comes from a thin AMM pool (0.63 XRP); minting at the live market price anyway.
 2026-11-05T09:52:21.432Z bonsai/USDX pool: USDX $1.00083 (8 bps) · reserves 34517.11 BONSAI / 0.23 USDX
+2026-11-05T09:53:04.437Z BONSAI $0.0000066049 (thin AMM pool (0.63 XRP)) · XRP $1.3184
+2026-11-05T09:53:04.437Z note: the BONSAI price comes from a thin AMM pool (0.63 XRP); minting at the live market price anyway.
+2026-11-05T09:53:28.423Z bonsai/USDX pool: USDX $0.99992 (-1 bps) · reserves 34517.11 BONSAI / 0.23 USDX
