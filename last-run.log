@@ -857,7 +857,7 @@
 2026-11-05T08:10:15.940Z bonsai/USDX pool: USDX $1.00389 (39 bps) · reserves 34517.11 BONSAI / 0.23 USDX
 2026-11-05T08:10:24.291Z BONSAI $0.0000066869 (thin AMM pool (0.63 XRP)) · XRP $1.3163
 2026-11-05T08:10:24.291Z note: the BONSAI price comes from a thin AMM pool (0.63 XRP); minting at the live market price anyway.
---- run 41990137626 2026-11-05T08:26:27Z ---
+--- run 41990137626 2026-11-05T08:26:59Z ---
 2026-11-05T08:11:54.478Z LIVE mode: transactions will be submitted
 2026-11-05T08:11:54.480Z receiver rphatRpwXcPAo7CVm46dC78JAQ6kLMqb2M · issuer key loaded, deposits will be processed · defending pools bonsai + xrp · DEX quotes in bonsai
 2026-11-05T08:11:55.021Z BONSAI $0.0000066836 (thin AMM pool (0.63 XRP)) · XRP $1.3157
