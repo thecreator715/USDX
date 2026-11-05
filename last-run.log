@@ -1,5 +1,3 @@
-2026-11-04T21:32:04.056Z LIVE mode: transactions will be submitted
-2026-11-04T21:32:04.058Z receiver rphatRpwXcPAo7CVm46dC78JAQ6kLMqb2M · issuer key loaded, deposits will be processed · defending pools bonsai + xrp · DEX quotes in bonsai
 2026-11-04T21:32:04.645Z BONSAI $0.0000066099 (thin AMM pool (0.63 XRP)) · XRP $1.3012
 2026-11-04T21:32:04.645Z note: the BONSAI price comes from a thin AMM pool (0.63 XRP); minting at the live market price anyway.
 2026-11-04T21:32:10.364Z bonsai/USDX pool: USDX $1.00204 (20 bps) · reserves 34517.11 BONSAI / 0.23 USDX
@@ -888,7 +886,7 @@ RippledError: rate limit: units quota (2000 per 10s) exhausted, retry in ~17338m
 2026-11-05T02:40:26.937Z bonsai/USDX pool: USDX $1.00119 (12 bps) · reserves 34517.11 BONSAI / 0.23 USDX
 2026-11-05T02:40:35.320Z BONSAI $0.0000066378 (thin AMM pool (0.63 XRP)) · XRP $1.3067
 2026-11-05T02:40:35.320Z note: the BONSAI price comes from a thin AMM pool (0.63 XRP); minting at the live market price anyway.
---- run 41954632156 2026-11-05T02:43:56Z ---
+--- run 41954632156 2026-11-05T02:44:27Z ---
 2026-11-05T02:41:52.173Z LIVE mode: transactions will be submitted
 2026-11-05T02:41:52.174Z receiver rphatRpwXcPAo7CVm46dC78JAQ6kLMqb2M · issuer key loaded, deposits will be processed · defending pools bonsai + xrp · DEX quotes in bonsai
 2026-11-05T02:41:53.329Z BONSAI $0.0000066394 (thin AMM pool (0.63 XRP)) · XRP $1.3070
@@ -898,3 +896,5 @@ RippledError: rate limit: units quota (2000 per 10s) exhausted, retry in ~17338m
 2026-11-05T02:42:56.405Z BONSAI $0.0000066350 (thin AMM pool (0.63 XRP)) · XRP $1.3061
 2026-11-05T02:42:56.405Z note: the BONSAI price comes from a thin AMM pool (0.63 XRP); minting at the live market price anyway.
 2026-11-05T02:43:00.895Z xrp/USDX pool: USDX $1.00092 (9 bps) · reserves 0.26 XRP / 0.34 USDX
+2026-11-05T02:44:05.137Z BONSAI $0.0000066333 (thin AMM pool (0.63 XRP)) · XRP $1.3058
+2026-11-05T02:44:05.137Z note: the BONSAI price comes from a thin AMM pool (0.63 XRP); minting at the live market price anyway.
