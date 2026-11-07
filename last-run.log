@@ -1,6 +1,3 @@
-2026-11-06T19:25:27.529Z xrp/USDX pool: USDX $0.99684 (-32 bps) · reserves 0.24 XRP / 0.29 USDX
-2026-11-06T19:25:54.204Z BONSAI $0.0000060837 (thin AMM pool (0.64 XRP)) · XRP $1.1820
-2026-11-06T19:25:54.204Z note: the BONSAI price comes from a thin AMM pool (0.64 XRP); minting at the live market price anyway.
 2026-11-06T19:26:28.323Z bonsai/USDX pool: USDX $0.99751 (-25 bps) · reserves 34517.11 BONSAI / 0.21 USDX
 2026-11-06T19:26:54.914Z BONSAI $0.0000060879 (thin AMM pool (0.64 XRP)) · XRP $1.1827
 2026-11-06T19:26:54.914Z note: the BONSAI price comes from a thin AMM pool (0.64 XRP); minting at the live market price anyway.
@@ -864,7 +861,7 @@ RippledError: rate limit: units quota (2000 per 10s) exhausted, retry in ~16940m
 2026-11-07T00:21:59.061Z bonsai/USDX pool: USDX $1.00093 (9 bps) · reserves 34517.11 BONSAI / 0.21 USDX
 2026-11-07T00:22:25.651Z BONSAI $0.0000061608 (thin AMM pool (0.64 XRP)) · XRP $1.1802
 2026-11-07T00:22:25.651Z note: the BONSAI price comes from a thin AMM pool (0.64 XRP); minting at the live market price anyway.
---- run 42315769787 2026-11-07T00:33:52Z ---
+--- run 42315769787 2026-11-07T00:34:23Z ---
 2026-11-07T00:23:28.488Z LIVE mode: transactions will be submitted
 2026-11-07T00:23:28.489Z receiver rphatRpwXcPAo7CVm46dC78JAQ6kLMqb2M · issuer key loaded, deposits will be processed · defending pools bonsai + xrp · DEX quotes in bonsai
 2026-11-07T00:23:29.442Z BONSAI $0.0000061556 (thin AMM pool (0.64 XRP)) · XRP $1.1792
@@ -898,3 +895,6 @@ RippledError: rate limit: units quota (2000 per 10s) exhausted, retry in ~16940m
 2026-11-07T00:33:05.176Z BONSAI $0.0000061520 (thin AMM pool (0.64 XRP)) · XRP $1.1785
 2026-11-07T00:33:05.176Z note: the BONSAI price comes from a thin AMM pool (0.64 XRP); minting at the live market price anyway.
 2026-11-07T00:33:47.025Z bonsai/USDX pool: USDX $0.99949 (-5 bps) · reserves 34517.11 BONSAI / 0.21 USDX
+2026-11-07T00:34:13.703Z BONSAI $0.0000061488 (thin AMM pool (0.64 XRP)) · XRP $1.1779
+2026-11-07T00:34:13.704Z note: the BONSAI price comes from a thin AMM pool (0.64 XRP); minting at the live market price anyway.
+2026-11-07T00:34:21.651Z DEX quotes skipped: receiver has 77.61 XRP, needs 77.80 XRP to hold another offer. Add XRP to the receiver.
