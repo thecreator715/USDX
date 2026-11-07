@@ -1,6 +1,3 @@
-2026-11-07T06:27:34.914Z BONSAI $0.0000061519 (thin AMM pool (0.65 XRP)) · XRP $1.1629
-2026-11-07T06:27:34.915Z note: the BONSAI price comes from a thin AMM pool (0.65 XRP); minting at the live market price anyway.
-2026-11-07T06:28:26.461Z xrp/USDX pool: USDX $1.00397 (40 bps) · reserves 0.22 XRP / 0.26 USDX
 2026-11-07T06:28:43.845Z BONSAI $0.0000061505 (thin AMM pool (0.65 XRP)) · XRP $1.1627
 2026-11-07T06:28:43.845Z note: the BONSAI price comes from a thin AMM pool (0.65 XRP); minting at the live market price anyway.
 2026-11-07T06:29:28.481Z bonsai/USDX pool: USDX $1.00276 (28 bps) · reserves 34517.11 BONSAI / 0.21 USDX
@@ -839,7 +836,7 @@
 2026-11-07T11:21:17.018Z bonsai/USDX pool: USDX $1.00219 (22 bps) · reserves 34517.11 BONSAI / 0.21 USDX
 2026-11-07T11:21:25.414Z BONSAI $0.0000061839 (thin AMM pool (0.65 XRP)) · XRP $1.1690
 2026-11-07T11:21:25.414Z note: the BONSAI price comes from a thin AMM pool (0.65 XRP); minting at the live market price anyway.
---- run 42366431829 2026-11-07T11:41:50Z ---
+--- run 42366431829 2026-11-07T11:42:21Z ---
 2026-11-07T11:22:35.874Z LIVE mode: transactions will be submitted
 2026-11-07T11:22:35.875Z receiver rphatRpwXcPAo7CVm46dC78JAQ6kLMqb2M · issuer key loaded, deposits will be processed · defending pools bonsai + xrp · DEX quotes in bonsai
 2026-11-07T11:22:36.480Z BONSAI $0.0000061831 (thin AMM pool (0.65 XRP)) · XRP $1.1688
@@ -898,3 +895,6 @@
 2026-11-07T11:40:43.603Z BONSAI $0.0000061902 (thin AMM pool (0.65 XRP)) · XRP $1.1702
 2026-11-07T11:40:43.604Z note: the BONSAI price comes from a thin AMM pool (0.65 XRP); minting at the live market price anyway.
 2026-11-07T11:41:17.861Z bonsai/USDX pool: USDX $1.00360 (36 bps) · reserves 34517.11 BONSAI / 0.21 USDX
+2026-11-07T11:41:52.396Z BONSAI $0.0000061929 (thin AMM pool (0.65 XRP)) · XRP $1.1707
+2026-11-07T11:41:52.396Z note: the BONSAI price comes from a thin AMM pool (0.65 XRP); minting at the live market price anyway.
+2026-11-07T11:42:19.085Z bonsai/USDX pool: USDX $1.00364 (36 bps) · reserves 34517.11 BONSAI / 0.21 USDX
