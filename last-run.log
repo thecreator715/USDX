@@ -1,6 +1,3 @@
-2026-11-07T15:19:11.217Z BONSAI $0.0000061167 (thin AMM pool (0.65 XRP)) · XRP $1.1563
-2026-11-07T15:19:11.217Z note: the BONSAI price comes from a thin AMM pool (0.65 XRP); minting at the live market price anyway.
-2026-11-07T15:21:01.889Z bonsai/USDX pool: USDX $0.99690 (-31 bps) · reserves 34517.11 BONSAI / 0.21 USDX
 2026-11-07T15:21:02.042Z xrp/USDX pool: USDX $0.99304 (-70 bps) · reserves 0.22 XRP / 0.26 USDX
 2026-11-07T15:21:02.972Z USDX below $1: withdrawing 0.001799 USDX from the pool with the treasury's LP tokens (100.00% of the pool)
 2026-11-07T15:21:08.476Z after rebalancing: USDX $1.00000 in the xrp pool
@@ -876,7 +873,7 @@
 2026-11-07T20:16:13.880Z BONSAI $0.0000060760 (thin AMM pool (0.64 XRP)) · XRP $1.1605
 2026-11-07T20:16:13.880Z note: the BONSAI price comes from a thin AMM pool (0.64 XRP); minting at the live market price anyway.
 2026-11-07T20:16:31.756Z bonsai/USDX pool: USDX $1.00090 (9 bps) · reserves 34517.11 BONSAI / 0.21 USDX
---- run 42408627985 2026-11-07T20:23:39Z ---
+--- run 42408627985 2026-11-07T20:24:11Z ---
 2026-11-07T20:17:23.971Z LIVE mode: transactions will be submitted
 2026-11-07T20:17:23.972Z receiver rphatRpwXcPAo7CVm46dC78JAQ6kLMqb2M · issuer key loaded, deposits will be processed · defending pools bonsai + xrp · DEX quotes in bonsai
 2026-11-07T20:17:24.873Z BONSAI $0.0000060765 (thin AMM pool (0.64 XRP)) · XRP $1.1606
@@ -898,3 +895,6 @@
 2026-11-07T20:22:41.607Z BONSAI $0.0000060712 (thin AMM pool (0.64 XRP)) · XRP $1.1596
 2026-11-07T20:22:41.607Z note: the BONSAI price comes from a thin AMM pool (0.64 XRP); minting at the live market price anyway.
 2026-11-07T20:23:02.720Z bonsai/USDX pool: USDX $1.00013 (1 bps) · reserves 34517.11 BONSAI / 0.21 USDX
+2026-11-07T20:23:47.751Z BONSAI $0.0000060705 (thin AMM pool (0.64 XRP)) · XRP $1.1595
+2026-11-07T20:23:47.751Z note: the BONSAI price comes from a thin AMM pool (0.64 XRP); minting at the live market price anyway.
+2026-11-07T20:24:08.906Z bonsai/USDX pool: USDX $1.00013 (1 bps) · reserves 34517.11 BONSAI / 0.21 USDX
