@@ -1,6 +1,3 @@
-2026-11-07T14:00:15.435Z bonsai/USDX pool: USDX $1.00418 (42 bps) · reserves 34517.11 BONSAI / 0.21 USDX
-2026-11-07T14:00:23.677Z BONSAI $0.0000061630 (thin AMM pool (0.65 XRP)) · XRP $1.1650
-2026-11-07T14:00:23.677Z note: the BONSAI price comes from a thin AMM pool (0.65 XRP); minting at the live market price anyway.
 2026-11-07T14:01:15.379Z bonsai/USDX pool: USDX $1.00509 (51 bps) · reserves 34517.11 BONSAI / 0.21 USDX
 2026-11-07T14:01:15.697Z USDX above $1: depositing 0.001077 treasury USDX into the pool
 2026-11-07T14:01:22.135Z after rebalancing: USDX $1.00000 in the bonsai pool
@@ -864,7 +861,7 @@
 2026-11-07T18:53:52.466Z BONSAI $0.0000060796 (thin AMM pool (0.64 XRP)) · XRP $1.1612
 2026-11-07T18:53:52.466Z note: the BONSAI price comes from a thin AMM pool (0.64 XRP); minting at the live market price anyway.
 2026-11-07T18:54:11.090Z bonsai/USDX pool: USDX $1.00151 (15 bps) · reserves 34517.11 BONSAI / 0.21 USDX
---- run 42401960815 2026-11-07T19:05:28Z ---
+--- run 42401960815 2026-11-07T19:05:59Z ---
 2026-11-07T18:55:04.458Z LIVE mode: transactions will be submitted
 2026-11-07T18:55:04.459Z receiver rphatRpwXcPAo7CVm46dC78JAQ6kLMqb2M · issuer key loaded, deposits will be processed · defending pools bonsai + xrp · DEX quotes in bonsai
 2026-11-07T18:55:05.526Z BONSAI $0.0000060796 (thin AMM pool (0.64 XRP)) · XRP $1.1612
@@ -898,3 +895,6 @@
 2026-11-07T19:04:42.257Z BONSAI $0.0000060843 (thin AMM pool (0.64 XRP)) · XRP $1.1621
 2026-11-07T19:04:42.257Z note: the BONSAI price comes from a thin AMM pool (0.64 XRP); minting at the live market price anyway.
 2026-11-07T19:05:01.228Z bonsai/USDX pool: USDX $1.00228 (23 bps) · reserves 34517.11 BONSAI / 0.21 USDX
+2026-11-07T19:05:45.362Z BONSAI $0.0000060804 (thin AMM pool (0.64 XRP)) · XRP $1.1614
+2026-11-07T19:05:45.362Z note: the BONSAI price comes from a thin AMM pool (0.64 XRP); minting at the live market price anyway.
+2026-11-07T19:05:50.865Z DEX quotes skipped: receiver has 77.61 XRP, needs 77.80 XRP to hold another offer. Add XRP to the receiver.
