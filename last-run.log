@@ -1,6 +1,3 @@
-2026-11-08T17:11:33.793Z note: the BONSAI price comes from a thin AMM pool (0.65 XRP); minting at the live market price anyway.
-2026-11-08T17:12:27.448Z bonsai/USDX pool: USDX $0.99978 (-2 bps) · reserves 34517.11 BONSAI / 0.21 USDX
-2026-11-08T17:12:35.877Z BONSAI $0.0000061152 (thin AMM pool (0.65 XRP)) · XRP $1.1535
 2026-11-08T17:12:35.877Z note: the BONSAI price comes from a thin AMM pool (0.65 XRP); minting at the live market price anyway.
 2026-11-08T17:13:28.414Z bonsai/USDX pool: USDX $0.99991 (-1 bps) · reserves 34517.11 BONSAI / 0.21 USDX
 2026-11-08T17:13:36.794Z BONSAI $0.0000061160 (thin AMM pool (0.65 XRP)) · XRP $1.1536
@@ -855,7 +852,7 @@
 2026-11-08T22:02:38.960Z posting buy quote 1.28 USDX @ 166952
 2026-11-08T22:02:54.885Z BONSAI $0.0000059916 (thin AMM pool (0.65 XRP)) · XRP $1.1162
 2026-11-08T22:02:54.885Z note: the BONSAI price comes from a thin AMM pool (0.65 XRP); minting at the live market price anyway.
---- run 42526637075 2026-11-08T22:14:06Z ---
+--- run 42526637075 2026-11-08T22:14:37Z ---
 2026-11-08T22:04:15.906Z LIVE mode: transactions will be submitted
 2026-11-08T22:04:15.908Z receiver rphatRpwXcPAo7CVm46dC78JAQ6kLMqb2M · issuer key loaded, deposits will be processed · defending pools bonsai + xrp · DEX quotes in bonsai
 2026-11-08T22:04:16.553Z BONSAI $0.0000060018 (thin AMM pool (0.65 XRP)) · XRP $1.1181
@@ -898,3 +895,6 @@
 2026-11-08T22:13:09.287Z BONSAI $0.0000059774 (thin AMM pool (0.65 XRP)) · XRP $1.1136
 2026-11-08T22:13:09.287Z note: the BONSAI price comes from a thin AMM pool (0.65 XRP); minting at the live market price anyway.
 2026-11-08T22:14:01.485Z bonsai/USDX pool: USDX $1.00429 (43 bps) · reserves 34517.11 BONSAI / 0.21 USDX
+2026-11-08T22:14:09.719Z BONSAI $0.0000059967 (thin AMM pool (0.65 XRP)) · XRP $1.1172
+2026-11-08T22:14:09.720Z note: the BONSAI price comes from a thin AMM pool (0.65 XRP); minting at the live market price anyway.
+2026-11-08T22:14:31.230Z BATCH re-peg: bonsai AMMDeposit 0.001547 + xrp AMMDeposit 0.001630 in one transaction
