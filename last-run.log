@@ -1,6 +1,3 @@
-2026-11-08T02:52:37.858Z bonsai/USDX pool: USDX $0.99513 (-49 bps) · reserves 34517.11 BONSAI / 0.21 USDX
-2026-11-08T02:53:20.970Z BONSAI $0.0000061203 (thin AMM pool (0.65 XRP)) · XRP $1.1544
-2026-11-08T02:53:20.970Z note: the BONSAI price comes from a thin AMM pool (0.65 XRP); minting at the live market price anyway.
 2026-11-08T02:53:41.439Z bonsai/USDX pool: USDX $0.99577 (-42 bps) · reserves 34517.11 BONSAI / 0.21 USDX
 2026-11-08T02:54:24.627Z BONSAI $0.0000061216 (thin AMM pool (0.65 XRP)) · XRP $1.1546
 2026-11-08T02:54:24.627Z note: the BONSAI price comes from a thin AMM pool (0.65 XRP); minting at the live market price anyway.
@@ -891,10 +888,13 @@
 2026-11-08T07:56:18.176Z bonsai/USDX pool: USDX $0.99867 (-13 bps) · reserves 34517.11 BONSAI / 0.21 USDX
 2026-11-08T07:56:44.761Z BONSAI $0.0000061696 (thin AMM pool (0.65 XRP)) · XRP $1.1637
 2026-11-08T07:56:44.761Z note: the BONSAI price comes from a thin AMM pool (0.65 XRP); minting at the live market price anyway.
---- run 42459535207 2026-11-08T07:58:44Z ---
+--- run 42459535207 2026-11-08T07:59:15Z ---
 2026-11-08T07:57:42.943Z LIVE mode: transactions will be submitted
 2026-11-08T07:57:42.944Z receiver rphatRpwXcPAo7CVm46dC78JAQ6kLMqb2M · issuer key loaded, deposits will be processed · defending pools bonsai + xrp · DEX quotes in bonsai
 2026-11-08T07:57:43.468Z BONSAI $0.0000061672 (thin AMM pool (0.65 XRP)) · XRP $1.1632
 2026-11-08T07:57:43.469Z note: the BONSAI price comes from a thin AMM pool (0.65 XRP); minting at the live market price anyway.
 2026-11-08T07:57:51.023Z bonsai/USDX pool: USDX $0.99828 (-17 bps) · reserves 34517.11 BONSAI / 0.21 USDX
 2026-11-08T07:57:51.291Z DEX quotes skipped: receiver has 77.61 XRP, needs 77.80 XRP to hold another offer. Add XRP to the receiver.
+2026-11-08T07:58:51.534Z BONSAI $0.0000061669 (thin AMM pool (0.65 XRP)) · XRP $1.1632
+2026-11-08T07:58:51.535Z note: the BONSAI price comes from a thin AMM pool (0.65 XRP); minting at the live market price anyway.
+2026-11-08T07:59:01.373Z bonsai/USDX pool: USDX $0.99824 (-18 bps) · reserves 34517.11 BONSAI / 0.21 USDX
