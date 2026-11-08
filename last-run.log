@@ -1,7 +1,3 @@
-2026-11-08T14:38:55.198Z note: the BONSAI price comes from a thin AMM pool (0.65 XRP); minting at the live market price anyway.
-2026-11-08T14:39:00.705Z bonsai/USDX pool: USDX $1.00065 (6 bps) · reserves 34517.11 BONSAI / 0.21 USDX
-2026-11-08T14:40:03.953Z BONSAI $0.0000061531 (thin AMM pool (0.65 XRP)) · XRP $1.1606
-2026-11-08T14:40:03.953Z note: the BONSAI price comes from a thin AMM pool (0.65 XRP); minting at the live market price anyway.
 2026-11-08T14:41:01.883Z bonsai/USDX pool: USDX $1.00078 (8 bps) · reserves 34517.11 BONSAI / 0.21 USDX
 2026-11-08T14:41:10.256Z BONSAI $0.0000061529 (thin AMM pool (0.65 XRP)) · XRP $1.1605
 2026-11-08T14:41:10.257Z note: the BONSAI price comes from a thin AMM pool (0.65 XRP); minting at the live market price anyway.
@@ -893,8 +889,12 @@
 2026-11-08T19:38:35.728Z bonsai/USDX pool: USDX $1.00035 (3 bps) · reserves 34517.11 BONSAI / 0.21 USDX
 2026-11-08T19:38:44.093Z BONSAI $0.0000061211 (thin AMM pool (0.65 XRP)) · XRP $1.1545
 2026-11-08T19:38:44.093Z note: the BONSAI price comes from a thin AMM pool (0.65 XRP); minting at the live market price anyway.
---- run 42514459523 2026-11-08T19:41:48Z ---
+--- run 42514459523 2026-11-08T19:42:19Z ---
 2026-11-08T19:40:15.513Z LIVE mode: transactions will be submitted
 2026-11-08T19:40:15.515Z receiver rphatRpwXcPAo7CVm46dC78JAQ6kLMqb2M · issuer key loaded, deposits will be processed · defending pools bonsai + xrp · DEX quotes in bonsai
 2026-11-08T19:40:16.372Z BONSAI $0.0000061211 (thin AMM pool (0.65 XRP)) · XRP $1.1545
 2026-11-08T19:40:16.373Z note: the BONSAI price comes from a thin AMM pool (0.65 XRP); minting at the live market price anyway.
+2026-11-08T19:42:01.911Z bonsai/USDX pool: USDX $1.00022 (2 bps) · reserves 34517.11 BONSAI / 0.21 USDX
+2026-11-08T19:42:02.572Z DEX quotes skipped: receiver has 77.61 XRP, needs 77.80 XRP to hold another offer. Add XRP to the receiver.
+2026-11-08T19:42:10.880Z BONSAI $0.0000061142 (thin AMM pool (0.65 XRP)) · XRP $1.1533
+2026-11-08T19:42:10.880Z note: the BONSAI price comes from a thin AMM pool (0.65 XRP); minting at the live market price anyway.
