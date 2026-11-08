@@ -1,5 +1,3 @@
-2026-11-07T23:09:45.410Z note: the BONSAI price comes from a thin AMM pool (0.65 XRP); minting at the live market price anyway.
-2026-11-07T23:10:26.277Z bonsai/USDX pool: USDX $0.99832 (-17 bps) · reserves 34517.11 BONSAI / 0.21 USDX
 2026-11-07T23:10:52.487Z BONSAI $0.0000061354 (thin AMM pool (0.65 XRP)) · XRP $1.1572
 2026-11-07T23:10:52.487Z note: the BONSAI price comes from a thin AMM pool (0.65 XRP); minting at the live market price anyway.
 2026-11-07T23:11:28.416Z bonsai/USDX pool: USDX $0.99806 (-19 bps) · reserves 34517.11 BONSAI / 0.21 USDX
@@ -839,7 +837,7 @@ RippledError: rate limit: units quota (10000 per 60s) exhausted, retry in ~57636
 2026-11-08T03:48:57.680Z BONSAI $0.0000061447 (thin AMM pool (0.65 XRP)) · XRP $1.1590
 2026-11-08T03:48:57.680Z note: the BONSAI price comes from a thin AMM pool (0.65 XRP); minting at the live market price anyway.
 2026-11-08T03:49:46.143Z bonsai/USDX pool: USDX $1.00004 (0 bps) · reserves 34517.11 BONSAI / 0.21 USDX
---- run 42442963657 2026-11-08T04:09:53Z ---
+--- run 42442963657 2026-11-08T04:10:24Z ---
 2026-11-08T03:50:38.615Z LIVE mode: transactions will be submitted
 2026-11-08T03:50:38.616Z receiver rphatRpwXcPAo7CVm46dC78JAQ6kLMqb2M · issuer key loaded, deposits will be processed · defending pools bonsai + xrp · DEX quotes in bonsai
 2026-11-08T03:50:39.459Z BONSAI $0.0000061468 (thin AMM pool (0.65 XRP)) · XRP $1.1594
@@ -898,3 +896,5 @@ RippledError: rate limit: units quota (10000 per 60s) exhausted, retry in ~57636
 2026-11-08T04:08:54.596Z BONSAI $0.0000061542 (thin AMM pool (0.65 XRP)) · XRP $1.1608
 2026-11-08T04:08:54.596Z note: the BONSAI price comes from a thin AMM pool (0.65 XRP); minting at the live market price anyway.
 2026-11-08T04:09:47.376Z bonsai/USDX pool: USDX $1.00147 (15 bps) · reserves 34517.11 BONSAI / 0.21 USDX
+2026-11-08T04:09:55.737Z BONSAI $0.0000061553 (thin AMM pool (0.65 XRP)) · XRP $1.1610
+2026-11-08T04:09:55.737Z note: the BONSAI price comes from a thin AMM pool (0.65 XRP); minting at the live market price anyway.
