@@ -1,10 +1,3 @@
-2026-11-09T01:45:20.780Z BATCH re-peg: bonsai AMMDeposit 0.001059 + xrp AMMDeposit 0.001113 in one transaction
-2026-11-09T01:45:21.355Z ERROR Batch re-peg (attempt 1/4): telCAN_NOT_QUEUE Batch
-2026-11-09T01:45:21.355Z batch re-peg failed, falling back to single transactions: telCAN_NOT_QUEUE Batch
-2026-11-09T01:45:21.494Z bonsai/USDX pool: USDX $1.00513 (51 bps) · reserves 34604.44 BONSAI / 0.21 USDX
-2026-11-09T01:45:21.917Z USDX above $1: depositing 0.001059 treasury USDX into the pool
-2026-11-09T01:45:27.751Z after rebalancing: USDX $1.00000 in the bonsai pool
-2026-11-09T01:45:27.892Z xrp/USDX pool: USDX $1.00513 (51 bps) · reserves 0.20 XRP / 0.22 USDX
 2026-11-09T01:45:28.325Z USDX above $1: depositing 0.001113 treasury USDX into the pool
 2026-11-09T01:45:34.814Z after rebalancing: USDX $1.00000 in the xrp pool
 2026-11-09T01:46:01.118Z BONSAI $0.0000059916 (thin AMM pool (0.65 XRP)) · XRP $1.1162
@@ -898,3 +891,10 @@ RippledError: rate limit: units quota (2000 per 10s) exhausted, retry in ~7993ms
 2026-11-09T07:00:05.927Z bonsai/USDX pool: USDX $1.00294 (29 bps) · reserves 34604.44 BONSAI / 0.20 USDX
 2026-11-09T07:00:14.276Z BONSAI $0.0000058524 (thin AMM pool (0.65 XRP)) · XRP $1.0903
 2026-11-09T07:00:14.276Z note: the BONSAI price comes from a thin AMM pool (0.65 XRP); minting at the live market price anyway.
+--- run 42574480244 2026-11-09T07:01:30Z ---
+2026-11-09T07:01:00.654Z LIVE mode: transactions will be submitted
+2026-11-09T07:01:00.656Z receiver rphatRpwXcPAo7CVm46dC78JAQ6kLMqb2M · issuer key loaded, deposits will be processed · defending pools bonsai + xrp · DEX quotes in bonsai
+2026-11-09T07:01:01.426Z BONSAI $0.0000058524 (thin AMM pool (0.65 XRP)) · XRP $1.0903
+2026-11-09T07:01:01.427Z note: the BONSAI price comes from a thin AMM pool (0.65 XRP); minting at the live market price anyway.
+2026-11-09T07:01:11.741Z bonsai/USDX pool: USDX $1.00248 (25 bps) · reserves 34604.44 BONSAI / 0.20 USDX
+2026-11-09T07:01:12.130Z DEX quotes skipped: receiver has 77.66 XRP, needs 77.80 XRP to hold another offer. Add XRP to the receiver.
