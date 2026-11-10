@@ -1,5 +1,3 @@
-2026-11-10T01:21:53.684Z receiver rphatRpwXcPAo7CVm46dC78JAQ6kLMqb2M · issuer key loaded, deposits will be processed · defending pools bonsai + xrp · DEX quotes in bonsai
-2026-11-10T01:21:54.437Z BONSAI $0.0000059152 (thin AMM pool (0.65 XRP)) · XRP $1.1020
 2026-11-10T01:21:54.437Z note: the BONSAI price comes from a thin AMM pool (0.65 XRP); minting at the live market price anyway.
 2026-11-10T01:22:00.710Z bonsai/USDX pool: USDX $0.99973 (-3 bps) · reserves 34604.44 BONSAI / 0.20 USDX
 2026-11-10T01:22:01.105Z DEX quotes skipped: receiver has 77.66 XRP, needs 77.80 XRP to hold another offer. Add XRP to the receiver.
@@ -838,7 +836,7 @@ RippledError: rate limit: units quota (10000 per 60s) exhausted, retry in ~27525
 2026-11-10T06:09:40.462Z BONSAI $0.0000058840 (thin AMM pool (0.65 XRP)) · XRP $1.0962
 2026-11-10T06:09:40.462Z note: the BONSAI price comes from a thin AMM pool (0.65 XRP); minting at the live market price anyway.
 2026-11-10T06:10:17.157Z bonsai/USDX pool: USDX $0.99968 (-3 bps) · reserves 34604.44 BONSAI / 0.20 USDX
---- run 42764600537 2026-11-10T06:29:38Z ---
+--- run 42764600537 2026-11-10T06:30:09Z ---
 2026-11-10T06:10:50.881Z LIVE mode: transactions will be submitted
 2026-11-10T06:10:50.883Z receiver rphatRpwXcPAo7CVm46dC78JAQ6kLMqb2M · issuer key loaded, deposits will be processed · defending pools bonsai + xrp · DEX quotes in bonsai
 2026-11-10T06:10:51.810Z BONSAI $0.0000058883 (thin AMM pool (0.65 XRP)) · XRP $1.0970
@@ -898,3 +896,5 @@ RippledError: rate limit: units quota (10000 per 60s) exhausted, retry in ~27525
 2026-11-10T06:28:56.249Z BONSAI $0.0000058974 (thin AMM pool (0.65 XRP)) · XRP $1.0987
 2026-11-10T06:28:56.249Z note: the BONSAI price comes from a thin AMM pool (0.65 XRP); minting at the live market price anyway.
 2026-11-10T06:29:31.695Z bonsai/USDX pool: USDX $1.00223 (22 bps) · reserves 34604.44 BONSAI / 0.20 USDX
+2026-11-10T06:29:58.410Z BONSAI $0.0000059028 (thin AMM pool (0.65 XRP)) · XRP $1.0997
+2026-11-10T06:29:58.410Z note: the BONSAI price comes from a thin AMM pool (0.65 XRP); minting at the live market price anyway.
