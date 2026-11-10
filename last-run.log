@@ -1,6 +1,3 @@
-2026-11-09T20:40:54.590Z BONSAI $0.0000058674 (thin AMM pool (0.65 XRP)) · XRP $1.0931
-2026-11-09T20:40:54.590Z note: the BONSAI price comes from a thin AMM pool (0.65 XRP); minting at the live market price anyway.
-2026-11-09T20:41:54.147Z bonsai/USDX pool: USDX $1.00239 (24 bps) · reserves 34604.44 BONSAI / 0.20 USDX
 2026-11-09T20:42:02.437Z BONSAI $0.0000058631 (thin AMM pool (0.65 XRP)) · XRP $1.0923
 2026-11-09T20:42:02.437Z note: the BONSAI price comes from a thin AMM pool (0.65 XRP); minting at the live market price anyway.
 2026-11-09T20:43:02.276Z bonsai/USDX pool: USDX $1.00239 (24 bps) · reserves 34604.44 BONSAI / 0.20 USDX
@@ -868,7 +865,7 @@
 2026-11-10T02:01:34.101Z note: the BONSAI price comes from a thin AMM pool (0.65 XRP); minting at the live market price anyway.
 2026-11-10T02:01:59.495Z BATCH re-peg: bonsai AMMWithdraw 0.001049 + xrp AMMWithdraw 0.001103 in one transaction
 2026-11-10T02:02:13.080Z retired 0.002152 USDX
---- run 42739840875 2026-11-10T02:15:16Z ---
+--- run 42739840875 2026-11-10T02:15:47Z ---
 2026-11-10T02:03:15.529Z LIVE mode: transactions will be submitted
 2026-11-10T02:03:15.531Z receiver rphatRpwXcPAo7CVm46dC78JAQ6kLMqb2M · issuer key loaded, deposits will be processed · defending pools bonsai + xrp · DEX quotes in bonsai
 2026-11-10T02:03:16.402Z BONSAI $0.0000058969 (thin AMM pool (0.65 XRP)) · XRP $1.0986
@@ -898,3 +895,6 @@
 2026-11-10T02:14:35.881Z bonsai/USDX pool: USDX $1.00114 (11 bps) · reserves 34604.44 BONSAI / 0.20 USDX
 2026-11-10T02:14:44.244Z BONSAI $0.0000058948 (thin AMM pool (0.65 XRP)) · XRP $1.0982
 2026-11-10T02:14:44.244Z note: the BONSAI price comes from a thin AMM pool (0.65 XRP); minting at the live market price anyway.
+2026-11-10T02:15:36.783Z bonsai/USDX pool: USDX $1.00173 (17 bps) · reserves 34604.44 BONSAI / 0.20 USDX
+2026-11-10T02:15:45.143Z BONSAI $0.0000058932 (thin AMM pool (0.65 XRP)) · XRP $1.0979
+2026-11-10T02:15:45.143Z note: the BONSAI price comes from a thin AMM pool (0.65 XRP); minting at the live market price anyway.
