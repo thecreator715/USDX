@@ -864,7 +864,7 @@ RippledError: rate limit: units quota (10000 per 60s) exhausted, retry in ~38425
 2026-11-10T17:30:09.244Z bonsai/USDX pool: USDX $1.00038 (4 bps) · reserves 34604.44 BONSAI / 0.20 USDX
 2026-11-10T17:30:26.907Z BONSAI $0.0000057011 (thin AMM pool (0.66 XRP)) · XRP $1.0468
 2026-11-10T17:30:26.907Z note: the BONSAI price comes from a thin AMM pool (0.66 XRP); minting at the live market price anyway.
---- run 42862529789 2026-11-10T17:42:47Z ---
+--- run 42862529789 2026-11-10T17:43:18Z ---
 2026-11-10T17:30:48.952Z LIVE mode: transactions will be submitted
 2026-11-10T17:30:48.954Z receiver rphatRpwXcPAo7CVm46dC78JAQ6kLMqb2M · issuer key loaded, deposits will be processed · defending pools bonsai + xrp · DEX quotes in bonsai
 2026-11-10T17:30:49.682Z BONSAI $0.0000057068 (thin AMM pool (0.66 XRP)) · XRP $1.0478
