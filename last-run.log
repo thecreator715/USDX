@@ -1,6 +1,3 @@
-2026-11-09T18:21:24.734Z note: the BONSAI price comes from a thin AMM pool (0.65 XRP); minting at the live market price anyway.
-2026-11-09T18:22:25.154Z bonsai/USDX pool: USDX $0.99963 (-4 bps) · reserves 34604.44 BONSAI / 0.20 USDX
---- run 42680745778 2026-11-09T19:30:46Z ---
 2026-11-09T19:10:22.426Z LIVE mode: transactions will be submitted
 2026-11-09T19:10:22.428Z receiver rphatRpwXcPAo7CVm46dC78JAQ6kLMqb2M · issuer key loaded, deposits will be processed · defending pools bonsai + xrp · DEX quotes in bonsai
 2026-11-09T19:10:23.270Z BONSAI $0.0000058556 (thin AMM pool (0.65 XRP)) · XRP $1.0909
@@ -880,7 +877,7 @@
 2026-11-10T00:38:02.365Z bonsai/USDX pool: USDX $1.00009 (1 bps) · reserves 34604.44 BONSAI / 0.20 USDX
 2026-11-10T00:38:10.771Z BONSAI $0.0000058792 (thin AMM pool (0.65 XRP)) · XRP $1.0953
 2026-11-10T00:38:10.771Z note: the BONSAI price comes from a thin AMM pool (0.65 XRP); minting at the live market price anyway.
---- run 42727472796 2026-11-10T00:49:01Z ---
+--- run 42727472796 2026-11-10T00:49:32Z ---
 2026-11-10T00:40:41.660Z LIVE mode: transactions will be submitted
 2026-11-10T00:40:41.661Z receiver rphatRpwXcPAo7CVm46dC78JAQ6kLMqb2M · issuer key loaded, deposits will be processed · defending pools bonsai + xrp · DEX quotes in bonsai
 2026-11-10T00:40:42.548Z BONSAI $0.0000058905 (thin AMM pool (0.65 XRP)) · XRP $1.0974
@@ -898,3 +895,6 @@
 2026-11-10T00:48:01.438Z bonsai/USDX pool: USDX $1.00059 (6 bps) · reserves 34604.44 BONSAI / 0.20 USDX
 2026-11-10T00:48:09.829Z BONSAI $0.0000058977 (thin AMM pool (0.65 XRP)) · XRP $1.0987
 2026-11-10T00:48:09.829Z note: the BONSAI price comes from a thin AMM pool (0.65 XRP); minting at the live market price anyway.
+2026-11-10T00:49:02.033Z bonsai/USDX pool: USDX $1.00246 (25 bps) · reserves 34604.44 BONSAI / 0.20 USDX
+2026-11-10T00:49:10.417Z BONSAI $0.0000059017 (thin AMM pool (0.65 XRP)) · XRP $1.0995
+2026-11-10T00:49:10.417Z note: the BONSAI price comes from a thin AMM pool (0.65 XRP); minting at the live market price anyway.
