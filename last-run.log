@@ -1,5 +1,3 @@
-2026-11-10T06:41:35.400Z bonsai/USDX pool: USDX $1.00264 (26 bps) · reserves 34604.44 BONSAI / 0.20 USDX
-2026-11-10T06:42:01.113Z BONSAI $0.0000059007 (thin AMM pool (0.65 XRP)) · XRP $1.0993
 2026-11-10T06:42:01.113Z note: the BONSAI price comes from a thin AMM pool (0.65 XRP); minting at the live market price anyway.
 2026-11-10T06:42:11.738Z DEX quotes skipped: receiver has 77.66 XRP, needs 77.80 XRP to hold another offer. Add XRP to the receiver.
 2026-11-10T06:42:37.932Z bonsai/USDX pool: USDX $1.00287 (29 bps) · reserves 34604.44 BONSAI / 0.20 USDX
@@ -882,7 +880,7 @@ RippledError: rate limit: units quota (2000 per 10s) exhausted, retry in ~17228m
 2026-11-10T11:40:01.245Z bonsai/USDX pool: USDX $1.00447 (45 bps) · reserves 34604.44 BONSAI / 0.20 USDX
 2026-11-10T11:40:09.570Z BONSAI $0.0000057936 (thin AMM pool (0.65 XRP)) · XRP $1.0794
 2026-11-10T11:40:09.570Z note: the BONSAI price comes from a thin AMM pool (0.65 XRP); minting at the live market price anyway.
---- run 42806707614 2026-11-10T11:46:06Z ---
+--- run 42806707614 2026-11-10T11:46:37Z ---
 2026-11-10T11:41:25.611Z LIVE mode: transactions will be submitted
 2026-11-10T11:41:25.612Z receiver rphatRpwXcPAo7CVm46dC78JAQ6kLMqb2M · issuer key loaded, deposits will be processed · defending pools bonsai + xrp · DEX quotes in bonsai
 2026-11-10T11:41:27.360Z BONSAI $0.0000057930 (thin AMM pool (0.65 XRP)) · XRP $1.0793
@@ -898,3 +896,5 @@ RippledError: rate limit: units quota (2000 per 10s) exhausted, retry in ~17228m
 2026-11-10T11:45:13.915Z BONSAI $0.0000057936 (thin AMM pool (0.65 XRP)) · XRP $1.0794
 2026-11-10T11:45:13.915Z note: the BONSAI price comes from a thin AMM pool (0.65 XRP); minting at the live market price anyway.
 2026-11-10T11:46:05.753Z xrp/USDX pool: USDX $1.00470 (47 bps) · reserves 0.20 XRP / 0.21 USDX
+2026-11-10T11:46:13.951Z BONSAI $0.0000057947 (thin AMM pool (0.65 XRP)) · XRP $1.0796
+2026-11-10T11:46:13.952Z note: the BONSAI price comes from a thin AMM pool (0.65 XRP); minting at the live market price anyway.
