@@ -1,6 +1,3 @@
-2026-11-09T18:11:13.646Z BONSAI $0.0000058532 (thin AMM pool (0.65 XRP)) · XRP $1.0904
-2026-11-09T18:11:13.647Z note: the BONSAI price comes from a thin AMM pool (0.65 XRP); minting at the live market price anyway.
-2026-11-09T18:11:49.186Z bonsai/USDX pool: USDX $0.99676 (-32 bps) · reserves 34604.44 BONSAI / 0.20 USDX
 2026-11-09T18:12:15.749Z BONSAI $0.0000058473 (thin AMM pool (0.65 XRP)) · XRP $1.0894
 2026-11-09T18:12:15.750Z note: the BONSAI price comes from a thin AMM pool (0.65 XRP); minting at the live market price anyway.
 2026-11-09T18:12:50.354Z bonsai/USDX pool: USDX $0.99561 (-44 bps) · reserves 34604.44 BONSAI / 0.20 USDX
@@ -854,7 +851,7 @@
 2026-11-10T00:19:03.836Z bonsai/USDX pool: USDX $0.99855 (-15 bps) · reserves 34604.44 BONSAI / 0.20 USDX
 2026-11-10T00:19:12.078Z BONSAI $0.0000059034 (thin AMM pool (0.65 XRP)) · XRP $1.0998
 2026-11-10T00:19:12.078Z note: the BONSAI price comes from a thin AMM pool (0.65 XRP); minting at the live market price anyway.
---- run 42724787210 2026-11-10T00:34:04Z ---
+--- run 42724787210 2026-11-10T00:34:35Z ---
 2026-11-10T00:19:58.580Z LIVE mode: transactions will be submitted
 2026-11-10T00:19:58.582Z receiver rphatRpwXcPAo7CVm46dC78JAQ6kLMqb2M · issuer key loaded, deposits will be processed · defending pools bonsai + xrp · DEX quotes in bonsai
 2026-11-10T00:19:59.529Z BONSAI $0.0000058999 (thin AMM pool (0.65 XRP)) · XRP $1.0992
@@ -898,3 +895,6 @@
 2026-11-10T00:33:04.356Z BONSAI $0.0000058886 (thin AMM pool (0.65 XRP)) · XRP $1.0971
 2026-11-10T00:33:04.356Z note: the BONSAI price comes from a thin AMM pool (0.65 XRP); minting at the live market price anyway.
 2026-11-10T00:33:38.317Z bonsai/USDX pool: USDX $0.99578 (-42 bps) · reserves 34604.44 BONSAI / 0.20 USDX
+2026-11-10T00:34:05.606Z BONSAI $0.0000058846 (thin AMM pool (0.65 XRP)) · XRP $1.0963
+2026-11-10T00:34:05.606Z note: the BONSAI price comes from a thin AMM pool (0.65 XRP); minting at the live market price anyway.
+2026-11-10T00:34:20.203Z BATCH re-peg: bonsai AMMWithdraw 0.001068 + xrp AMMWithdraw 0.001122 in one transaction
