@@ -839,7 +839,7 @@
 2026-11-11T13:23:47.731Z BATCH re-peg: bonsai AMMDeposit 0.001151 + xrp AMMDeposit 0.000921 in one transaction
 2026-11-11T13:24:04.455Z BONSAI $0.0000058378 (thin AMM pool (0.66 XRP)) · XRP $1.0599
 2026-11-11T13:24:04.455Z note: the BONSAI price comes from a thin AMM pool (0.66 XRP); minting at the live market price anyway.
---- run 43026012890 2026-11-11T13:44:08Z ---
+--- run 43026012890 2026-11-11T13:44:39Z ---
 2026-11-11T13:26:20.621Z LIVE mode: transactions will be submitted
 2026-11-11T13:26:20.623Z receiver rphatRpwXcPAo7CVm46dC78JAQ6kLMqb2M · issuer key loaded, deposits will be processed · defending pools bonsai + xrp · DEX quotes in bonsai
 2026-11-11T13:26:21.252Z BONSAI $0.0000058340 (thin AMM pool (0.66 XRP)) · XRP $1.0593
