@@ -1,6 +1,3 @@
-2026-11-11T15:54:09.278Z BONSAI $0.0000059006 (thin AMM pool (0.66 XRP)) · XRP $1.0714
-2026-11-11T15:54:09.278Z note: the BONSAI price comes from a thin AMM pool (0.66 XRP); minting at the live market price anyway.
-2026-11-11T15:55:01.588Z bonsai/USDX pool: USDX $1.00201 (20 bps) · reserves 34516.64 BONSAI / 0.20 USDX
 2026-11-11T15:55:09.841Z BONSAI $0.0000059015 (thin AMM pool (0.66 XRP)) · XRP $1.0715
 2026-11-11T15:55:09.841Z note: the BONSAI price comes from a thin AMM pool (0.66 XRP); minting at the live market price anyway.
 2026-11-11T15:57:01.505Z bonsai/USDX pool: USDX $1.00215 (21 bps) · reserves 34516.64 BONSAI / 0.20 USDX
@@ -858,7 +855,7 @@ RippledError: rate limit: units quota (10000 per 60s) exhausted, retry in ~27710
 2026-11-11T23:41:21.381Z bonsai/USDX pool: USDX $0.99900 (-10 bps) · reserves 34516.64 BONSAI / 0.20 USDX
 2026-11-11T23:41:29.695Z BONSAI $0.0000057738 (thin AMM pool (0.66 XRP)) · XRP $1.0465
 2026-11-11T23:41:29.695Z note: the BONSAI price comes from a thin AMM pool (0.66 XRP); minting at the live market price anyway.
---- run 43119292654 2026-11-11T23:55:26Z ---
+--- run 43119292654 2026-11-11T23:55:57Z ---
 2026-11-11T23:42:56.563Z LIVE mode: transactions will be submitted
 2026-11-11T23:42:56.565Z receiver rphatRpwXcPAo7CVm46dC78JAQ6kLMqb2M · issuer key loaded, deposits will be processed · defending pools bonsai + xrp · DEX quotes in bonsai
 2026-11-11T23:42:57.508Z BONSAI $0.0000057777 (thin AMM pool (0.66 XRP)) · XRP $1.0472
@@ -898,3 +895,6 @@ RippledError: rate limit: units quota (10000 per 60s) exhausted, retry in ~27710
 2026-11-11T23:55:03.968Z BONSAI $0.0000058017 (thin AMM pool (0.66 XRP)) · XRP $1.0515
 2026-11-11T23:55:03.968Z note: the BONSAI price comes from a thin AMM pool (0.66 XRP); minting at the live market price anyway.
 2026-11-11T23:55:11.978Z DEX quotes skipped: receiver has 77.65 XRP, needs 77.80 XRP to hold another offer. Add XRP to the receiver.
+2026-11-11T23:55:39.697Z xrp/USDX pool: USDX $1.00521 (52 bps) · reserves 0.15 XRP / 0.16 USDX
+2026-11-11T23:55:40.226Z USDX above $1: depositing 0.000829 treasury USDX into the pool
+2026-11-11T23:55:44.631Z after rebalancing: USDX $1.00000 in the xrp pool
