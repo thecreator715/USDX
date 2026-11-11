@@ -1,5 +1,3 @@
-2026-11-10T21:17:34.237Z receiver rphatRpwXcPAo7CVm46dC78JAQ6kLMqb2M · issuer key loaded, deposits will be processed · defending pools bonsai + xrp · DEX quotes in bonsai
-2026-11-10T21:17:35.292Z BONSAI $0.0000057945 (thin AMM pool (0.66 XRP)) · XRP $1.0603
 2026-11-10T21:17:35.292Z note: the BONSAI price comes from a thin AMM pool (0.66 XRP); minting at the live market price anyway.
 2026-11-10T21:19:01.247Z bonsai/USDX pool: USDX $0.99886 (-11 bps) · reserves 34604.44 BONSAI / 0.20 USDX
 2026-11-10T21:19:01.667Z DEX quotes skipped: receiver has 77.66 XRP, needs 77.80 XRP to hold another offer. Add XRP to the receiver.
@@ -802,7 +800,7 @@ RippledError: rate limit: units quota (10000 per 60s) exhausted, retry in ~48786
 2026-11-11T02:04:01.303Z bonsai/USDX pool: USDX $0.99773 (-23 bps) · reserves 34604.44 BONSAI / 0.20 USDX
 2026-11-11T02:04:09.529Z BONSAI $0.0000057557 (thin AMM pool (0.66 XRP)) · XRP $1.0532
 2026-11-11T02:04:09.530Z note: the BONSAI price comes from a thin AMM pool (0.66 XRP); minting at the live market price anyway.
---- run 42942795614 2026-11-11T02:25:09Z ---
+--- run 42942795614 2026-11-11T02:25:40Z ---
 2026-11-11T02:06:21.239Z LIVE mode: transactions will be submitted
 2026-11-11T02:06:21.241Z receiver rphatRpwXcPAo7CVm46dC78JAQ6kLMqb2M · issuer key loaded, deposits will be processed · defending pools bonsai + xrp · DEX quotes in bonsai
 2026-11-11T02:06:22.551Z BONSAI $0.0000057473 (thin AMM pool (0.66 XRP)) · XRP $1.0516
@@ -898,3 +896,5 @@ RippledError: rate limit: units quota (10000 per 60s) exhausted, retry in ~26858
 2026-11-11T02:25:02.173Z USDX above $1: depositing 0.001273 treasury USDX into the pool
 2026-11-11T02:25:06.600Z after rebalancing: USDX $1.00000 in the bonsai pool
 2026-11-11T02:25:06.758Z xrp/USDX pool: USDX $1.00091 (9 bps) · reserves 0.15 XRP / 0.16 USDX
+2026-11-11T02:25:15.045Z BONSAI $0.0000057762 (thin AMM pool (0.66 XRP)) · XRP $1.0488
+2026-11-11T02:25:15.045Z note: the BONSAI price comes from a thin AMM pool (0.66 XRP); minting at the live market price anyway.
