@@ -1,6 +1,3 @@
-2026-11-11T02:22:39.989Z ALERT: USDX is $0.9633 in the xrp/USDX pool, below the $0.99 floor
-2026-11-11T02:22:40.521Z USDX below $1: withdrawing 0.006153 USDX from the pool with the treasury's LP tokens (100.00% of the pool)
-2026-11-11T02:22:46.040Z after rebalancing: USDX $0.96635 in the xrp pool
 2026-11-11T02:22:46.438Z xrp/USDX pool: USDX $0.96671 (-333 bps) · reserves 0.15 XRP / 0.16 USDX
 2026-11-11T02:22:46.438Z ALERT: USDX is $0.9667 in the xrp/USDX pool, below the $0.99 floor
 2026-11-11T02:22:46.941Z USDX below $1: withdrawing 0.005468 USDX from the pool with the treasury's LP tokens (100.00% of the pool)
@@ -846,7 +843,7 @@
 2026-11-11T07:34:01.691Z bonsai/USDX pool: USDX $1.00104 (10 bps) · reserves 34516.64 BONSAI / 0.20 USDX
 2026-11-11T07:34:10.077Z BONSAI $0.0000058301 (thin AMM pool (0.66 XRP)) · XRP $1.0586
 2026-11-11T07:34:10.077Z note: the BONSAI price comes from a thin AMM pool (0.66 XRP); minting at the live market price anyway.
---- run 42978100686 2026-11-11T07:52:51Z ---
+--- run 42978100686 2026-11-11T07:53:22Z ---
 2026-11-11T07:35:38.661Z LIVE mode: transactions will be submitted
 2026-11-11T07:35:38.663Z receiver rphatRpwXcPAo7CVm46dC78JAQ6kLMqb2M · issuer key loaded, deposits will be processed · defending pools bonsai + xrp · DEX quotes in bonsai
 2026-11-11T07:35:39.209Z BONSAI $0.0000058252 (thin AMM pool (0.66 XRP)) · XRP $1.0576
@@ -898,3 +895,6 @@
 2026-11-11T07:52:01.696Z bonsai/USDX pool: USDX $1.00105 (10 bps) · reserves 34516.64 BONSAI / 0.20 USDX
 2026-11-11T07:52:09.914Z BONSAI $0.0000058139 (thin AMM pool (0.66 XRP)) · XRP $1.0556
 2026-11-11T07:52:09.914Z note: the BONSAI price comes from a thin AMM pool (0.66 XRP); minting at the live market price anyway.
+2026-11-11T07:53:08.535Z bonsai/USDX pool: USDX $1.00252 (25 bps) · reserves 34516.64 BONSAI / 0.20 USDX
+2026-11-11T07:53:17.055Z BONSAI $0.0000058122 (thin AMM pool (0.66 XRP)) · XRP $1.0553
+2026-11-11T07:53:17.056Z note: the BONSAI price comes from a thin AMM pool (0.66 XRP); minting at the live market price anyway.
