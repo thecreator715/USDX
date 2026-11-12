@@ -858,7 +858,7 @@ RippledError: rate limit: units quota (10000 per 60s) exhausted, retry in ~27710
 2026-11-12T01:04:28.052Z xrp/USDX pool: USDX $0.99470 (-53 bps) · reserves 0.15 XRP / 0.16 USDX
 2026-11-12T01:04:28.530Z USDX below $1: withdrawing 0.000852 USDX from the pool with the treasury's LP tokens (100.00% of the pool)
 2026-11-12T01:04:40.067Z after rebalancing: USDX $1.00000 in the xrp pool
---- run 43129516180 2026-11-12T01:17:27Z ---
+--- run 43129516180 2026-11-12T01:17:59Z ---
 2026-11-12T01:05:26.428Z LIVE mode: transactions will be submitted
 2026-11-12T01:05:26.430Z receiver rphatRpwXcPAo7CVm46dC78JAQ6kLMqb2M · issuer key loaded, deposits will be processed · defending pools bonsai + xrp · DEX quotes in bonsai
 2026-11-12T01:05:27.434Z BONSAI $0.0000057937 (thin AMM pool (0.66 XRP)) · XRP $1.0500
