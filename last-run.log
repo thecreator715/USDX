@@ -1,6 +1,3 @@
-2026-11-12T08:22:52.719Z note: the BONSAI price comes from a thin AMM pool (0.66 XRP); minting at the live market price anyway.
-2026-11-12T08:23:11.263Z bonsai/USDX pool: USDX $0.99866 (-13 bps) · reserves 34516.64 BONSAI / 0.20 USDX
-2026-11-12T08:23:55.365Z BONSAI $0.0000057482 (thin AMM pool (0.66 XRP)) · XRP $1.0418
 2026-11-12T08:23:55.365Z note: the BONSAI price comes from a thin AMM pool (0.66 XRP); minting at the live market price anyway.
 2026-11-12T08:24:18.163Z bonsai/USDX pool: USDX $0.99799 (-20 bps) · reserves 34516.64 BONSAI / 0.20 USDX
 2026-11-12T08:25:01.987Z BONSAI $0.0000057495 (thin AMM pool (0.66 XRP)) · XRP $1.0420
@@ -856,7 +853,7 @@
 2026-11-12T13:26:01.671Z bonsai/USDX pool: USDX $0.99966 (-3 bps) · reserves 34414.54 BONSAI / 0.20 USDX
 2026-11-12T13:26:10.058Z BONSAI $0.0000056869 (thin AMM pool (0.66 XRP)) · XRP $1.0307
 2026-11-12T13:26:10.058Z note: the BONSAI price comes from a thin AMM pool (0.66 XRP); minting at the live market price anyway.
---- run 43224203746 2026-11-12T13:43:34Z ---
+--- run 43224203746 2026-11-12T13:44:06Z ---
 2026-11-12T13:27:49.638Z LIVE mode: transactions will be submitted
 2026-11-12T13:27:49.639Z receiver rphatRpwXcPAo7CVm46dC78JAQ6kLMqb2M · issuer key loaded, deposits will be processed · defending pools bonsai + xrp · DEX quotes in bonsai
 2026-11-12T13:27:50.579Z BONSAI $0.0000056924 (thin AMM pool (0.66 XRP)) · XRP $1.0317
@@ -898,3 +895,6 @@
 2026-11-12T13:42:34.962Z bonsai/USDX pool: USDX $1.00136 (14 bps) · reserves 34414.54 BONSAI / 0.20 USDX
 2026-11-12T13:42:43.326Z BONSAI $0.0000056958 (thin AMM pool (0.66 XRP)) · XRP $1.0323
 2026-11-12T13:42:43.326Z note: the BONSAI price comes from a thin AMM pool (0.66 XRP); minting at the live market price anyway.
+2026-11-12T13:43:37.118Z bonsai/USDX pool: USDX $1.00330 (33 bps) · reserves 34414.54 BONSAI / 0.20 USDX
+2026-11-12T13:43:45.545Z BONSAI $0.0000057068 (thin AMM pool (0.66 XRP)) · XRP $1.0343
+2026-11-12T13:43:45.545Z note: the BONSAI price comes from a thin AMM pool (0.66 XRP); minting at the live market price anyway.
