@@ -830,7 +830,7 @@ async function scanLedger(force){
 }
 
 /* ---------- render ---------- */
-const BUILD='20261112-2050';
+const BUILD='20261112-2120';
 const LIVE_URL='https://thecreator715.github.io/USDX/';
 function sandboxNote(){
   setNet(false); if(document.getElementById('sbNote')) return;
@@ -1539,7 +1539,7 @@ async function scanBurns(deeper){
     const page=(m,lim)=>req({command:'account_tx',account:S.cfg.bIss,limit:lim||200,marker:m,ledger_index_min:-1,ledger_index_max:-1});
     const take=e=>{
       const p=parseTx(e); if(BS.seen.has(p.hash)) return false; BS.seen.add(p.hash);
-      if(p.ok&&p.t.TransactionType==='Payment'&&p.t.Destination===S.cfg.bIss){ const d=p.delivered; if(d&&typeof d==='object'&&cc(d.currency)===bc) BS.rows.push({hash:p.hash,from:p.t.Account,value:Number(d.value),time:p.time,mt:p.mt}); }
+      if(p.ok&&p.t.TransactionType==='Payment'&&p.t.Destination===S.cfg.bIss){ const d=p.delivered; if(d&&typeof d==='object'&&cc(d.currency)===bc) BS.rows.push({hash:p.hash,from:p.t.Account,value:Number(d.value),time:p.time,mt:p.mt,dep:(p.mm&&p.mm.dep)||''}); }
       return true;
     };
     if(!BS.init){ let m,n=0; while(n<200){ const r=await page(m); r.transactions.forEach(e=>{take(e);n++;}); m=r.marker; if(!m){BS.done=true;break;} } BS.marker=m; BS.init=true; }
@@ -1548,7 +1548,7 @@ async function scanBurns(deeper){
   }catch(e){ toast('Burn history: '+e.message); }
   BS.busy=false;
 }
-const burnSource=r=> r.from===S.cfg.recv?(r.mt==='USDX/COVER'?'Coverage burn':'USDX mint burn'): r.from===S.cfg.bTrack?'BONSAI receiver':'Holder';
+const burnSource=r=> r.from===S.cfg.recv?(r.mt==='USDX/COVER'?'Coverage burn':(String(r.dep).startsWith('PEGMINT')?'Auto peg-mint burn':'USDX mint burn')): r.from===S.cfg.bTrack?'BONSAI receiver':'Holder';
 async function renderBurns(){
   await scanBurns(false);
   const rows=BS.rows.slice().sort((a,b)=>(b.time||0)-(a.time||0));

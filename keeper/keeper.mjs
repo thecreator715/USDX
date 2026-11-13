@@ -424,7 +424,7 @@ async function repeg(px) {
   if (!again && PENDING_BURN.v > 0.000001) {
     try { const have = bal(await lines(recv.address), USDX), KEEP = +E.PEG_KEEP_USDX || 5, burn = Math.min(Math.max(0, have - KEEP), PENDING_BURN.v); PENDING_BURN.v = 0;   // recovered USDX stays in the treasury as inventory for the next above-peg correction; only a surplus is retired
       if (burn >= 0.000001) { await submit({ TransactionType: 'Payment', Account: recv.address, Destination: UI, Amount: { ...USDX, value: fmt6(burn) }, Memos: [memo('USDX/PEGBURN', { v: 1, usdx: burn })] }, recv, 'burn recovered USDX'); log(`retired ${fmt6(burn)} USDX`); } }
-    catch (e) { log('retire failed:', e.message); }
+    catch (e) { PENDING_BURN.v += 0; log('retire failed (USDX stays in the treasury as inventory):', e.message); }
   }
   OFFBAND = again;   // fast loop only while corrections are actually moving the price; a pool that cannot be corrected falls back to the normal cycle
 }
