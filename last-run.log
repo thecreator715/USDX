@@ -1,19 +1,3 @@
-2026-11-13T05:30:22.442Z posting sell quote 7.64 USDX @ 283284
-2026-11-13T05:30:25.074Z ERROR OfferCreate (attempt 1/4): Transaction not found.
-2026-11-13T05:30:25.074Z DEX sell quote failed: Transaction not found.
-2026-11-13T05:30:25.074Z buy quote skipped: not enough of the other asset
---- run 43372506803 2026-11-13T05:51:45Z ---
-2026-11-13T05:31:18.034Z LIVE mode: transactions will be submitted
-2026-11-13T05:31:18.036Z receiver rphatRpwXcPAo7CVm46dC78JAQ6kLMqb2M · issuer key loaded, deposits will be processed · defending pools bonsai + xrp · DEX quotes in bonsai
-2026-11-13T05:31:18.972Z BONSAI $0.0000035104 (thin AMM pool (0.63 XRP)) · XRP $1.0084
-2026-11-13T05:31:18.973Z note: the BONSAI price comes from a thin AMM pool (0.63 XRP); minting at the live market price anyway.
-2026-11-13T05:31:22.898Z bonsai/USDX pool: USDX $0.99909 (-9 bps) · reserves 976.59 BONSAI / 0.00 USDX
-2026-11-13T05:31:23.041Z replacing stale sell quote at 283284
-RippledError: rate limit: units quota (10000 per 60s) exhausted, retry in ~31229ms
-  data: {
-    error: 'tooBusy',
-    error_code: 9,
-    error_message: 'rate limit: units quota (10000 per 60s) exhausted, retry in ~31229ms',
     api_version: 2,
     id: 0,
     request: { command: 'server_info', id: 0 },
@@ -605,7 +589,7 @@ RippledError: rate limit: units quota (10000 per 60s) exhausted, retry in ~33984
 2026-11-13T05:50:18.679Z BONSAI $0.0000054133 (thin AMM pool (0.78 XRP) (median of 11)) · XRP $1.0151
 2026-11-13T05:50:18.679Z note: the BONSAI price comes from a thin AMM pool (0.78 XRP) (median of 11); minting at the live market price anyway.
 2026-11-13T05:50:37.546Z bonsai/USDX pool: USDX $1.00057 (6 bps) · reserves 873.56 BONSAI / 0.00 USDX
---- run 43372551863 2026-11-13T06:05:10Z ---
+--- run 43372551863 2026-11-13T06:05:41Z ---
 2026-11-13T05:52:06.949Z LIVE mode: transactions will be submitted
 2026-11-13T05:52:06.950Z receiver rphatRpwXcPAo7CVm46dC78JAQ6kLMqb2M · issuer key loaded, deposits will be processed · defending pools bonsai + xrp · DEX quotes in bonsai
 2026-11-13T05:52:07.844Z BONSAI $0.0000053994 (thin AMM pool (0.78 XRP)) · XRP $1.0125
@@ -898,3 +882,19 @@ RippledError: rate limit: units quota (10000 per 60s) exhausted, retry in ~87766
 2026-11-13T06:05:02.012Z ALERT: USDX is $0.9502 in the bonsai/USDX pool, below the $0.99 floor
 2026-11-13T06:05:02.549Z correction of 0.000235 USDX is below the 0.0005 minimum action
 2026-11-13T06:05:02.734Z xrp/USDX pool: USDX $0.99756 (-24 bps) · reserves 0.01 XRP / 0.01 USDX
+2026-11-13T06:05:11.111Z bonsai/USDX pool: USDX $0.95048 (-495 bps) · reserves 873.56 BONSAI / 0.00 USDX
+2026-11-13T06:05:11.111Z ALERT: USDX is $0.9505 in the bonsai/USDX pool, below the $0.99 floor
+2026-11-13T06:05:11.816Z correction of 0.000234 USDX is below the 0.0005 minimum action
+2026-11-13T06:05:11.989Z xrp/USDX pool: USDX $0.99786 (-21 bps) · reserves 0.01 XRP / 0.01 USDX
+2026-11-13T06:05:20.531Z bonsai/USDX pool: USDX $0.95048 (-495 bps) · reserves 873.56 BONSAI / 0.00 USDX
+2026-11-13T06:05:20.531Z ALERT: USDX is $0.9505 in the bonsai/USDX pool, below the $0.99 floor
+2026-11-13T06:05:21.059Z correction of 0.000234 USDX is below the 0.0005 minimum action
+2026-11-13T06:05:21.233Z xrp/USDX pool: USDX $0.99786 (-21 bps) · reserves 0.01 XRP / 0.01 USDX
+2026-11-13T06:05:29.656Z bonsai/USDX pool: USDX $0.95048 (-495 bps) · reserves 873.56 BONSAI / 0.00 USDX
+2026-11-13T06:05:29.656Z ALERT: USDX is $0.9505 in the bonsai/USDX pool, below the $0.99 floor
+2026-11-13T06:05:30.175Z correction of 0.000234 USDX is below the 0.0005 minimum action
+2026-11-13T06:05:30.348Z xrp/USDX pool: USDX $0.99786 (-21 bps) · reserves 0.01 XRP / 0.01 USDX
+2026-11-13T06:05:38.797Z bonsai/USDX pool: USDX $0.95001 (-500 bps) · reserves 873.56 BONSAI / 0.00 USDX
+2026-11-13T06:05:38.797Z ALERT: USDX is $0.9500 in the bonsai/USDX pool, below the $0.99 floor
+2026-11-13T06:05:39.352Z correction of 0.000236 USDX is below the 0.0005 minimum action
+2026-11-13T06:05:39.526Z xrp/USDX pool: USDX $0.99737 (-26 bps) · reserves 0.01 XRP / 0.01 USDX
