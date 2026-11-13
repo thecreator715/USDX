@@ -1,4 +1,3 @@
-2026-11-13T17:50:09.264Z BONSAI $0.0000003725 (thin AMM pool (0.44 XRP) (median of 11)) · XRP $1.0226
 2026-11-13T17:50:09.264Z note: the BONSAI price comes from a thin AMM pool (0.44 XRP) (median of 11); minting at the live market price anyway.
 2026-11-13T17:50:47.202Z bonsai/USDX pool holds only $0.2466: too small to defend, its price is meaningless and the keeper will not touch it. Re-seed it with BONSAI and USDX together.
 2026-11-13T17:51:12.146Z BONSAI $0.0000003719 (thin AMM pool (0.44 XRP) (median of 11)) · XRP $1.0210
@@ -872,7 +871,7 @@ RippledError: rate limit: units quota (2000 per 10s) exhausted, retry in ~15412m
 2026-11-13T23:45:21.614Z note: the BONSAI price comes from a thin AMM pool (0.44 XRP) (median of 11); minting at the live market price anyway.
 2026-11-13T23:46:24.691Z BONSAI $0.0000003671 (thin AMM pool (0.44 XRP) (median of 11)) · XRP $1.0078
 2026-11-13T23:46:24.691Z note: the BONSAI price comes from a thin AMM pool (0.44 XRP) (median of 11); minting at the live market price anyway.
---- run 43527146207 2026-11-13T23:57:16Z ---
+--- run 43527146207 2026-11-13T23:57:47Z ---
 2026-11-13T23:47:21.586Z LIVE mode: transactions will be submitted
 2026-11-13T23:47:21.588Z receiver rphatRpwXcPAo7CVm46dC78JAQ6kLMqb2M · issuer key loaded, deposits will be processed · defending pools bonsai + xrp · DEX quotes in bonsai
 2026-11-13T23:47:22.509Z BONSAI $0.0000003669 (thin AMM pool (0.44 XRP)) · XRP $1.0074
@@ -898,3 +897,4 @@ RippledError: rate limit: units quota (2000 per 10s) exhausted, retry in ~15412m
 2026-11-13T23:55:47.110Z note: the BONSAI price comes from a thin AMM pool (0.44 XRP) (median of 10); minting at the live market price anyway.
 2026-11-13T23:56:49.109Z BONSAI $0.0000003675 (thin AMM pool (0.44 XRP) (median of 11)) · XRP $1.0091
 2026-11-13T23:56:49.109Z note: the BONSAI price comes from a thin AMM pool (0.44 XRP) (median of 11); minting at the live market price anyway.
+2026-11-13T23:57:36.184Z bonsai/USDX pool holds only $0.2457: too small to defend, its price is meaningless and the keeper will not touch it. Re-seed it with BONSAI and USDX together.
