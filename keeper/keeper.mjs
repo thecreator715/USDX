@@ -178,7 +178,7 @@ async function alert(msg) {
 // whichever of these tools the treasury can actually afford, cheapest first:
 //   below $1 (too much USDX in the pool):  1) withdraw USDX single-sided from the treasury's LP tokens   2) buy USDX with the other asset   -> burn what it recovered
 //   above $1 (too little USDX in the pool): 1) deposit treasury USDX single-sided   2) burn BONSAI, mint collateralised USDX, deposit it   3) withdraw the other asset single-sided
-const MINT_ON = E.PEG_MINT !== '0';
+const MINT_ON = E.PEG_MINT === '1';   // OFF: the keeper no longer, on its own, burns BONSAI to mint USDX
 const lpBal = async (pool) => { const ls = await lines(recv.address); const l = ls.find(z => z.account === pool.acct); return l ? Number(l.balance) : 0; };
 const fmt6 = n => Number(n).toFixed(6);
 const MIN_ACT = +E.PEG_MIN_USDX || 0.0005;   // pools are small, so corrections of a fraction of a cent matter
@@ -349,7 +349,7 @@ async function holders(excl) {
   return out;
 }
 async function yieldStep(px) {
-  if (!iss || !YIELD_APY) return;
+  if (!iss || !YIELD_APY || E.AUTO_BURN !== '1') return;   // yield needs an automatic collateral burn, so it stays off until that is approved
   const day = utcDay(); if (day < (E.YIELD_START || C.yieldStart || '2026-12-01')) return; if (YIELD_DONE === day) return;   // rewards begin December 2026
 
   const rt = (await history(RECV, 400)).map(parse);
@@ -368,7 +368,7 @@ async function yieldStep(px) {
   let burned = 0;
   if (!covered && total > 0) {
     const need = total * 100 / K.ratio / px.bonsaiUsd, have = bal(await lines(RECV), BONSAI), amt = Math.min(need, have);
-    if (amt > 0) { try { await submit({ TransactionType: 'Payment', Account: RECV, Destination: BI, Amount: { ...BONSAI, value: floor6(amt) }, Memos: [memo('USDX/COVER', { v: 1, kind: 'yield', day, usdx: total, bonsai: amt, rateUsd: px.bonsaiUsd })] }, recv); burned = amt; log(`yield cover: burned ${floor6(amt)} BONSAI`); } catch (e) { log('yield cover failed:', e.message); } }
+    if (amt > 0 && E.AUTO_BURN === '1') { try { await submit({ TransactionType: 'Payment', Account: RECV, Destination: BI, Amount: { ...BONSAI, value: floor6(amt) }, Memos: [memo('USDX/COVER', { v: 1, kind: 'yield', day, usdx: total, bonsai: amt, rateUsd: px.bonsaiUsd })] }, recv); burned = amt; log(`yield cover: burned ${floor6(amt)} BONSAI`); } catch (e) { log('yield cover failed:', e.message); } }
     if (amt < need) { log(`yield cover SHORT by ${floor6(need - amt)} BONSAI`); await alert(`USDX yield for ${day} is short of collateral by ${floor6(need - amt)} BONSAI. Add BONSAI to the treasury.`); }
   }
   // 2) pay holders (a batch per cycle so a run never overruns; the rest follow next cycle)
@@ -435,7 +435,7 @@ async function repeg(px) {
   }
   for (const kind of live) still[kind] = true;
   again = Object.values(still).some(Boolean) && live.length > 0;
-  if (!again && PENDING_BURN.v > 0.000001) {
+  if (!again && PENDING_BURN.v > 0.000001 && E.AUTO_BURN === '1') {
     try { const have = bal(await lines(recv.address), USDX), KEEP = +E.PEG_KEEP_USDX || 5, burn = Math.min(Math.max(0, have - KEEP), PENDING_BURN.v); PENDING_BURN.v = 0;   // recovered USDX stays in the treasury as inventory for the next above-peg correction; only a surplus is retired
       if (burn >= 0.000001) { await submit({ TransactionType: 'Payment', Account: recv.address, Destination: UI, Amount: { ...USDX, value: fmt6(burn) }, Memos: [memo('USDX/PEGBURN', { v: 1, usdx: burn })] }, recv, 'burn recovered USDX'); log(`retired ${fmt6(burn)} USDX`); } }
     catch (e) { PENDING_BURN.v += 0; log('retire failed (USDX stays in the treasury as inventory):', e.message); }
