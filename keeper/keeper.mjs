@@ -76,14 +76,14 @@ let FEEBUMP = 1;
 async function submit1(tx, wallet) {
   if (!LIVE) { log('DRY RUN', tx.TransactionType, JSON.stringify(tx.Amount || tx.TakerGets || tx.OfferSequence || '')); return 'dryrun'; }
   const c = await connect(), busy = /rate limit|slowDown|too much load|units quota/i;
-  let prep; for (let a = 0; ; a++) { try { prep = await c.autofill(tx); if (FEEBUMP > 1) prep.Fee = String(Math.ceil(Number(prep.Fee) * FEEBUMP)); if (prep.LastLedgerSequence) prep.LastLedgerSequence += 30; break; } catch (e) { if (busy.test(String(e.message || e)) && a < 10) { await sleep(3000 + Math.random() * 1000); continue; } throw e; } }
+  let prep; for (let a = 0; ; a++) { try { prep = await c.autofill(tx); if (FEEBUMP > 1) prep.Fee = String(Math.ceil(Number(prep.Fee) * FEEBUMP)); if (+prep.Fee < 1000) prep.Fee = '1000'; if (prep.LastLedgerSequence) prep.LastLedgerSequence = Math.min(prep.LastLedgerSequence, (await req({ command: 'ledger_current' })).ledger_current_index + 8); break; } catch (e) { if (busy.test(String(e.message || e)) && a < 10) { await sleep(3000 + Math.random() * 1000); continue; } throw e; } }
   const signed = wallet.sign(prep), sub = await req({ command: 'submit', tx_blob: signed.tx_blob }), er = sub.engine_result || '';
   if (/^(tem|tef|tel)/.test(er) && er !== 'tefALREADY' && er !== 'tefPAST_SEQ') throw new Error(er + ' ' + tx.TransactionType);
-  for (let i = 0; i < 90; i++) {
+  for (let i = 0; i < 60; i++) {
     await sleep(i ? 1000 : 2500); let r = null;
     try { r = await req({ command: 'tx', transaction: signed.hash }); } catch (e) { if (!/txnNotFound|rate limit|slowDown|too much load|units quota/i.test(String(e.message || e))) throw e; if (/rate limit|slowDown|too much load|units quota/i.test(String(e.message || e))) { await sleep(8000); continue; } }
     if (r && r.validated) { if (Number(r.ledger_index) > LEDGER.min) LEDGER.min = Number(r.ledger_index); const code = (r.meta || r.metaData || {}).TransactionResult; if (code !== 'tesSUCCESS') throw new Error(code + ' ' + tx.TransactionType); return signed.hash; }
-    if (!r && prep.LastLedgerSequence && (await req({ command: 'ledger_current' })).ledger_current_index > prep.LastLedgerSequence + 2) throw new Error('transaction expired before validation, nothing applied');
+    if ((!r || !r.validated) && prep.LastLedgerSequence && (await req({ command: 'ledger_current' })).ledger_current_index > prep.LastLedgerSequence + 2) throw new Error('transaction expired before validation, nothing applied');
   }
   throw new Error('timed out waiting for validation of ' + signed.hash);
 }
@@ -388,7 +388,7 @@ async function fastBatch(px) {
   if (ops.length < 2) return false;   // one pool off: the normal path handles it with a single transaction
   try {
     log(`BATCH re-peg: ${ops.map(o => `${o.kind} ${o.tx.TransactionType} ${o.tx.Amount.value}`).join(' + ')} in one transaction`);
-    await submit({ TransactionType: 'Batch', Account: recv.address, Flags: 524288 /* tfIndependent: each pool is corrected on its own */, Fee: '3000' /* generous: a Batch that underpays the open-ledger fee cannot be queued (telCAN_NOT_QUEUE) */, RawTransactions: ops.map(o => ({ RawTransaction: { ...o.tx, Flags: o.tx.Flags + INNER } })), Memos: [memo('USDX/PEG', { v: 1, batch: ops.length })] }, recv, 'Batch re-peg');
+    await submit({ TransactionType: 'Batch', Account: recv.address, Flags: 524288 /* tfIndependent: each pool is corrected on its own */, Fee: '12000' /* generous: a Batch that underpays the open-ledger fee cannot be queued (telCAN_NOT_QUEUE) */, RawTransactions: ops.map(o => ({ RawTransaction: { ...o.tx, Flags: o.tx.Flags + INNER } })), Memos: [memo('USDX/PEG', { v: 1, batch: ops.length })] }, recv, 'Batch re-peg');
     PENDING_BURN.v += ops.reduce((a, o) => a + o.out, 0);
     BATCH_FAILS = 0; for (const o of ops) await freshPool(o.kind, before[o.kind]);
     return true;
