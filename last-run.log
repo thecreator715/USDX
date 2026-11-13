@@ -886,7 +886,7 @@ RippledError: rate limit: units quota (2000 per 10s) exhausted, retry in ~18100m
 2026-11-13T02:50:21.680Z DEX quotes skipped: receiver has 23.96 XRP, needs 24.40 XRP to hold another offer. Add XRP to the receiver.
 2026-11-13T02:50:29.916Z BONSAI $0.0000101993 (thin AMM pool (0.96 XRP)) · XRP $1.0184
 2026-11-13T02:50:29.916Z note: the BONSAI price comes from a thin AMM pool (0.96 XRP); minting at the live market price anyway.
---- run 43352760511 2026-11-13T02:55:49Z ---
+--- run 43352760511 2026-11-13T02:56:20Z ---
 2026-11-13T02:52:10.837Z LIVE mode: transactions will be submitted
 2026-11-13T02:52:10.839Z receiver rphatRpwXcPAo7CVm46dC78JAQ6kLMqb2M · issuer key loaded, deposits will be processed · defending pools bonsai + xrp · DEX quotes in bonsai
 2026-11-13T02:52:11.464Z BONSAI $0.0000101933 (thin AMM pool (0.96 XRP)) · XRP $1.0178
