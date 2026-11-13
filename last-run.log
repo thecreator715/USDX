@@ -1,7 +1,3 @@
-2026-11-13T06:40:00.652Z ALERT: USDX is $0.4335 in the xrp/USDX pool, below the $0.99 floor
-2026-11-13T06:40:00.832Z correction of 0.000188 USDX is below the 0.0005 minimum action
-2026-11-13T06:40:09.096Z bonsai/USDX pool: USDX $0.25507 (-7449 bps) · reserves 4.40 BONSAI / 0.00 USDX
-2026-11-13T06:40:09.096Z ALERT: USDX is $0.2551 in the bonsai/USDX pool, below the $0.99 floor
 2026-11-13T06:40:09.289Z correction of 0.000057 USDX is below the 0.0005 minimum action
 2026-11-13T06:40:09.328Z xrp/USDX pool: USDX $0.43388 (-5661 bps) · reserves 0.00 XRP / 0.00 USDX
 2026-11-13T06:40:09.328Z ALERT: USDX is $0.4339 in the xrp/USDX pool, below the $0.99 floor
@@ -878,7 +874,7 @@
 2026-11-13T09:59:30.726Z note: the BONSAI price comes from a thin AMM pool (0.66 XRP) (median of 7); minting at the live market price anyway.
 2026-11-13T09:59:38.191Z bonsai/USDX pool: USDX $1.01157 (116 bps) · reserves 1128107.20 BONSAI / 4.20 USDX
 2026-11-13T09:59:38.293Z USDX above $1: depositing 0.048602 treasury USDX into the pool
---- run 43403161350 2026-11-13T10:00:50Z ---
+--- run 43403161350 2026-11-13T10:01:22Z ---
 2026-11-13T10:00:20.838Z LIVE mode: transactions will be submitted
 2026-11-13T10:00:20.840Z receiver rphatRpwXcPAo7CVm46dC78JAQ6kLMqb2M · issuer key loaded, deposits will be processed · defending pools bonsai + xrp · DEX quotes in bonsai
 2026-11-13T10:00:21.712Z BONSAI $0.0000024710 (thin AMM pool (0.53 XRP)) · XRP $1.0282
@@ -898,3 +894,7 @@
 2026-11-13T10:00:49.424Z xrp/USDX pool: USDX $0.94812 (-519 bps) · reserves 0.27 XRP / 0.29 USDX
 2026-11-13T10:00:49.424Z ALERT: USDX is $0.9481 in the xrp/USDX pool, below the $0.99 floor
 2026-11-13T10:00:49.686Z USDX below $1: withdrawing 0.015266 USDX from the pool with the treasury's LP tokens (100.00% of the pool)
+2026-11-13T10:00:57.375Z after rebalancing: USDX $1.00000 in the xrp pool
+2026-11-13T10:00:57.658Z replacing stale buy quote at 254531
+2026-11-13T10:01:05.004Z posting sell quote 3.86 USDX @ 405906
+2026-11-13T10:01:12.299Z posting buy quote 1.89 USDX @ 403478
