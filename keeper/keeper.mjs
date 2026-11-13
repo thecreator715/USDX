@@ -188,6 +188,8 @@ async function pegStep(px, kind, depth = 0) {
   const uu = kind === 'xrp' ? px.xrpUsd : px.bonsaiUsd, pool = await poolInfo(kind), nm = kind === 'xrp' ? 'XRP' : 'BONSAI';
   if (!pool) return log(`no ${kind}/USDX pool yet`);
   const price = pool.ro / pool.ru * uu;
+  const poolUsd = pool.ro * uu + pool.ru, MINPOOL = +E.MIN_POOL_USD || 0.5;
+  if (!(poolUsd >= MINPOOL)) { EPISODE[kind] = false; if (Date.now() - (pegStep.warn || 0) > 300000) { pegStep.warn = Date.now(); log(`${kind}/USDX pool holds only $${poolUsd.toFixed(4)}: too small to defend, its price is meaningless and the keeper will not touch it. Re-seed it with ${nm} and USDX together.`); } return 'ok'; }
   if (OFFBAND || Math.abs(price - 1) > K.band || Date.now() - (pegStep.last || 0) > 60000) { pegStep.last = Date.now(); log(`${kind}/USDX pool: USDX $${price.toFixed(5)} (${((price - 1) * 1e4).toFixed(0)} bps) · reserves ${pool.ro.toFixed(2)} ${nm} / ${pool.ru.toFixed(2)} USDX`); }
   if (price < K.floor) await alert(`USDX is $${price.toFixed(4)} in the ${kind}/USDX pool, below the $${K.floor} floor`);
   // a correction starts when the price leaves the band and does not stop until it is back within a few bps of exactly $1.00

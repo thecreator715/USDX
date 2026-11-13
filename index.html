@@ -830,7 +830,7 @@ async function scanLedger(force){
 }
 
 /* ---------- render ---------- */
-const BUILD='20261112-2120';
+const BUILD='20261113-0000';
 const LIVE_URL='https://thecreator715.github.io/USDX/';
 function sandboxNote(){
   setNet(false); if(document.getElementById('sbNote')) return;
@@ -1470,14 +1470,16 @@ function renderMonitor(){
   box.innerHTML=['bonsai','xrp'].map(k=>{
     const v=last?last[k]:null, p=S.pools&&S.pools[k];
     let st,cls;
-    if(!p||v==null){ st='No pool yet'; cls='brass'; }
+    const emptyP=p&&S.px&&(p.ro*unitUsd(k)+p.ru)<0.5;
+    if(emptyP){ st='POOL EMPTY · needs re-seeding, price not meaningful'; cls='brass'; }
+    else if(!p||v==null){ st='No pool yet'; cls='brass'; }
     else if(v<FLOOR){ st='BELOW THE $0.99 FLOOR'; cls='brass'; bad.push(`${PAIRS[k].label} is $${v.toFixed(4)}, below the $0.99 floor`); }
     else if(Math.abs(v-1)>tol){ st=(v>1?'Above':'Below')+' the band, keeper will '+(v>1?'sell USDX into the pool':'buy back USDX'); cls='brass'; if(Math.abs(v-1)>0.01) bad.push(`${PAIRS[k].label} is $${v.toFixed(4)}`); }
     else { st='In band'; cls='jade'; }
-    const dev=v==null?'':((v-1)*1e4).toFixed(0)+' bps';
+    const dev=(v==null||emptyP)?'':((v-1)*1e4).toFixed(0)+' bps';
     const tvl=p&&S.px?p.ro*unitUsd(k)+p.ru:null;
     return `<div class="leg"><div class="u">${PAIRS[k].label}</div>
-      <div class="row" style="justify-content:space-between;align-items:baseline"><b class="mono ${cls}" style="font-size:26px">${v==null?'—':'$'+v.toFixed(4)}</b><span class="s mono" style="color:var(--mute)">${dev}</span></div>
+      <div class="row" style="justify-content:space-between;align-items:baseline"><b class="mono ${cls}" style="font-size:26px">${v==null||emptyP?'—':'$'+v.toFixed(4)}</b><span class="s mono" style="color:var(--mute)">${dev}</span></div>
       <div class="s ${cls}" style="margin:2px 0 8px">${st}</div>${spark(k)}
       <div class="row" style="justify-content:space-between;margin-top:6px"><span style="color:var(--mute)">Pool value</span><b class="mono">${tvl==null?'—':'$'+fmt(tvl,2)}</b></div>
       <div class="row" style="justify-content:space-between"><span style="color:var(--mute)">Order book</span><b class="mono">${(()=>{ const q=MON.dex&&MON.dex[k]; return q&&(q.bid||q.ask)?(q.bid?'$'+q.bid.toFixed(4):'—')+' / '+(q.ask?'$'+q.ask.toFixed(4):'—'):'no quotes'; })()}</b></div>
