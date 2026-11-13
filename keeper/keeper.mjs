@@ -155,6 +155,15 @@ async function freshPool(kind, before) {
   }
   return p;
 }
+// daily limit on USDX the keeper may mint for peg defence (set PEG_DAILY_CAP_USDX in the workflow env to change it)
+const DAILY_CAP = E.PEG_DAILY_CAP_USDX !== undefined && E.PEG_DAILY_CAP_USDX !== '' ? +E.PEG_DAILY_CAP_USDX : 10;
+let MINTED_TODAY = { day: '', v: 0, at: 0 };
+async function mintedToday() {
+  const day = new Date().toISOString().slice(0, 10);
+  if (MINTED_TODAY.day === day && Date.now() - MINTED_TODAY.at < 60000) return MINTED_TODAY.v;
+  let v = 0; try { const it = (await history(UI, 300)).map(parse); it.forEach(p => { if (p.ok && p.t.Account === UI && p.mm && String(p.mm.dep || '').startsWith('PEGMINT') && p.mt === 'USDX/RECEIPT' && p.d && typeof p.d === 'object') { const tm = p.t.date ? new Date((p.t.date + 946684800) * 1000).toISOString().slice(0, 10) : ''; if (tm === day) v += Number(p.d.value); } }); } catch { return MINTED_TODAY.day === day ? MINTED_TODAY.v : DAILY_CAP; }
+  MINTED_TODAY = { day, v, at: Date.now() }; return v;
+}
 const PENDING_BURN = { v: 0 };   // USDX recovered from pools, retired once every pool is back in the band
 
 const lastAlert = {};
@@ -227,14 +236,16 @@ async function pegStep(px, kind, depth = 0) {
     let left = need - added;
     if (left >= MIN_ACT && MINT_ON && iss && bonsaiInv > 0 && px.bonsaiUsd > 0) {
       // collateralised mint: burn BONSAI worth the USDX, issue exactly that much USDX, put it in the pool
-      const x = Math.min(left, bonsaiInv * px.bonsaiUsd * 100 / K.ratio * 0.98), bonsaiBurn = x * K.ratio / 100 / px.bonsaiUsd;
+      const room = Math.max(0, DAILY_CAP - await mintedToday());
+      if (room < MIN_ACT) log(`daily peg-mint limit of ${DAILY_CAP} USDX reached, no more minting today`);
+      const x = Math.min(left, room, bonsaiInv * px.bonsaiUsd * 100 / K.ratio * 0.98), bonsaiBurn = x * K.ratio / 100 / px.bonsaiUsd;
       if (x >= MIN_ACT && bonsaiBurn <= bonsaiInv) {
         try {
           const dep = 'PEGMINT-' + Date.now();
           log(`USDX above $1 and the pool is short of USDX: burning ${bonsaiBurn.toFixed(4)} BONSAI to mint ${fmt6(x)} USDX`);
           const burn = await submit({ TransactionType: 'Payment', Account: recv.address, Destination: BI, Amount: { ...BONSAI, value: bonsaiBurn.toFixed(6) }, Memos: [memo('USDX/BURN', { v: 1, dep, bonsai: bonsaiBurn, to: recv.address })] }, recv, 'burn BONSAI');
           await submit({ TransactionType: 'Payment', Account: UI, Destination: recv.address, Amount: { ...USDX, value: fmt6(x) }, Memos: [memo('USDX/RECEIPT', { v: 1, dep, burn, bonsai: bonsaiBurn, rateUsd: px.bonsaiUsd, ratio: K.ratio, usdx: x })] }, iss, 'mint USDX');
-          log(`MINTED ${fmt6(x)} USDX to the treasury · backed by ${bonsaiBurn.toFixed(4)} BONSAI burned`);
+          MINTED_TODAY.v += x; log(`MINTED ${fmt6(x)} USDX to the treasury · backed by ${bonsaiBurn.toFixed(4)} BONSAI burned`);
           await submit({ TransactionType: 'AMMDeposit', Account: recv.address, ...AS, Amount: { ...USDX, value: fmt6(x) }, Flags: 524288 }, recv, 'AMMDeposit USDX'); added += x; acted = true; left -= x;
         } catch (e) { log(`mint-and-deposit failed: ${e.message}`); }
       }
