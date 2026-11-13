@@ -39,11 +39,11 @@ if (recv.address !== RECV) { console.error(`RECEIVER_SEED belongs to ${recv.addr
 const iss = E.ISSUER_SEED ? xrpl.Wallet.fromSeed(E.ISSUER_SEED) : null;
 if (iss && iss.address !== UI) { console.error(`ISSUER_SEED belongs to ${iss.address}, but config.json usdx issuer is ${UI}.`); process.exit(1); }
 
-let client;
+let client, SRV = 0;
 async function connect() {
   if (client && client.isConnected()) return client;
   let last;
-  for (const u of C.servers) { try { const c = new xrpl.Client(u); await c.connect(); client = c; return c; } catch (e) { last = e; } }
+  for (let k = 0; k < C.servers.length; k++) { const u = C.servers[(SRV + k) % C.servers.length]; try { const c = new xrpl.Client(u); await c.connect(); client = c; return c; } catch (e) { last = e; } }
   throw last || new Error('no XRPL server reachable');
 }
 const sleep = ms => new Promise(r => setTimeout(r, ms));
@@ -53,8 +53,9 @@ const req = async r => {
     catch (e) {
       const m = String(e && e.message || e);
       if (/rate limit|slowDown|too much load|units quota/i.test(m) && a < 8) {
-        const t = /retry in ~?(\d+)\s*ms/i.exec(m);
-        await sleep((t ? +t[1] : 3000) + 400 + Math.random() * 600); continue;
+        // each public server rate-limits per client, so move to the next one at once instead of waiting a minute or more on this one
+        SRV = (SRV + 1) % C.servers.length; try { const old = client; client = null; if (old) old.disconnect().catch(() => {}); } catch {}
+        await sleep(500 + Math.random() * 500); continue;
       }
       throw e;
     }
@@ -479,7 +480,7 @@ log(LIVE ? 'LIVE mode: transactions will be submitted' : 'DRY RUN: nothing is su
 log(`receiver ${RECV}${iss ? ' · issuer key loaded, deposits will be processed' : ' · no issuer key, deposits are not processed'} · defending pools ${K.pegPools.join(' + ')} · DEX quotes in ${K.pool}`);
 // Main loop. The peg is checked every few seconds (and every 2 s while a pool is off the peg); deposits, yield and DEX quotes are heavier on the public
 // servers' rate limit, so they run once a minute and never while a correction is under way.
-const POLL = (+E.PEG_POLL_SEC || 6) * 1000, HEAVY = (+E.HEAVY_SEC || 60) * 1000; let lastHeavy = 0;
+const POLL = (+E.PEG_POLL_SEC || 8) * 1000, HEAVY = (+E.HEAVY_SEC || 60) * 1000; let lastHeavy = 0;
 for (;;) {
   try {
     const px = await prices(), heavy = !OFFBAND && Date.now() - lastHeavy >= HEAVY;
