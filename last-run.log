@@ -1,5 +1,3 @@
-2026-11-13T09:58:27.387Z xrp/USDX pool: USDX $1.02114 (211 bps) · reserves 0.33 XRP / 0.33 USDX
-2026-11-13T09:58:27.495Z USDX above $1: depositing 0.006931 treasury USDX into the pool
 2026-11-13T09:58:35.568Z after rebalancing: USDX $0.94867 in the xrp pool
 2026-11-13T09:58:35.691Z xrp/USDX pool: USDX $0.94858 (-514 bps) · reserves 0.32 XRP / 0.34 USDX
 2026-11-13T09:58:35.691Z ALERT: USDX is $0.9486 in the xrp/USDX pool, below the $0.99 floor
@@ -853,7 +851,7 @@ RippledError: rate limit: units quota (2000 per 10s) exhausted, retry in ~6864ms
 2026-11-13T13:25:21.552Z note: the BONSAI price comes from a thin AMM pool (0.44 XRP) (median of 11); minting at the live market price anyway.
 2026-11-13T13:26:25.167Z BONSAI $0.0000003706 (thin AMM pool (0.44 XRP) (median of 11)) · XRP $1.0176
 2026-11-13T13:26:25.167Z note: the BONSAI price comes from a thin AMM pool (0.44 XRP) (median of 11); minting at the live market price anyway.
---- run 43430797481 2026-11-13T13:46:11Z ---
+--- run 43430797481 2026-11-13T13:46:42Z ---
 2026-11-13T13:27:17.717Z LIVE mode: transactions will be submitted
 2026-11-13T13:27:17.718Z receiver rphatRpwXcPAo7CVm46dC78JAQ6kLMqb2M · issuer key loaded, deposits will be processed · defending pools bonsai + xrp · DEX quotes in bonsai
 2026-11-13T13:27:18.752Z BONSAI $0.0000003705 (thin AMM pool (0.44 XRP)) · XRP $1.0173
@@ -898,3 +896,5 @@ RippledError: rate limit: units quota (2000 per 10s) exhausted, retry in ~6864ms
 2026-11-13T13:44:18.054Z note: the BONSAI price comes from a thin AMM pool (0.44 XRP) (median of 11); minting at the live market price anyway.
 2026-11-13T13:45:26.126Z BONSAI $0.0000003782 (thin AMM pool (0.44 XRP) (median of 11)) · XRP $1.0385
 2026-11-13T13:45:26.126Z note: the BONSAI price comes from a thin AMM pool (0.44 XRP) (median of 11); minting at the live market price anyway.
+2026-11-13T13:46:29.462Z BONSAI $0.0000003777 (thin AMM pool (0.44 XRP) (median of 11)) · XRP $1.0371
+2026-11-13T13:46:29.462Z note: the BONSAI price comes from a thin AMM pool (0.44 XRP) (median of 11); minting at the live market price anyway.
