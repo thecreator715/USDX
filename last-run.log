@@ -1,6 +1,3 @@
-2026-11-13T06:41:03.922Z correction of 0.000188 USDX is below the 0.0005 minimum action
-2026-11-13T06:41:12.133Z bonsai/USDX pool: USDX $0.25529 (-7447 bps) · reserves 4.40 BONSAI / 0.00 USDX
-2026-11-13T06:41:12.133Z ALERT: USDX is $0.2553 in the bonsai/USDX pool, below the $0.99 floor
 2026-11-13T06:41:12.314Z correction of 0.000057 USDX is below the 0.0005 minimum action
 2026-11-13T06:41:12.352Z xrp/USDX pool: USDX $0.43424 (-5658 bps) · reserves 0.00 XRP / 0.00 USDX
 2026-11-13T06:41:12.352Z ALERT: USDX is $0.4342 in the xrp/USDX pool, below the $0.99 floor
@@ -833,7 +830,7 @@
 2026-11-13T09:59:30.726Z note: the BONSAI price comes from a thin AMM pool (0.66 XRP) (median of 7); minting at the live market price anyway.
 2026-11-13T09:59:38.191Z bonsai/USDX pool: USDX $1.01157 (116 bps) · reserves 1128107.20 BONSAI / 4.20 USDX
 2026-11-13T09:59:38.293Z USDX above $1: depositing 0.048602 treasury USDX into the pool
---- run 43403161350 2026-11-13T10:07:39Z ---
+--- run 43403161350 2026-11-13T10:08:10Z ---
 2026-11-13T10:00:20.838Z LIVE mode: transactions will be submitted
 2026-11-13T10:00:20.840Z receiver rphatRpwXcPAo7CVm46dC78JAQ6kLMqb2M · issuer key loaded, deposits will be processed · defending pools bonsai + xrp · DEX quotes in bonsai
 2026-11-13T10:00:21.712Z BONSAI $0.0000024710 (thin AMM pool (0.53 XRP)) · XRP $1.0282
@@ -898,3 +895,6 @@
 2026-11-13T10:06:44.233Z bonsai/USDX pool: USDX $0.99976 (-2 bps) · reserves 1082596.22 BONSAI / 2.60 USDX
 2026-11-13T10:07:00.753Z BONSAI $0.0000023941 (thin AMM pool (0.52 XRP) (median of 11)) · XRP $1.0279
 2026-11-13T10:07:00.754Z note: the BONSAI price comes from a thin AMM pool (0.52 XRP) (median of 11); minting at the live market price anyway.
+2026-11-13T10:07:46.867Z bonsai/USDX pool: USDX $0.99777 (-22 bps) · reserves 1082596.22 BONSAI / 2.60 USDX
+2026-11-13T10:08:03.401Z BONSAI $0.0000023920 (thin AMM pool (0.52 XRP) (median of 11)) · XRP $1.0271
+2026-11-13T10:08:03.401Z note: the BONSAI price comes from a thin AMM pool (0.52 XRP) (median of 11); minting at the live market price anyway.
