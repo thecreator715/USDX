@@ -1,8 +1,3 @@
-2026-11-13T00:13:34.494Z note: the BONSAI price comes from a thin AMM pool (0.65 XRP); minting at the live market price anyway.
-2026-11-13T00:14:34.832Z bonsai/USDX pool: USDX $1.00299 (30 bps) · reserves 34310.62 BONSAI / 0.19 USDX
-2026-11-13T00:14:43.186Z BONSAI $0.0000055968 (thin AMM pool (0.65 XRP)) · XRP $1.0404
-2026-11-13T00:14:43.186Z note: the BONSAI price comes from a thin AMM pool (0.65 XRP); minting at the live market price anyway.
-2026-11-13T00:15:37.074Z bonsai/USDX pool: USDX $1.00275 (27 bps) · reserves 34310.62 BONSAI / 0.19 USDX
 2026-11-13T00:15:45.506Z BONSAI $0.0000055934 (thin AMM pool (0.65 XRP)) · XRP $1.0397
 2026-11-13T00:15:45.506Z note: the BONSAI price comes from a thin AMM pool (0.65 XRP); minting at the live market price anyway.
 2026-11-13T00:16:45.729Z bonsai/USDX pool: USDX $1.00299 (30 bps) · reserves 34310.62 BONSAI / 0.19 USDX
@@ -831,7 +826,7 @@ RippledError: rate limit: units quota (2000 per 10s) exhausted, retry in ~17969m
 2026-11-13T04:13:54.217Z after rebalancing: USDX $0.88640 in the xrp pool
 2026-11-13T04:13:54.750Z xrp/USDX pool: USDX $0.88644 (-1136 bps) · reserves 0.13 XRP / 0.14 USDX
 2026-11-13T04:13:54.750Z ALERT: USDX is $0.8864 in the xrp/USDX pool, below the $0.99 floor
---- run 43361959384 2026-11-13T04:30:57Z ---
+--- run 43361959384 2026-11-13T04:31:29Z ---
 2026-11-13T04:14:17.236Z LIVE mode: transactions will be submitted
 2026-11-13T04:14:17.237Z receiver rphatRpwXcPAo7CVm46dC78JAQ6kLMqb2M · issuer key loaded, deposits will be processed · defending pools bonsai + xrp · DEX quotes in bonsai
 2026-11-13T04:14:18.136Z BONSAI $0.0000090910 (thin AMM pool (0.92 XRP)) · XRP $1.0046
@@ -898,3 +893,8 @@ RippledError: rate limit: units quota (2000 per 10s) exhausted, retry in ~17969m
 2026-11-13T04:29:30.412Z xrp/USDX pool: USDX $0.88027 (-1197 bps) · reserves 0.09 XRP / 0.10 USDX
 2026-11-13T04:29:30.412Z ALERT: USDX is $0.8803 in the xrp/USDX pool, below the $0.99 floor
 2026-11-13T04:29:30.993Z USDX below $1: withdrawing 0.012109 USDX from the pool with the treasury's LP tokens (100.00% of the pool)
+2026-11-13T04:31:23.503Z ERROR AMMWithdraw USDX (attempt 1/4): timed out waiting for validation of F2257C27F714144511C015156D62F2678D9B3442D060FB6F05AFD5A92DA6F9AC
+2026-11-13T04:31:23.503Z LP withdraw failed: timed out waiting for validation of F2257C27F714144511C015156D62F2678D9B3442D060FB6F05AFD5A92DA6F9AC
+2026-11-13T04:31:23.503Z USDX below $1: buying 0.006247 USDX with up to 0.0059 XRP
+2026-11-13T04:31:28.960Z ERROR peg buy (attempt 1/4): tecPATH_PARTIAL Payment
+2026-11-13T04:31:28.961Z peg buy failed: tecPATH_PARTIAL Payment
