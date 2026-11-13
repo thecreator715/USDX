@@ -379,7 +379,7 @@ async function yieldStep(px) {
 }
 
 // ---- XRPL Batch (XLS-56): withdraw/deposit on both pools in ONE transaction, so both pools are corrected in the same ledger ----
-let BATCH_OK = E.BATCH !== '0', BATCH_FAILS = 0;
+let BATCH_OK = E.BATCH === '1', BATCH_FAILS = 0;
 const INNER = 0x40000000;   // tfInnerBatchTxn
 async function fastBatch(px) {
   if (!BATCH_OK || K.pegPools.length < 2) return false;
