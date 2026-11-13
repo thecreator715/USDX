@@ -1,17 +1,3 @@
-2026-11-13T11:23:09.460Z LIVE mode: transactions will be submitted
-2026-11-13T11:23:09.462Z receiver rphatRpwXcPAo7CVm46dC78JAQ6kLMqb2M · issuer key loaded, deposits will be processed · defending pools bonsai + xrp · DEX quotes in bonsai
-2026-11-13T11:23:10.217Z BONSAI $0.0000003709 (thin AMM pool (0.44 XRP)) · XRP $1.0183
-2026-11-13T11:23:10.218Z note: the BONSAI price comes from a thin AMM pool (0.44 XRP); minting at the live market price anyway.
-2026-11-13T11:23:13.538Z bonsai/USDX pool holds only $0.2463: too small to defend, its price is meaningless and the keeper will not touch it. Re-seed it with BONSAI and USDX together.
-2026-11-13T11:23:13.714Z DEX quotes skipped: receiver has 21.45 XRP, needs 21.60 XRP to hold another offer. Add XRP to the receiver.
-2026-11-13T11:24:11.675Z BONSAI $0.0000003707 (thin AMM pool (0.44 XRP) (median of 8)) · XRP $1.0177
-2026-11-13T11:24:11.675Z note: the BONSAI price comes from a thin AMM pool (0.44 XRP) (median of 8); minting at the live market price anyway.
-2026-11-13T11:25:15.943Z BONSAI $0.0000003711 (thin AMM pool (0.44 XRP) (median of 11)) · XRP $1.0190
-2026-11-13T11:25:15.944Z note: the BONSAI price comes from a thin AMM pool (0.44 XRP) (median of 11); minting at the live market price anyway.
-2026-11-13T11:26:18.951Z BONSAI $0.0000003710 (thin AMM pool (0.44 XRP) (median of 11)) · XRP $1.0185
-2026-11-13T11:26:18.951Z note: the BONSAI price comes from a thin AMM pool (0.44 XRP) (median of 11); minting at the live market price anyway.
-2026-11-13T11:27:22.607Z BONSAI $0.0000003705 (thin AMM pool (0.44 XRP) (median of 11)) · XRP $1.0173
-2026-11-13T11:27:22.607Z note: the BONSAI price comes from a thin AMM pool (0.44 XRP) (median of 11); minting at the live market price anyway.
 2026-11-13T11:28:15.612Z bonsai/USDX pool holds only $0.2463: too small to defend, its price is meaningless and the keeper will not touch it. Re-seed it with BONSAI and USDX together.
 2026-11-13T11:28:23.830Z BONSAI $0.0000003708 (thin AMM pool (0.44 XRP) (median of 11)) · XRP $1.0180
 2026-11-13T11:28:23.831Z note: the BONSAI price comes from a thin AMM pool (0.44 XRP) (median of 11); minting at the live market price anyway.
@@ -850,7 +836,7 @@ RippledError: rate limit: units quota (2000 per 10s) exhausted, retry in ~14744m
 2026-11-13T16:52:27.372Z processor: websocket was closed, 
 2026-11-13T16:53:26.738Z BONSAI $0.0000003702 (thin AMM pool (0.44 XRP) (median of 11)) · XRP $1.0163
 2026-11-13T16:53:26.738Z note: the BONSAI price comes from a thin AMM pool (0.44 XRP) (median of 11); minting at the live market price anyway.
---- run 43463901315 2026-11-13T17:08:52Z ---
+--- run 43463901315 2026-11-13T17:09:24Z ---
 2026-11-13T16:54:15.508Z LIVE mode: transactions will be submitted
 2026-11-13T16:54:15.510Z receiver rphatRpwXcPAo7CVm46dC78JAQ6kLMqb2M · issuer key loaded, deposits will be processed · defending pools bonsai + xrp · DEX quotes in bonsai
 2026-11-13T16:54:16.421Z BONSAI $0.0000003700 (thin AMM pool (0.44 XRP)) · XRP $1.0160
@@ -898,3 +884,17 @@ RippledError: rate limit: units quota (2000 per 10s) exhausted, retry in ~12610m
 2026-11-13T17:06:59.436Z note: the BONSAI price comes from a thin AMM pool (0.44 XRP) (median of 11); minting at the live market price anyway.
 2026-11-13T17:08:01.311Z BONSAI $0.0000003709 (thin AMM pool (0.44 XRP) (median of 11)) · XRP $1.0183
 2026-11-13T17:08:01.311Z note: the BONSAI price comes from a thin AMM pool (0.44 XRP) (median of 11); minting at the live market price anyway.
+2026-11-13T17:09:07.090Z BONSAI $0.0000003713 (thin AMM pool (0.44 XRP) (median of 10)) · XRP $1.0195
+2026-11-13T17:09:07.090Z note: the BONSAI price comes from a thin AMM pool (0.44 XRP) (median of 10); minting at the live market price anyway.
+RippledError: rate limit: units quota (2000 per 10s) exhausted, retry in ~6340ms
+  data: {
+    error: 'tooBusy',
+    error_code: 9,
+    error_message: 'rate limit: units quota (2000 per 10s) exhausted, retry in ~6340ms',
+    api_version: 2,
+    id: 0,
+    request: { command: 'server_info', id: 0 },
+    status: 'error',
+    type: 'response'
+  }
+}
