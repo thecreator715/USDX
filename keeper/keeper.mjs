@@ -17,7 +17,7 @@ for (const f of [new URL('./.env', import.meta.url), new URL('../.env', import.m
 }
 const E = process.env, LIVE = E.LIVE === '1';
 const K = {
-  band: (+E.BAND_BPS || 50) / 1e4, maxPct: (+E.MAX_TRADE_PCT || 20) / 100, slip: (+E.SLIP_BPS || 100) / 1e4,
+  band: (+E.BAND_BPS || 50) / 1e4, tight: (+E.PEG_TIGHT_BPS || 10) / 1e4, maxPct: (+E.MAX_TRADE_PCT || 20) / 100, slip: (+E.SLIP_BPS || 100) / 1e4,
   every: (+E.INTERVAL_SEC || 30) * 1000, pool: E.DEX_POOL || E.PEG_POOL_PRIMARY || 'bonsai', pegPools: (!E.PEG_POOL || E.PEG_POOL === 'both') ? ['bonsai', 'xrp'] : [E.PEG_POOL],
   hook: E.ALERT_WEBHOOK || '', floor: +E.PEG_FLOOR || 0.99,
   dexSize: +E.DEX_SIZE_USD || 500, dexSp: (+E.DEX_SPREAD_BPS || 30) / 1e4, ratio: +C.collateralRatioPercent || 100,
@@ -172,6 +172,7 @@ const MINT_ON = E.PEG_MINT !== '0';
 const lpBal = async (pool) => { const ls = await lines(recv.address); const l = ls.find(z => z.account === pool.acct); return l ? Number(l.balance) : 0; };
 const fmt6 = n => Number(n).toFixed(6);
 const MIN_ACT = +E.PEG_MIN_USDX || 0.0005;   // pools are small, so corrections of a fraction of a cent matter
+const EPISODE = {}, DEV = {};
 let OFFBAND = false;   // set while any pool is outside the band: the keeper then loops fast until it is restored
 async function pegStep(px, kind, depth = 0) {
   const uu = kind === 'xrp' ? px.xrpUsd : px.bonsaiUsd, pool = await poolInfo(kind), nm = kind === 'xrp' ? 'XRP' : 'BONSAI';
@@ -179,7 +180,9 @@ async function pegStep(px, kind, depth = 0) {
   const price = pool.ro / pool.ru * uu;
   if (OFFBAND || Math.abs(price - 1) > K.band || Date.now() - (pegStep.last || 0) > 60000) { pegStep.last = Date.now(); log(`${kind}/USDX pool: USDX $${price.toFixed(5)} (${((price - 1) * 1e4).toFixed(0)} bps) · reserves ${pool.ro.toFixed(2)} ${nm} / ${pool.ru.toFixed(2)} USDX`); }
   if (price < K.floor) await alert(`USDX is $${price.toFixed(4)} in the ${kind}/USDX pool, below the $${K.floor} floor`);
-  if (Math.abs(price - 1) <= K.band) return 'ok';
+  // a correction starts when the price leaves the band and does not stop until it is back within a few bps of exactly $1.00
+  if (Math.abs(price - 1) <= (EPISODE[kind] ? K.tight : K.band)) { if (EPISODE[kind]) log(`${kind}/USDX restored to $${price.toFixed(5)}`); EPISODE[kind] = false; return 'ok'; }
+  EPISODE[kind] = true;
   OFFBAND = true;
   const cap = Math.abs(price - 1) > 0.01 ? 0.9 : K.maxPct, ls = await lines(recv.address);
   const usdxInv = bal(ls, USDX), bonsaiInv = bal(ls, BONSAI), xrpInv = Math.max(0, (await xrpBal(recv.address)) - 5);
@@ -189,7 +192,7 @@ async function pegStep(px, kind, depth = 0) {
   if (price < 1) {
     // need = USDX to remove so that other/USDX x unitUsd = 1
     const need = Math.min(pool.ru * (1 - price), pool.ru * cap);
-    if (need < MIN_ACT) return log(`correction of ${need.toFixed(6)} USDX is below the ${MIN_ACT} minimum action`);
+    if (need < MIN_ACT) { EPISODE[kind] = false; return log(`correction of ${need.toFixed(6)} USDX is below the ${MIN_ACT} minimum action`); }
     let got = 0;
     const out = Math.min(need, share * pool.ru * 0.9);
     if (out >= MIN_ACT) {
@@ -213,7 +216,7 @@ async function pegStep(px, kind, depth = 0) {
     if (got > 0) PENDING_BURN.v += got;   // retired once the pools are back in the band, so corrections are not slowed by an extra transaction each
   } else {
     const need = Math.min(pool.ru * (price - 1), pool.ru * cap);   // USDX to add so the price returns to $1
-    if (need < MIN_ACT) return log(`correction of ${need.toFixed(6)} USDX is below the ${MIN_ACT} minimum action`);
+    if (need < MIN_ACT) { EPISODE[kind] = false; return log(`correction of ${need.toFixed(6)} USDX is below the ${MIN_ACT} minimum action`); }
     let added = 0;
     const have = Math.max(0, usdxInv - Math.min(0.5, usdxInv * 0.1));
     if (have >= MIN_ACT) {
@@ -248,7 +251,7 @@ async function pegStep(px, kind, depth = 0) {
       }
     } else if (left >= MIN_ACT && !acted) log(`USDX above $1 by ${((price - 1) * 1e4).toFixed(0)} bps but the treasury has no USDX, no BONSAI to burn and no LP tokens. Fund the receiver to defend the ceiling.`);
   }
-  if (acted) { const p3 = await freshPool(kind, pool); if (p3) { const pr3 = p3.ro / p3.ru * uu; log(`after rebalancing: USDX $${pr3.toFixed(5)} in the ${kind} pool`); return Math.abs(pr3 - 1) > K.band ? 'again' : 'fixed'; } }
+  if (acted) { const p3 = await freshPool(kind, pool); if (p3) { const pr3 = p3.ro / p3.ru * uu; log(`after rebalancing: USDX $${pr3.toFixed(5)} in the ${kind} pool`); DEV[kind] = Math.abs(pr3 - 1); return Math.abs(pr3 - 1) > K.tight ? 'again' : 'fixed'; } }
   return acted ? 'fixed' : 'stuck';
 }
 
@@ -402,14 +405,22 @@ async function fastBatch(px) {
 async function repeg(px) {
   let again = false;
   await fastBatch(px).catch(e => log('batch:', e.message));
-  for (const kind of K.pegPools) {
-    let r = '', n = 0;
-    do {
-      try { r = await pegStep(px, kind); } catch (e) { log(`peg ${kind}:`, e.message); await alert(`peg defence failed in the ${kind} pool: ${e.message}`); r = 'stuck'; }
-      if (r === 'again') { n++; px = await prices().catch(() => px); }
-    } while (r === 'again' && n < 8);
-    if (r === 'again') { again = true; log(`${kind}: still outside the band after ${n} corrections, continuing`); }
+  // Round-robin over the pools that are off the peg, re-reading the price each round, and keep going until every one is back within a few bps of $1.00.
+  // A pool is only given up on when four rounds in a row failed to move it closer (nothing left to correct with), and then the normal cycle retries it.
+  const t0 = Date.now(), still = {}, stall = {}, prev = {}; let live = [...K.pegPools], rounds = 0;
+  while (live.length && Date.now() - t0 < 200000) {
+    const next = []; rounds++;
+    for (const kind of live) {
+      let r; try { r = await pegStep(px, kind); } catch (e) { log(`peg ${kind}:`, e.message); await alert(`peg defence failed in the ${kind} pool: ${e.message}`); r = 'stuck'; }
+      if (r !== 'again') { still[kind] = false; continue; }
+      const d = DEV[kind]; stall[kind] = prev[kind] != null && d > prev[kind] * 0.95 ? (stall[kind] || 0) + 1 : 0; prev[kind] = d;
+      if (stall[kind] >= 4) { still[kind] = true; log(`${kind}: not getting closer to $1.00 after ${rounds} rounds (${(d * 1e4).toFixed(0)} bps off), will keep trying on the next pass; the treasury may need more liquidity`); }
+      else next.push(kind);
+    }
+    live = next; if (live.length) px = await prices().catch(() => px);
   }
+  for (const kind of live) still[kind] = true;
+  again = Object.values(still).some(Boolean) && live.length > 0;
   if (!again && PENDING_BURN.v > 0.000001) {
     try { const have = bal(await lines(recv.address), USDX), KEEP = +E.PEG_KEEP_USDX || 5, burn = Math.min(Math.max(0, have - KEEP), PENDING_BURN.v); PENDING_BURN.v = 0;   // recovered USDX stays in the treasury as inventory for the next above-peg correction; only a surplus is retired
       if (burn >= 0.000001) { await submit({ TransactionType: 'Payment', Account: recv.address, Destination: UI, Amount: { ...USDX, value: fmt6(burn) }, Memos: [memo('USDX/PEGBURN', { v: 1, usdx: burn })] }, recv, 'burn recovered USDX'); log(`retired ${fmt6(burn)} USDX`); } }
