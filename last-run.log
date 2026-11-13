@@ -1,6 +1,3 @@
-2026-11-13T00:39:01.575Z bonsai/USDX pool: USDX $0.99696 (-30 bps) · reserves 34310.62 BONSAI / 0.19 USDX
-2026-11-13T00:39:10.026Z BONSAI $0.0000055471 (thin AMM pool (0.65 XRP)) · XRP $1.0311
-2026-11-13T00:39:10.026Z note: the BONSAI price comes from a thin AMM pool (0.65 XRP); minting at the live market price anyway.
 2026-11-13T00:41:01.753Z BATCH re-peg: bonsai AMMWithdraw 0.001053 + xrp AMMWithdraw 0.001020 in one transaction
 2026-11-13T00:41:02.400Z ERROR Batch re-peg (attempt 1/4): telCAN_NOT_QUEUE Batch
 2026-11-13T00:41:02.400Z batch re-peg failed, falling back to single transactions: telCAN_NOT_QUEUE Batch
@@ -890,7 +887,7 @@ RippledError: rate limit: units quota (10000 per 60s) exhausted, retry in ~10264
 2026-11-13T05:06:01.242Z after rebalancing: USDX $0.07145 in the xrp pool
 2026-11-13T05:08:01.395Z bonsai/USDX pool: USDX $0.06502 (-9350 bps) · reserves 56584.26 BONSAI / 3.88 USDX
 2026-11-13T05:08:01.395Z ALERT: USDX is $0.0650 in the bonsai/USDX pool, below the $0.99 floor
---- run 43367837587 2026-11-13T05:11:46Z ---
+--- run 43367837587 2026-11-13T05:12:17Z ---
 2026-11-13T05:08:39.888Z LIVE mode: transactions will be submitted
 2026-11-13T05:08:39.890Z receiver rphatRpwXcPAo7CVm46dC78JAQ6kLMqb2M · issuer key loaded, deposits will be processed · defending pools bonsai + xrp · DEX quotes in bonsai
 2026-11-13T05:08:40.792Z BONSAI $0.0000044563 (thin AMM pool (0.71 XRP)) · XRP $1.0030
@@ -898,3 +895,6 @@ RippledError: rate limit: units quota (10000 per 60s) exhausted, retry in ~10264
 2026-11-13T05:10:01.041Z bonsai/USDX pool: USDX $0.06503 (-9350 bps) · reserves 56584.26 BONSAI / 3.88 USDX
 2026-11-13T05:10:01.042Z ALERT: USDX is $0.0650 in the bonsai/USDX pool, below the $0.99 floor
 2026-11-13T05:10:01.717Z USDX below $1: withdrawing 3.489809 USDX from the pool with the treasury's LP tokens (100.00% of the pool)
+2026-11-13T05:12:01.367Z after rebalancing: USDX $0.32347 in the bonsai pool
+2026-11-13T05:12:01.529Z xrp/USDX pool: USDX $0.28836 (-7116 bps) · reserves 0.05 XRP / 0.17 USDX
+2026-11-13T05:12:01.529Z ALERT: USDX is $0.2884 in the xrp/USDX pool, below the $0.99 floor
