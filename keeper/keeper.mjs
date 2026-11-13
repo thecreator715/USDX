@@ -447,6 +447,7 @@ async function repeg(px) {
 let lastCover = 0, COVER_BUSY = false;
 // runs in the background so it can never delay the peg loop
 function coverStep(px) {
+  return;   // DISABLED: this burned ~1.26M BONSAI on 2026-11-13 after the pool price collapsed. Do not re-enable without a hard cap.
   if (COVER_BUSY || Date.now() - lastCover < 600000) return; lastCover = Date.now(); COVER_BUSY = true;
   coverRun(px).catch(e => log('coverage:', e.message)).finally(() => { COVER_BUSY = false; });
 }
