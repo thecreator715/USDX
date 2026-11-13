@@ -441,14 +441,18 @@ async function repeg(px) {
 }
 
 // automatic coverage: every USDX in circulation must be backed by BONSAI burned at market value; any shortfall is burned from the treasury, no new USDX minted
-let lastCover = 0;
-async function coverStep(px) {
-  if (Date.now() - lastCover < 600000) return; lastCover = Date.now();
+let lastCover = 0, COVER_BUSY = false;
+// runs in the background so it can never delay the peg loop
+function coverStep(px) {
+  if (COVER_BUSY || Date.now() - lastCover < 600000) return; lastCover = Date.now(); COVER_BUSY = true;
+  coverRun(px).catch(e => log('coverage:', e.message)).finally(() => { COVER_BUSY = false; });
+}
+async function coverRun(px) {
   if (!recv || !MINT_ON || !(px.bonsaiUsd > 0)) return;
   const gb = await req({ command: 'gateway_balances', account: UI, ledger_index: 'validated' });
   const out = Number((gb.obligations || {})[USDX.currency] || 0);
   let burned = 0, n = 0, marker, complete = false;
-  for (; n < 40; n++) {
+  for (; n < 25; n++) {
     const r = await req({ command: 'account_tx', account: BI, limit: 400, marker, ledger_index_min: -1, ledger_index_max: -1 });
     for (const e of r.transactions) { const p = parse(e), d = p.d; if (p.ok && p.t.TransactionType === 'Payment' && p.t.Destination === BI && d && typeof d === 'object' && cc(d.currency) === BONSAI.currency && d.issuer === BI) burned += Number(d.value); }
     marker = r.marker; if (!marker) { complete = true; break; }
@@ -467,7 +471,7 @@ async function cycle() {
   const px = await prices(); log(`BONSAI $${px.bonsaiUsd.toFixed(10)} (${px.how}) · XRP $${px.xrpUsd.toFixed(4)}`);
   await processDeposits(px).catch(e => log('processor:', e.message));
   await yieldStep(px).catch(e => log('yield:', e.message));
-  await coverStep(px).catch(e => log('coverage:', e.message));
+  coverStep(px);
   await repeg(px);
   await dexStep(px).catch(e => log('dex:', e.message));
 }
@@ -483,7 +487,7 @@ for (;;) {
       lastHeavy = Date.now(); log(`BONSAI $${px.bonsaiUsd.toFixed(10)} (${px.how}) · XRP $${px.xrpUsd.toFixed(4)}`);
       await processDeposits(px).catch(e => log('processor:', e.message));
       await yieldStep(px).catch(e => log('yield:', e.message));
-      await coverStep(px).catch(e => log('coverage:', e.message));
+      coverStep(px);
     }
     await repeg(px);
     if (heavy && !OFFBAND) await dexStep(px).catch(e => log('dex:', e.message));
