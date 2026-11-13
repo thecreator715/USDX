@@ -429,10 +429,34 @@ async function repeg(px) {
   OFFBAND = again;   // fast loop only while corrections are actually moving the price; a pool that cannot be corrected falls back to the normal cycle
 }
 
+// automatic coverage: every USDX in circulation must be backed by BONSAI burned at market value; any shortfall is burned from the treasury, no new USDX minted
+let lastCover = 0;
+async function coverStep(px) {
+  if (Date.now() - lastCover < 600000) return; lastCover = Date.now();
+  if (!recv || !MINT_ON || !(px.bonsaiUsd > 0)) return;
+  const gb = await req({ command: 'gateway_balances', account: UI, ledger_index: 'validated' });
+  const out = Number((gb.obligations || {})[USDX.currency] || 0);
+  let burned = 0, n = 0, marker, complete = false;
+  for (; n < 40; n++) {
+    const r = await req({ command: 'account_tx', account: BI, limit: 400, marker, ledger_index_min: -1, ledger_index_max: -1 });
+    for (const e of r.transactions) { const p = parse(e), d = p.d; if (p.ok && p.t.TransactionType === 'Payment' && p.t.Destination === BI && d && typeof d === 'object' && cc(d.currency) === BONSAI.currency && d.issuer === BI) burned += Number(d.value); }
+    marker = r.marker; if (!marker) { complete = true; break; }
+  }
+  if (!complete) return log('coverage check skipped: the BONSAI issuer history is too long to total safely, no burn made');
+  const needUsd = out * K.ratio / 100 - burned * px.bonsaiUsd, needB = needUsd / px.bonsaiUsd;
+  log(`coverage: ${out.toFixed(4)} USDX outstanding · ${burned.toFixed(2)} BONSAI burned · ${needUsd > 0 ? 'short $' + needUsd.toFixed(4) : 'fully covered'}`);
+  if (needUsd < 0.01) return;
+  const have = bal(await lines(recv.address), BONSAI), amt = Math.min(needB, have * 0.98);
+  if (amt < 1) return log(`coverage short by ${needB.toFixed(2)} BONSAI but the treasury holds only ${have.toFixed(2)}. Add BONSAI to the receiver.`);
+  try { await submit({ TransactionType: 'Payment', Account: recv.address, Destination: BI, Amount: { ...BONSAI, value: amt.toFixed(6) }, Memos: [memo('USDX/COVER', { v: 1, kind: 'auto', bonsai: amt, usdx: out, rateUsd: px.bonsaiUsd })] }, recv, 'coverage burn'); log(`COVERAGE BURN: ${amt.toFixed(4)} BONSAI burned to back circulating USDX`); }
+  catch (e) { log('coverage burn failed:', e.message); }
+}
+
 async function cycle() {
   const px = await prices(); log(`BONSAI $${px.bonsaiUsd.toFixed(10)} (${px.how}) · XRP $${px.xrpUsd.toFixed(4)}`);
   await processDeposits(px).catch(e => log('processor:', e.message));
   await yieldStep(px).catch(e => log('yield:', e.message));
+  await coverStep(px).catch(e => log('coverage:', e.message));
   await repeg(px);
   await dexStep(px).catch(e => log('dex:', e.message));
 }
@@ -448,6 +472,7 @@ for (;;) {
       lastHeavy = Date.now(); log(`BONSAI $${px.bonsaiUsd.toFixed(10)} (${px.how}) · XRP $${px.xrpUsd.toFixed(4)}`);
       await processDeposits(px).catch(e => log('processor:', e.message));
       await yieldStep(px).catch(e => log('yield:', e.message));
+      await coverStep(px).catch(e => log('coverage:', e.message));
     }
     await repeg(px);
     if (heavy && !OFFBAND) await dexStep(px).catch(e => log('dex:', e.message));
