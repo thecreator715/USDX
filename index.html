@@ -830,7 +830,7 @@ async function scanLedger(force){
 }
 
 /* ---------- render ---------- */
-const BUILD='20261028-1558';
+const BUILD='20261112-2050';
 const LIVE_URL='https://thecreator715.github.io/USDX/';
 function sandboxNote(){
   setNet(false); if(document.getElementById('sbNote')) return;
@@ -1488,7 +1488,7 @@ function renderMonitor(){
   const age=last?(Date.now()-last.t)/1000:null; if(MON.err) bad.push('Monitor error: '+MON.err); else if(age!=null&&age>120) bad.push('Price check is stale ('+Math.round(age)+' s old)');
   $('#monAlert').innerHTML=bad.length?`<div class="note err-note">${bad.join('<br>')}</div>`:'';
   const armed=!!S.w.recv;
-  $('#monMeta').textContent=(last?'Last check '+new Date(last.t).toLocaleTimeString()+' · ':'Waiting for the first check · ')+'peg band ±'+(tol*1e4).toFixed(0)+' bps · floor $0.99 · '+(armed&&$('#kOn').checked?'keeper armed, will rebalance both pools':'keeper NOT armed: load the receiver key and tick auto-rebalance, or run the Node keeper, otherwise prices are only watched');
+  $('#monMeta').textContent=(last?'Last check '+new Date(last.t).toLocaleTimeString()+' · ':'Waiting for the first check · ')+'peg band ±'+(tol*1e4).toFixed(0)+' bps · floor $0.99 · '+(S.ghFresh?'keeper running 24/7 on GitHub, re-pegging both pools automatically (this page only watches)':'waiting for the GitHub keeper log (see the keeper card below)');
   const worst=last?['bonsai','xrp'].map(k=>last[k]).filter(v=>v!=null).reduce((a,v)=>Math.abs(v-1)>Math.abs(a-1)?v:a,1):1;
   document.title = (worst<FLOOR||Math.abs(worst-1)>0.01)? '⚠ USDX $'+worst.toFixed(4)+' · '+TITLE0 : TITLE0;
 }

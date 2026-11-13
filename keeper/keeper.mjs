@@ -60,6 +60,18 @@ const req = async r => {
     }
   }
 };
+// The public servers are load balanced and a read can come back from a node that is a ledger or two behind, showing the pool as it was BEFORE our last
+// transaction. Acting on that made the keeper correct twice and overshoot. Every state read therefore must come from a ledger at least as new as the newest
+// one this keeper has already seen or confirmed a transaction in.
+const LEDGER = { min: 0 };
+async function rd(r) {
+  for (let i = 0; i < 40; i++) {
+    const res = await req({ ...r, ledger_index: 'validated' }), li = Number(res.ledger_index || res.ledger_current_index || 0);
+    if (!li || li >= LEDGER.min) { if (li > LEDGER.min) LEDGER.min = li; return res; }
+    await sleep(350);
+  }
+  throw new Error(`server still behind ledger ${LEDGER.min}`);
+}
 let FEEBUMP = 1;
 async function submit1(tx, wallet) {
   if (!LIVE) { log('DRY RUN', tx.TransactionType, JSON.stringify(tx.Amount || tx.TakerGets || tx.OfferSequence || '')); return 'dryrun'; }
@@ -70,7 +82,7 @@ async function submit1(tx, wallet) {
   for (let i = 0; i < 90; i++) {
     await sleep(i ? 1000 : 2500); let r = null;
     try { r = await req({ command: 'tx', transaction: signed.hash }); } catch (e) { if (!/txnNotFound|rate limit|slowDown|too much load|units quota/i.test(String(e.message || e))) throw e; if (/rate limit|slowDown|too much load|units quota/i.test(String(e.message || e))) { await sleep(8000); continue; } }
-    if (r && r.validated) { const code = (r.meta || r.metaData || {}).TransactionResult; if (code !== 'tesSUCCESS') throw new Error(code + ' ' + tx.TransactionType); return signed.hash; }
+    if (r && r.validated) { if (Number(r.ledger_index) > LEDGER.min) LEDGER.min = Number(r.ledger_index); const code = (r.meta || r.metaData || {}).TransactionResult; if (code !== 'tesSUCCESS') throw new Error(code + ' ' + tx.TransactionType); return signed.hash; }
     if (!r && prep.LastLedgerSequence && (await req({ command: 'ledger_current' })).ledger_current_index > prep.LastLedgerSequence + 2) throw new Error('transaction expired before validation, nothing applied');
   }
   throw new Error('timed out waiting for validation of ' + signed.hash);
@@ -90,14 +102,15 @@ async function submit(tx, wallet, label) {
   }
   FEEBUMP = 1; throw last;
 }
-const lines = async a => (await req({ command: 'account_lines', account: a, ledger_index: 'validated', limit: 400 })).lines;
-const xrpBal = async a => { try { return Number((await req({ command: 'account_info', account: a, ledger_index: 'validated' })).account_data.Balance) / 1e6; } catch { return 0; } };
+const lines = async a => (await rd({ command: 'account_lines', account: a, limit: 400 })).lines;
+const xrpBal = async a => { try { return Number((await rd({ command: 'account_info', account: a })).account_data.Balance) / 1e6; } catch { return 0; } };
 const bal = (ls, x) => Number((ls.find(z => cc(z.currency) === cc(x.currency) && z.account === x.issuer) || { balance: 0 }).balance);
 
 async function xrpUsd() {
   try { const j = await (await fetch('https://api.coinbase.com/v2/prices/XRP-USD/spot')).json(); if (+j.data.amount > 0) return +j.data.amount; } catch {}
   const j = await (await fetch('https://api.kraken.com/0/public/Ticker?pair=XRPUSD')).json(); const k = Object.keys(j.result)[0]; return +j.result[k].c[0];
 }
+const PH = [];
 async function prices() {
   const xrp = { currency: 'XRP' }, [ask, bid, amm] = await Promise.all([
     req({ command: 'book_offers', taker_gets: BONSAI, taker_pays: xrp, limit: 30 }).catch(() => null),
@@ -118,11 +131,15 @@ async function prices() {
   else if (pool) { bx = pool.p; how = `thin AMM pool (${pool.x.toFixed(2)} XRP)`; thin = true; }
   else if (asks[0] || bids[0]) { bx = (asks[0] || bids[0]).p; how = 'thin order book'; thin = true; }
   else throw new Error('no BONSAI/XRP market found');
+  // BONSAI trades in a pool about 1 XRP deep, so single readings jump by tens of percent. Deciding on the median of the last readings stops the keeper from
+  // chasing phantom moves (withdrawing and re-depositing real liquidity for nothing) while a real move still comes through within about a minute.
+  PH.push({ t: Date.now(), v: bx }); while (PH.length && Date.now() - PH[0].t > 90000) PH.shift();
+  if (PH.length >= 3 && !man) { const sv = PH.map(h => h.v).sort((a, b) => a - b); bx = sv[Math.floor(sv.length / 2)]; how += ' (median of ' + PH.length + ')'; }
   const xu = await xrpUsd(); return { xrpUsd: xu, bonsaiXrp: bx, bonsaiUsd: bx * xu, how, thin };
 }
 async function poolInfo(kind) {
   try {
-    const a = (await req({ command: 'amm_info', asset: otherAsset(kind), asset2: USDX, ledger_index: 'validated' })).amm;
+    const a = (await rd({ command: 'amm_info', asset: otherAsset(kind), asset2: USDX })).amm;
     const uFirst = isUsdx(a.amount), u = uFirst ? a.amount : a.amount2, o = uFirst ? a.amount2 : a.amount;
     return { ro: aval(o), ru: aval(u), fee: a.trading_fee / 100000, acct: a.account, lpTotal: Number(a.lp_token && a.lp_token.value || 0) };
   } catch { return null; }
@@ -348,7 +365,7 @@ async function yieldStep(px) {
 }
 
 // ---- XRPL Batch (XLS-56): withdraw/deposit on both pools in ONE transaction, so both pools are corrected in the same ledger ----
-let BATCH_OK = E.BATCH !== '0';
+let BATCH_OK = E.BATCH !== '0', BATCH_FAILS = 0;
 const INNER = 0x40000000;   // tfInnerBatchTxn
 async function fastBatch(px) {
   if (!BATCH_OK || K.pegPools.length < 2) return false;
@@ -368,13 +385,14 @@ async function fastBatch(px) {
   if (ops.length < 2) return false;   // one pool off: the normal path handles it with a single transaction
   try {
     log(`BATCH re-peg: ${ops.map(o => `${o.kind} ${o.tx.TransactionType} ${o.tx.Amount.value}`).join(' + ')} in one transaction`);
-    await submit({ TransactionType: 'Batch', Account: recv.address, Flags: 524288 /* tfIndependent: each pool is corrected on its own */, RawTransactions: ops.map(o => ({ RawTransaction: { ...o.tx, Flags: o.tx.Flags + INNER } })), Memos: [memo('USDX/PEG', { v: 1, batch: ops.length })] }, recv, 'Batch re-peg');
+    await submit({ TransactionType: 'Batch', Account: recv.address, Flags: 524288 /* tfIndependent: each pool is corrected on its own */, Fee: '3000' /* generous: a Batch that underpays the open-ledger fee cannot be queued (telCAN_NOT_QUEUE) */, RawTransactions: ops.map(o => ({ RawTransaction: { ...o.tx, Flags: o.tx.Flags + INNER } })), Memos: [memo('USDX/PEG', { v: 1, batch: ops.length })] }, recv, 'Batch re-peg');
     PENDING_BURN.v += ops.reduce((a, o) => a + o.out, 0);
-    for (const o of ops) await freshPool(o.kind, before[o.kind]);
+    BATCH_FAILS = 0; for (const o of ops) await freshPool(o.kind, before[o.kind]);
     return true;
   } catch (e) {
     const m = String(e && e.message || e);
-    if (/temINVALID|temDISABLED|temMALFORMED|temBAD|tefNO|tecBATCH|not supported|unknown|Invalid|Unsupported/i.test(m)) { BATCH_OK = false; log('Batch not usable here, using single transactions from now on:', m); }
+    BATCH_FAILS = (BATCH_FAILS || 0) + 1;
+    if (/temINVALID|temDISABLED|temMALFORMED|temBAD|tefNO|tecBATCH|not supported|unknown|Invalid|Unsupported/i.test(m) || BATCH_FAILS >= 3) { BATCH_OK = false; log('Batch not usable here, using single transactions from now on:', m); }
     else log('batch re-peg failed, falling back to single transactions:', m);
     return false;
   }
@@ -393,7 +411,7 @@ async function repeg(px) {
     if (r === 'again') { again = true; log(`${kind}: still outside the band after ${n} corrections, continuing`); }
   }
   if (!again && PENDING_BURN.v > 0.000001) {
-    try { const have = bal(await lines(recv.address), USDX), burn = Math.min(have, PENDING_BURN.v); PENDING_BURN.v = 0;
+    try { const have = bal(await lines(recv.address), USDX), KEEP = +E.PEG_KEEP_USDX || 5, burn = Math.min(Math.max(0, have - KEEP), PENDING_BURN.v); PENDING_BURN.v = 0;   // recovered USDX stays in the treasury as inventory for the next above-peg correction; only a surplus is retired
       if (burn >= 0.000001) { await submit({ TransactionType: 'Payment', Account: recv.address, Destination: UI, Amount: { ...USDX, value: fmt6(burn) }, Memos: [memo('USDX/PEGBURN', { v: 1, usdx: burn })] }, recv, 'burn recovered USDX'); log(`retired ${fmt6(burn)} USDX`); } }
     catch (e) { log('retire failed:', e.message); }
   }
@@ -411,7 +429,7 @@ log(LIVE ? 'LIVE mode: transactions will be submitted' : 'DRY RUN: nothing is su
 log(`receiver ${RECV}${iss ? ' · issuer key loaded, deposits will be processed' : ' · no issuer key, deposits are not processed'} · defending pools ${K.pegPools.join(' + ')} · DEX quotes in ${K.pool}`);
 // Main loop. The peg is checked every few seconds (and every 2 s while a pool is off the peg); deposits, yield and DEX quotes are heavier on the public
 // servers' rate limit, so they run once a minute and never while a correction is under way.
-const POLL = (+E.PEG_POLL_SEC || 8) * 1000, HEAVY = (+E.HEAVY_SEC || 60) * 1000; let lastHeavy = 0;
+const POLL = (+E.PEG_POLL_SEC || 6) * 1000, HEAVY = (+E.HEAVY_SEC || 60) * 1000; let lastHeavy = 0;
 for (;;) {
   try {
     const px = await prices(), heavy = !OFFBAND && Date.now() - lastHeavy >= HEAVY;
