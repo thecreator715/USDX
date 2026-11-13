@@ -1,20 +1,3 @@
-2026-11-13T02:24:02.873Z replacing stale buy quote at 164119
-2026-11-13T02:24:10.593Z replacing stale buy quote at 174468
-2026-11-13T02:24:18.254Z replacing stale buy quote at 174132
-2026-11-13T02:24:26.002Z replacing stale buy quote at 174342
-2026-11-13T02:24:34.954Z replacing stale buy quote at 174654
-2026-11-13T02:24:42.896Z replacing stale buy quote at 166503
-2026-11-13T02:24:50.636Z replacing stale buy quote at 174249
-2026-11-13T02:24:59.519Z replacing stale buy quote at 174409
-2026-11-13T02:25:07.275Z replacing stale buy quote at 174056
-2026-11-13T02:25:15.128Z replacing stale buy quote at 174933
-2026-11-13T02:25:22.865Z replacing stale buy quote at 174451
-2026-11-13T02:25:30.821Z replacing stale sell quote at 181608
-2026-11-13T02:25:38.523Z replacing stale sell quote at 181608
-2026-11-13T02:25:46.255Z replacing stale buy quote at 174443
-2026-11-13T02:25:54.056Z replacing stale buy quote at 174266
-2026-11-13T02:26:02.974Z replacing stale buy quote at 180522
-2026-11-13T02:26:11.075Z replacing stale sell quote at 181732
 2026-11-13T02:26:18.775Z posting sell quote 8.41 USDX @ 178414
 2026-11-13T02:26:26.541Z posting buy quote 1.26 USDX @ 177347
 2026-11-13T02:26:57.164Z BONSAI $0.0000056111 (thin AMM pool (0.66 XRP)) · XRP $1.0238
@@ -693,7 +676,7 @@ RippledError: rate limit: units quota (10000 per 60s) exhausted, retry in ~39898
 2026-11-13T05:30:25.074Z ERROR OfferCreate (attempt 1/4): Transaction not found.
 2026-11-13T05:30:25.074Z DEX sell quote failed: Transaction not found.
 2026-11-13T05:30:25.074Z buy quote skipped: not enough of the other asset
---- run 43372506803 2026-11-13T05:38:08Z ---
+--- run 43372506803 2026-11-13T05:38:40Z ---
 2026-11-13T05:31:18.034Z LIVE mode: transactions will be submitted
 2026-11-13T05:31:18.036Z receiver rphatRpwXcPAo7CVm46dC78JAQ6kLMqb2M · issuer key loaded, deposits will be processed · defending pools bonsai + xrp · DEX quotes in bonsai
 2026-11-13T05:31:18.972Z BONSAI $0.0000035104 (thin AMM pool (0.63 XRP)) · XRP $1.0084
@@ -898,3 +881,20 @@ RippledError: rate limit: units quota (10000 per 60s) exhausted, retry in ~12007
 2026-11-13T05:38:03.468Z correction of 0.000233 USDX is below the 0.0005 minimum action
 2026-11-13T05:38:03.489Z xrp/USDX pool: USDX $1.00713 (71 bps) · reserves 0.01 XRP / 0.01 USDX
 2026-11-13T05:38:03.593Z correction of 0.000038 USDX is below the 0.0005 minimum action
+2026-11-13T05:38:11.685Z bonsai/USDX pool: USDX $0.93211 (-679 bps) · reserves 976.59 BONSAI / 0.00 USDX
+2026-11-13T05:38:11.685Z ALERT: USDX is $0.9321 in the bonsai/USDX pool, below the $0.99 floor
+2026-11-13T05:38:11.786Z correction of 0.000233 USDX is below the 0.0005 minimum action
+2026-11-13T05:38:11.808Z xrp/USDX pool: USDX $1.00713 (71 bps) · reserves 0.01 XRP / 0.01 USDX
+2026-11-13T05:38:11.923Z correction of 0.000038 USDX is below the 0.0005 minimum action
+2026-11-13T05:38:20.070Z bonsai/USDX pool: USDX $0.93221 (-678 bps) · reserves 976.59 BONSAI / 0.00 USDX
+2026-11-13T05:38:20.070Z ALERT: USDX is $0.9322 in the bonsai/USDX pool, below the $0.99 floor
+2026-11-13T05:38:20.173Z correction of 0.000233 USDX is below the 0.0005 minimum action
+2026-11-13T05:38:20.210Z xrp/USDX pool: USDX $1.00723 (72 bps) · reserves 0.01 XRP / 0.01 USDX
+2026-11-13T05:38:20.337Z correction of 0.000039 USDX is below the 0.0005 minimum action
+2026-11-13T05:38:28.434Z bonsai/USDX pool: USDX $0.93318 (-668 bps) · reserves 976.59 BONSAI / 0.00 USDX
+2026-11-13T05:38:28.434Z ALERT: USDX is $0.9332 in the bonsai/USDX pool, below the $0.99 floor
+2026-11-13T05:38:28.536Z correction of 0.000229 USDX is below the 0.0005 minimum action
+2026-11-13T05:38:28.556Z xrp/USDX pool: USDX $1.00828 (83 bps) · reserves 0.01 XRP / 0.01 USDX
+2026-11-13T05:38:28.659Z correction of 0.000044 USDX is below the 0.0005 minimum action
+2026-11-13T05:38:36.733Z BONSAI $0.0000032754 (thin AMM pool (0.61 XRP) (median of 10)) · XRP $1.0095
+2026-11-13T05:38:36.733Z note: the BONSAI price comes from a thin AMM pool (0.61 XRP) (median of 10); minting at the live market price anyway.
