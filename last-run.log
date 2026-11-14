@@ -1,17 +1,3 @@
-2026-11-14T02:19:15.935Z BONSAI $0.0000003647 (thin AMM pool (0.44 XRP) (median of 11)) · XRP $1.0014
-2026-11-14T02:19:15.935Z note: the BONSAI price comes from a thin AMM pool (0.44 XRP) (median of 11); minting at the live market price anyway.
-2026-11-14T02:20:16.132Z BONSAI $0.0000003646 (thin AMM pool (0.44 XRP) (median of 11)) · XRP $1.0010
-2026-11-14T02:20:16.132Z note: the BONSAI price comes from a thin AMM pool (0.44 XRP) (median of 11); minting at the live market price anyway.
-2026-11-14T02:21:19.879Z BONSAI $0.0000003631 (thin AMM pool (0.44 XRP) (median of 11)) · XRP $0.9968
-2026-11-14T02:21:19.879Z note: the BONSAI price comes from a thin AMM pool (0.44 XRP) (median of 11); minting at the live market price anyway.
-2026-11-14T02:22:04.553Z bonsai/USDX pool holds only $0.2448: too small to defend, its price is meaningless and the keeper will not touch it. Re-seed it with BONSAI and USDX together.
-2026-11-14T02:22:20.971Z BONSAI $0.0000003615 (thin AMM pool (0.44 XRP) (median of 11)) · XRP $0.9925
-2026-11-14T02:22:20.971Z note: the BONSAI price comes from a thin AMM pool (0.44 XRP) (median of 11); minting at the live market price anyway.
-2026-11-14T02:22:27.692Z DEX quotes skipped: receiver has 21.45 XRP, needs 21.60 XRP to hold another offer. Add XRP to the receiver.
-2026-11-14T02:23:25.256Z BONSAI $0.0000003621 (thin AMM pool (0.44 XRP) (median of 11)) · XRP $0.9940
-2026-11-14T02:23:25.256Z note: the BONSAI price comes from a thin AMM pool (0.44 XRP) (median of 11); minting at the live market price anyway.
-2026-11-14T02:24:25.768Z BONSAI $0.0000003606 (thin AMM pool (0.44 XRP) (median of 11)) · XRP $0.9899
-2026-11-14T02:24:25.768Z note: the BONSAI price comes from a thin AMM pool (0.44 XRP) (median of 11); minting at the live market price anyway.
 2026-11-14T02:25:29.263Z BONSAI $0.0000003615 (thin AMM pool (0.44 XRP) (median of 11)) · XRP $0.9924
 2026-11-14T02:25:29.263Z note: the BONSAI price comes from a thin AMM pool (0.44 XRP) (median of 11); minting at the live market price anyway.
 2026-11-14T02:26:31.912Z BONSAI $0.0000003620 (thin AMM pool (0.44 XRP) (median of 11)) · XRP $0.9939
@@ -855,7 +841,7 @@ RippledError: rate limit: units quota (2000 per 10s) exhausted, retry in ~14746m
 2026-11-14T07:59:31.926Z note: the BONSAI price comes from a thin AMM pool (0.44 XRP) (median of 11); minting at the live market price anyway.
 2026-11-14T08:00:34.575Z BONSAI $0.0000003576 (thin AMM pool (0.44 XRP) (median of 11)) · XRP $0.9817
 2026-11-14T08:00:34.575Z note: the BONSAI price comes from a thin AMM pool (0.44 XRP) (median of 11); minting at the live market price anyway.
---- run 43572271605 2026-11-14T08:19:45Z ---
+--- run 43572271605 2026-11-14T08:20:17Z ---
 2026-11-14T08:02:03.019Z LIVE mode: transactions will be submitted
 2026-11-14T08:02:03.021Z receiver rphatRpwXcPAo7CVm46dC78JAQ6kLMqb2M · issuer key loaded, deposits will be processed · defending pools bonsai + xrp · DEX quotes in bonsai
 2026-11-14T08:02:03.799Z BONSAI $0.0000003579 (thin AMM pool (0.44 XRP)) · XRP $0.9826
@@ -898,3 +884,17 @@ RippledError: rate limit: units quota (2000 per 10s) exhausted, retry in ~14746m
 2026-11-14T08:17:43.326Z note: the BONSAI price comes from a thin AMM pool (0.44 XRP) (median of 11); minting at the live market price anyway.
 2026-11-14T08:18:49.037Z BONSAI $0.0000003595 (thin AMM pool (0.44 XRP) (median of 10)) · XRP $0.9869
 2026-11-14T08:18:49.037Z note: the BONSAI price comes from a thin AMM pool (0.44 XRP) (median of 10); minting at the live market price anyway.
+2026-11-14T08:19:51.155Z BONSAI $0.0000003594 (thin AMM pool (0.44 XRP) (median of 11)) · XRP $0.9867
+2026-11-14T08:19:51.155Z note: the BONSAI price comes from a thin AMM pool (0.44 XRP) (median of 11); minting at the live market price anyway.
+RippledError: rate limit: units quota (2000 per 10s) exhausted, retry in ~17241ms
+  data: {
+    error: 'tooBusy',
+    error_code: 9,
+    error_message: 'rate limit: units quota (2000 per 10s) exhausted, retry in ~17241ms',
+    api_version: 2,
+    id: 0,
+    request: { command: 'server_info', id: 0 },
+    status: 'error',
+    type: 'response'
+  }
+}
