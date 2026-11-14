@@ -1,4 +1,3 @@
-2026-11-14T15:39:08.954Z note: the BONSAI price comes from a thin AMM pool (0.44 XRP) (median of 11); minting at the live market price anyway.
 2026-11-14T15:40:13.827Z BONSAI $0.0000003524 (thin AMM pool (0.44 XRP) (median of 11)) · XRP $0.9675
 2026-11-14T15:40:13.828Z note: the BONSAI price comes from a thin AMM pool (0.44 XRP) (median of 11); minting at the live market price anyway.
 2026-11-14T15:41:07.186Z bonsai/USDX pool holds only $0.2431: too small to defend, its price is meaningless and the keeper will not touch it. Re-seed it with BONSAI and USDX together.
@@ -872,7 +871,7 @@ RippledError: rate limit: units quota (2000 per 10s) exhausted, retry in ~12618m
 2026-11-14T21:23:48.919Z note: the BONSAI price comes from a thin AMM pool (0.44 XRP) (median of 10); minting at the live market price anyway.
 2026-11-14T21:24:53.135Z BONSAI $0.0000003326 (thin AMM pool (0.44 XRP) (median of 11)) · XRP $0.9133
 2026-11-14T21:24:53.135Z note: the BONSAI price comes from a thin AMM pool (0.44 XRP) (median of 11); minting at the live market price anyway.
---- run 43640969841 2026-11-14T21:36:29Z ---
+--- run 43640969841 2026-11-14T21:37:00Z ---
 2026-11-14T21:26:33.811Z LIVE mode: transactions will be submitted
 2026-11-14T21:26:33.812Z receiver rphatRpwXcPAo7CVm46dC78JAQ6kLMqb2M · issuer key loaded, deposits will be processed · defending pools bonsai + xrp · DEX quotes in bonsai
 2026-11-14T21:26:34.690Z BONSAI $0.0000003322 (thin AMM pool (0.44 XRP)) · XRP $0.9119
@@ -898,3 +897,4 @@ RippledError: rate limit: units quota (2000 per 10s) exhausted, retry in ~12618m
 2026-11-14T21:34:55.279Z note: the BONSAI price comes from a thin AMM pool (0.44 XRP) (median of 11); minting at the live market price anyway.
 2026-11-14T21:35:57.874Z BONSAI $0.0000003325 (thin AMM pool (0.44 XRP) (median of 11)) · XRP $0.9128
 2026-11-14T21:35:57.874Z note: the BONSAI price comes from a thin AMM pool (0.44 XRP) (median of 11); minting at the live market price anyway.
+2026-11-14T21:36:52.352Z bonsai/USDX pool holds only $0.2394: too small to defend, its price is meaningless and the keeper will not touch it. Re-seed it with BONSAI and USDX together.
