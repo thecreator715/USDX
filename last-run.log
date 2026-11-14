@@ -1,10 +1,3 @@
-2026-11-14T08:58:46.202Z bonsai/USDX pool holds only $0.2440: too small to defend, its price is meaningless and the keeper will not touch it. Re-seed it with BONSAI and USDX together.
-2026-11-14T08:59:02.685Z BONSAI $0.0000003579 (thin AMM pool (0.44 XRP) (median of 11)) · XRP $0.9826
-2026-11-14T08:59:02.686Z note: the BONSAI price comes from a thin AMM pool (0.44 XRP) (median of 11); minting at the live market price anyway.
-2026-11-14T09:00:06.516Z BONSAI $0.0000003579 (thin AMM pool (0.44 XRP) (median of 11)) · XRP $0.9825
-2026-11-14T09:00:06.516Z note: the BONSAI price comes from a thin AMM pool (0.44 XRP) (median of 11); minting at the live market price anyway.
-2026-11-14T09:01:09.400Z BONSAI $0.0000003580 (thin AMM pool (0.44 XRP) (median of 11)) · XRP $0.9829
-2026-11-14T09:01:09.400Z note: the BONSAI price comes from a thin AMM pool (0.44 XRP) (median of 11); minting at the live market price anyway.
 2026-11-14T09:02:11.891Z BONSAI $0.0000003588 (thin AMM pool (0.44 XRP) (median of 11)) · XRP $0.9852
 2026-11-14T09:02:11.892Z note: the BONSAI price comes from a thin AMM pool (0.44 XRP) (median of 11); minting at the live market price anyway.
 2026-11-14T09:03:13.240Z BONSAI $0.0000003589 (thin AMM pool (0.44 XRP) (median of 11)) · XRP $0.9853
@@ -898,3 +891,10 @@ RippledError: rate limit: units quota (2000 per 10s) exhausted, retry in ~11296m
     type: 'response'
   }
 }
+--- run 43605518482 2026-11-14T14:55:08Z ---
+2026-11-14T14:54:38.293Z LIVE mode: transactions will be submitted
+2026-11-14T14:54:38.294Z receiver rphatRpwXcPAo7CVm46dC78JAQ6kLMqb2M · issuer key loaded, deposits will be processed · defending pools bonsai + xrp · DEX quotes in bonsai
+2026-11-14T14:54:38.826Z BONSAI $0.0000003566 (thin AMM pool (0.44 XRP)) · XRP $0.9790
+2026-11-14T14:54:38.827Z note: the BONSAI price comes from a thin AMM pool (0.44 XRP); minting at the live market price anyway.
+2026-11-14T14:54:44.712Z bonsai/USDX pool holds only $0.2438: too small to defend, its price is meaningless and the keeper will not touch it. Re-seed it with BONSAI and USDX together.
+2026-11-14T14:54:44.956Z DEX quotes skipped: receiver has 21.45 XRP, needs 21.60 XRP to hold another offer. Add XRP to the receiver.
