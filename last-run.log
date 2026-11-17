@@ -1,5 +1,3 @@
-2026-11-17T16:44:10.138Z note: the BONSAI price comes from a thin AMM pool (0.44 XRP) (median of 10); minting at the live market price anyway.
-2026-11-17T16:45:15.440Z BONSAI $0.0000003489 (thin AMM pool (0.44 XRP) (median of 11)) · XRP $0.9577
 2026-11-17T16:45:15.440Z note: the BONSAI price comes from a thin AMM pool (0.44 XRP) (median of 11); minting at the live market price anyway.
 2026-11-17T16:45:43.156Z xrp/USDX pool holds only $0.3801: too small to defend, its price is meaningless and the keeper will not touch it. Re-seed it with XRP and USDX together.
 2026-11-17T16:46:16.044Z BONSAI $0.0000003482 (thin AMM pool (0.44 XRP) (median of 10)) · XRP $0.9559
@@ -878,7 +876,7 @@
 2026-11-17T23:00:39.066Z note: the BONSAI price comes from a thin AMM pool (0.44 XRP) (median of 11); minting at the live market price anyway.
 2026-11-17T23:01:40.408Z BONSAI $0.0000003550 (thin AMM pool (0.44 XRP) (median of 11)) · XRP $0.9745
 2026-11-17T23:01:40.408Z note: the BONSAI price comes from a thin AMM pool (0.44 XRP) (median of 11); minting at the live market price anyway.
---- run 44192547800 2026-11-17T23:09:28Z ---
+--- run 44192547800 2026-11-17T23:10:00Z ---
 2026-11-17T23:02:43.287Z LIVE mode: transactions will be submitted
 2026-11-17T23:02:43.288Z receiver rphatRpwXcPAo7CVm46dC78JAQ6kLMqb2M · issuer key loaded, deposits will be processed · defending pools bonsai + xrp · DEX quotes in bonsai
 2026-11-17T23:02:44.215Z BONSAI $0.0000003551 (thin AMM pool (0.44 XRP)) · XRP $0.9748
@@ -898,3 +896,5 @@
 2026-11-17T23:08:00.321Z note: the BONSAI price comes from a thin AMM pool (0.44 XRP) (median of 11); minting at the live market price anyway.
 2026-11-17T23:09:01.058Z BONSAI $0.0000003578 (thin AMM pool (0.44 XRP) (median of 11)) · XRP $0.9823
 2026-11-17T23:09:01.058Z note: the BONSAI price comes from a thin AMM pool (0.44 XRP) (median of 11); minting at the live market price anyway.
+2026-11-17T23:09:31.365Z cycle error: no BONSAI/XRP market found
+2026-11-17T23:09:39.388Z cycle error: no BONSAI/XRP market found
