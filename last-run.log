@@ -1,4 +1,3 @@
-2026-11-16T19:11:28.352Z note: the BONSAI price comes from a thin AMM pool (0.44 XRP) (median of 8); minting at the live market price anyway.
 2026-11-16T19:12:30.051Z BONSAI $0.0000003480 (thin AMM pool (0.44 XRP) (median of 11)) · XRP $0.9554
 2026-11-16T19:12:30.051Z note: the BONSAI price comes from a thin AMM pool (0.44 XRP) (median of 11); minting at the live market price anyway.
 2026-11-16T19:13:33.425Z BONSAI $0.0000003481 (thin AMM pool (0.44 XRP) (median of 11)) · XRP $0.9556
@@ -883,7 +882,7 @@ RippledError: rate limit: units quota (2000 per 10s) exhausted, retry in ~18211m
 2026-11-17T01:20:18.979Z note: the BONSAI price comes from a thin AMM pool (0.44 XRP) (median of 11); minting at the live market price anyway.
 2026-11-17T01:21:21.909Z BONSAI $0.0000003476 (thin AMM pool (0.44 XRP) (median of 11)) · XRP $0.9544
 2026-11-17T01:21:21.909Z note: the BONSAI price comes from a thin AMM pool (0.44 XRP) (median of 11); minting at the live market price anyway.
---- run 43992674825 2026-11-17T01:26:42Z ---
+--- run 43992674825 2026-11-17T01:27:14Z ---
 2026-11-17T01:22:01.674Z LIVE mode: transactions will be submitted
 2026-11-17T01:22:01.675Z receiver rphatRpwXcPAo7CVm46dC78JAQ6kLMqb2M · issuer key loaded, deposits will be processed · defending pools bonsai + xrp · DEX quotes in bonsai
 2026-11-17T01:22:02.646Z BONSAI $0.0000003476 (thin AMM pool (0.44 XRP)) · XRP $0.9544
@@ -898,3 +897,4 @@ RippledError: rate limit: units quota (2000 per 10s) exhausted, retry in ~18211m
 2026-11-17T01:25:10.843Z note: the BONSAI price comes from a thin AMM pool (0.44 XRP) (median of 11); minting at the live market price anyway.
 2026-11-17T01:26:18.147Z BONSAI $0.0000003474 (thin AMM pool (0.44 XRP) (median of 10)) · XRP $0.9537
 2026-11-17T01:26:18.147Z note: the BONSAI price comes from a thin AMM pool (0.44 XRP) (median of 10); minting at the live market price anyway.
+2026-11-17T01:27:13.734Z bonsai/USDX pool holds only $0.2422: too small to defend, its price is meaningless and the keeper will not touch it. Re-seed it with BONSAI and USDX together.
