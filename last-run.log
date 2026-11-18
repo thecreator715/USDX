@@ -1,10 +1,3 @@
-2026-11-17T21:04:13.733Z bonsai/USDX pool holds only $0.2432: too small to defend, its price is meaningless and the keeper will not touch it. Re-seed it with BONSAI and USDX together.
-2026-11-17T21:04:22.247Z BONSAI $0.0000003531 (thin AMM pool (0.44 XRP) (median of 11)) · XRP $0.9696
-2026-11-17T21:04:22.247Z note: the BONSAI price comes from a thin AMM pool (0.44 XRP) (median of 11); minting at the live market price anyway.
-2026-11-17T21:05:24.948Z BONSAI $0.0000003536 (thin AMM pool (0.44 XRP) (median of 11)) · XRP $0.9708
-2026-11-17T21:05:24.948Z note: the BONSAI price comes from a thin AMM pool (0.44 XRP) (median of 11); minting at the live market price anyway.
-2026-11-17T21:06:29.623Z BONSAI $0.0000003535 (thin AMM pool (0.44 XRP) (median of 11)) · XRP $0.9706
-2026-11-17T21:06:29.623Z note: the BONSAI price comes from a thin AMM pool (0.44 XRP) (median of 11); minting at the live market price anyway.
 2026-11-17T21:07:33.659Z BONSAI $0.0000003534 (thin AMM pool (0.44 XRP) (median of 11)) · XRP $0.9701
 2026-11-17T21:07:33.659Z note: the BONSAI price comes from a thin AMM pool (0.44 XRP) (median of 11); minting at the live market price anyway.
 2026-11-17T21:08:37.848Z BONSAI $0.0000003531 (thin AMM pool (0.44 XRP) (median of 11)) · XRP $0.9693
@@ -898,3 +891,10 @@
 2026-11-18T03:28:00.395Z note: the BONSAI price comes from a thin AMM pool (0.44 XRP) (median of 10); minting at the live market price anyway.
 2026-11-18T03:29:05.329Z BONSAI $0.0000003555 (thin AMM pool (0.44 XRP) (median of 10)) · XRP $0.9760
 2026-11-18T03:29:05.329Z note: the BONSAI price comes from a thin AMM pool (0.44 XRP) (median of 10); minting at the live market price anyway.
+--- run 44228465239 2026-11-18T03:31:08Z ---
+2026-11-18T03:30:38.253Z LIVE mode: transactions will be submitted
+2026-11-18T03:30:38.254Z receiver rphatRpwXcPAo7CVm46dC78JAQ6kLMqb2M · issuer key loaded, deposits will be processed · defending pools bonsai + xrp · DEX quotes in bonsai
+2026-11-18T03:30:38.806Z BONSAI $0.0000003560 (thin AMM pool (0.44 XRP)) · XRP $0.9774
+2026-11-18T03:30:38.807Z note: the BONSAI price comes from a thin AMM pool (0.44 XRP); minting at the live market price anyway.
+2026-11-18T03:30:43.446Z bonsai/USDX pool holds only $0.2437: too small to defend, its price is meaningless and the keeper will not touch it. Re-seed it with BONSAI and USDX together.
+2026-11-18T03:30:43.696Z DEX quotes skipped: receiver has 21.45 XRP, needs 21.60 XRP to hold another offer. Add XRP to the receiver.
