@@ -1,5 +1,3 @@
-2026-11-18T22:44:28.820Z note: the BONSAI price comes from a thin AMM pool (0.44 XRP) (median of 11); minting at the live market price anyway.
-2026-11-18T22:45:35.710Z BONSAI $0.0000003507 (thin AMM pool (0.44 XRP) (median of 11)) · XRP $0.9627
 2026-11-18T22:45:35.710Z note: the BONSAI price comes from a thin AMM pool (0.44 XRP) (median of 11); minting at the live market price anyway.
 --- run 44411467198 2026-11-18T23:06:40Z ---
 2026-11-18T22:46:18.765Z LIVE mode: transactions will be submitted
@@ -878,7 +876,7 @@
 2026-11-19T04:54:59.482Z note: the BONSAI price comes from a thin AMM pool (0.44 XRP) (median of 11); minting at the live market price anyway.
 2026-11-19T04:56:00.677Z BONSAI $0.0000003554 (thin AMM pool (0.44 XRP) (median of 11)) · XRP $0.9757
 2026-11-19T04:56:00.677Z note: the BONSAI price comes from a thin AMM pool (0.44 XRP) (median of 11); minting at the live market price anyway.
---- run 44459499813 2026-11-19T05:03:59Z ---
+--- run 44459499813 2026-11-19T05:04:30Z ---
 2026-11-19T04:57:12.529Z LIVE mode: transactions will be submitted
 2026-11-19T04:57:12.530Z receiver rphatRpwXcPAo7CVm46dC78JAQ6kLMqb2M · issuer key loaded, deposits will be processed · defending pools bonsai + xrp · DEX quotes in bonsai
 2026-11-19T04:57:13.333Z BONSAI $0.0000003551 (thin AMM pool (0.44 XRP)) · XRP $0.9749
@@ -898,3 +896,5 @@
 2026-11-19T05:02:23.581Z bonsai/USDX pool holds only $0.2435: too small to defend, its price is meaningless and the keeper will not touch it. Re-seed it with BONSAI and USDX together.
 2026-11-19T05:03:21.784Z BONSAI $0.0000003549 (thin AMM pool (0.44 XRP) (median of 11)) · XRP $0.9742
 2026-11-19T05:03:21.784Z note: the BONSAI price comes from a thin AMM pool (0.44 XRP) (median of 11); minting at the live market price anyway.
+2026-11-19T05:04:23.586Z BONSAI $0.0000003548 (thin AMM pool (0.44 XRP) (median of 11)) · XRP $0.9742
+2026-11-19T05:04:23.586Z note: the BONSAI price comes from a thin AMM pool (0.44 XRP) (median of 11); minting at the live market price anyway.
