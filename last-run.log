@@ -859,7 +859,7 @@
 2026-11-20T14:18:56.433Z ERROR OfferCreate (attempt 1/4): Cannot construct UInt32 from given value
 2026-11-20T14:18:56.434Z DEX sell quote failed: Cannot construct UInt32 from given value
 2026-11-20T14:18:56.434Z buy quote skipped: not enough of the other asset
---- run 44749163366 2026-11-20T14:26:52Z ---
+--- run 44749163366 2026-11-20T14:27:24Z ---
 2026-11-20T14:20:07.048Z LIVE mode: transactions will be submitted
 2026-11-20T14:20:07.050Z receiver rphatRpwXcPAo7CVm46dC78JAQ6kLMqb2M · issuer key loaded, deposits will be processed · defending pools bonsai + xrp · DEX quotes in bonsai
 2026-11-20T14:20:07.751Z BONSAI $0.0000007472 (thin AMM pool (1.16 XRP)) · XRP $0.9497
