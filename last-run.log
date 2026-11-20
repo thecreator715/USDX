@@ -1,8 +1,3 @@
-2026-11-20T14:49:33.960Z BONSAI $0.0000007399 (thin AMM pool (1.16 XRP) (median of 9)) · XRP $0.9405
-2026-11-20T14:49:33.960Z note: the BONSAI price comes from a thin AMM pool (1.16 XRP) (median of 9); minting at the live market price anyway.
-2026-11-20T14:49:37.615Z replacing stale sell quote at 1.35589e+6
-2026-11-20T14:49:43.602Z posting sell quote 6.21 USDX @ 1.35567e+6
-2026-11-20T14:49:51.351Z buy quote skipped: not enough of the other asset
 2026-11-20T14:50:40.574Z BONSAI $0.0000007371 (thin AMM pool (1.16 XRP) (median of 9)) · XRP $0.9369
 2026-11-20T14:50:40.574Z note: the BONSAI price comes from a thin AMM pool (1.16 XRP) (median of 9); minting at the live market price anyway.
 2026-11-20T14:50:43.707Z replacing stale sell quote at 1.35567e+6
@@ -884,7 +879,7 @@ RippledError: rate limit: units quota (2000 per 10s) exhausted, retry in ~7385ms
 2026-11-20T17:46:19.821Z replacing stale sell quote at 1.41456e+6
 2026-11-20T17:46:24.913Z posting sell quote 6.21 USDX @ 1.40823e+6
 2026-11-20T17:46:33.433Z buy quote skipped: not enough of the other asset
---- run 44783339114 2026-11-20T17:49:34Z ---
+--- run 44783339114 2026-11-20T17:50:05Z ---
 2026-11-20T17:47:29.489Z LIVE mode: transactions will be submitted
 2026-11-20T17:47:29.491Z receiver rphatRpwXcPAo7CVm46dC78JAQ6kLMqb2M · issuer key loaded, deposits will be processed · defending pools bonsai + xrp · DEX quotes in bonsai
 2026-11-20T17:47:30.388Z BONSAI $0.0000007116 (thin AMM pool (1.16 XRP)) · XRP $0.9045
@@ -898,3 +893,8 @@ RippledError: rate limit: units quota (2000 per 10s) exhausted, retry in ~7385ms
 2026-11-20T17:48:41.914Z replacing stale sell quote at 1.40947e+6
 2026-11-20T17:48:46.955Z posting sell quote 6.21 USDX @ 1.40947e+6
 2026-11-20T17:48:55.578Z buy quote skipped: not enough of the other asset
+2026-11-20T17:49:45.372Z BONSAI $0.0000007104 (thin AMM pool (1.16 XRP) (median of 9)) · XRP $0.9031
+2026-11-20T17:49:45.372Z note: the BONSAI price comes from a thin AMM pool (1.16 XRP) (median of 9); minting at the live market price anyway.
+2026-11-20T17:49:48.016Z replacing stale sell quote at 1.40947e+6
+2026-11-20T17:49:56.498Z posting sell quote 6.21 USDX @ 1.41182e+6
+2026-11-20T17:50:03.782Z buy quote skipped: not enough of the other asset
