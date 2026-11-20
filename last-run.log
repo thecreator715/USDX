@@ -1,5 +1,3 @@
-2026-11-20T15:47:23.056Z BONSAI $0.0000007117 (thin AMM pool (1.16 XRP) (median of 9)) · XRP $0.9046
-2026-11-20T15:47:23.056Z note: the BONSAI price comes from a thin AMM pool (1.16 XRP) (median of 9); minting at the live market price anyway.
 2026-11-20T15:47:27.897Z replacing stale sell quote at 1.40722e+6
 2026-11-20T15:47:34.275Z posting sell quote 6.21 USDX @ 1.40932e+6
 2026-11-20T15:47:43.028Z buy quote skipped: not enough of the other asset
@@ -868,7 +866,7 @@ RippledError: rate limit: units quota (2000 per 10s) exhausted, retry in ~7385ms
 2026-11-20T19:08:09.285Z note: the BONSAI price comes from a thin AMM pool (1.16 XRP) (median of 11); minting at the live market price anyway.
 2026-11-20T19:09:10.441Z BONSAI $0.0000007104 (thin AMM pool (1.16 XRP) (median of 11)) · XRP $0.9031
 2026-11-20T19:09:10.441Z note: the BONSAI price comes from a thin AMM pool (1.16 XRP) (median of 11); minting at the live market price anyway.
---- run 44796364246 2026-11-20T19:22:04Z ---
+--- run 44796364246 2026-11-20T19:22:36Z ---
 2026-11-20T19:09:55.762Z LIVE mode: transactions will be submitted
 2026-11-20T19:09:55.764Z receiver rphatRpwXcPAo7CVm46dC78JAQ6kLMqb2M · issuer key loaded, deposits will be processed · defending pools bonsai + xrp · DEX quotes in bonsai
 2026-11-20T19:09:56.663Z BONSAI $0.0000007096 (thin AMM pool (1.16 XRP)) · XRP $0.9021
@@ -898,3 +896,5 @@ RippledError: rate limit: units quota (2000 per 10s) exhausted, retry in ~7385ms
 2026-11-20T19:21:00.111Z BONSAI $0.0000007037 (thin AMM pool (1.16 XRP) (median of 11)) · XRP $0.8944
 2026-11-20T19:21:00.112Z note: the BONSAI price comes from a thin AMM pool (1.16 XRP) (median of 11); minting at the live market price anyway.
 2026-11-20T19:21:01.776Z DEX quotes skipped: receiver has 21.39 XRP, needs 21.40 XRP to hold another offer. Add XRP to the receiver.
+2026-11-20T19:22:06.880Z BONSAI $0.0000007050 (thin AMM pool (1.16 XRP) (median of 11)) · XRP $0.8962
+2026-11-20T19:22:06.880Z note: the BONSAI price comes from a thin AMM pool (1.16 XRP) (median of 11); minting at the live market price anyway.
