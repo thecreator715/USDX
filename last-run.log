@@ -1,5 +1,3 @@
-2026-11-20T22:05:43.846Z note: the BONSAI price comes from a thin AMM pool (1.16 XRP) (median of 11); minting at the live market price anyway.
-2026-11-20T22:05:45.795Z DEX quotes skipped: receiver has 21.39 XRP, needs 21.40 XRP to hold another offer. Add XRP to the receiver.
 2026-11-20T22:06:51.982Z BONSAI $0.0000007144 (thin AMM pool (1.16 XRP) (median of 11)) · XRP $0.9082
 2026-11-20T22:06:51.982Z note: the BONSAI price comes from a thin AMM pool (1.16 XRP) (median of 11); minting at the live market price anyway.
 2026-11-20T22:07:53.401Z BONSAI $0.0000007143 (thin AMM pool (1.16 XRP) (median of 11)) · XRP $0.9080
@@ -889,7 +887,7 @@
 2026-11-21T04:25:08.438Z note: the BONSAI price comes from a thin AMM pool (1.16 XRP) (median of 11); minting at the live market price anyway.
 2026-11-21T04:26:09.899Z BONSAI $0.0000006858 (thin AMM pool (1.16 XRP) (median of 11)) · XRP $0.8717
 2026-11-21T04:26:09.899Z note: the BONSAI price comes from a thin AMM pool (1.16 XRP) (median of 11); minting at the live market price anyway.
---- run 44864435544 2026-11-21T04:29:12Z ---
+--- run 44864435544 2026-11-21T04:29:43Z ---
 2026-11-21T04:27:09.135Z LIVE mode: transactions will be submitted
 2026-11-21T04:27:09.137Z receiver rphatRpwXcPAo7CVm46dC78JAQ6kLMqb2M · issuer key loaded, deposits will be processed · defending pools bonsai + xrp · DEX quotes in bonsai
 2026-11-21T04:27:09.615Z BONSAI $0.0000006855 (thin AMM pool (1.16 XRP)) · XRP $0.8713
@@ -898,3 +896,5 @@
 2026-11-21T04:27:12.568Z DEX quotes skipped: receiver has 21.39 XRP, needs 21.40 XRP to hold another offer. Add XRP to the receiver.
 2026-11-21T04:28:10.285Z BONSAI $0.0000006851 (thin AMM pool (1.16 XRP) (median of 8)) · XRP $0.8708
 2026-11-21T04:28:10.286Z note: the BONSAI price comes from a thin AMM pool (1.16 XRP) (median of 8); minting at the live market price anyway.
+2026-11-21T04:29:18.177Z BONSAI $0.0000006841 (thin AMM pool (1.16 XRP) (median of 11)) · XRP $0.8696
+2026-11-21T04:29:18.177Z note: the BONSAI price comes from a thin AMM pool (1.16 XRP) (median of 11); minting at the live market price anyway.
