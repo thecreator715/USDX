@@ -1,5 +1,3 @@
-2026-11-23T14:08:22.289Z note: the BONSAI price comes from a thin AMM pool (1.16 XRP) (median of 11); minting at the live market price anyway.
---- run 45187629626 2026-11-23T14:30:04Z ---
 2026-11-23T14:09:32.653Z LIVE mode: transactions will be submitted
 2026-11-23T14:09:32.655Z receiver rphatRpwXcPAo7CVm46dC78JAQ6kLMqb2M · issuer key loaded, deposits will be processed · defending pools bonsai + xrp · DEX quotes in bonsai
 2026-11-23T14:09:33.606Z BONSAI $0.0000007629 (thin AMM pool (1.16 XRP)) · XRP $0.9804
@@ -857,7 +855,7 @@
 2026-11-23T20:18:59.476Z note: the BONSAI price comes from a thin AMM pool (1.16 XRP) (median of 11); minting at the live market price anyway.
 2026-11-23T20:20:07.027Z BONSAI $0.0000007328 (thin AMM pool (1.16 XRP) (median of 11)) · XRP $0.9417
 2026-11-23T20:20:07.027Z note: the BONSAI price comes from a thin AMM pool (1.16 XRP) (median of 11); minting at the live market price anyway.
---- run 45254816069 2026-11-23T20:37:36Z ---
+--- run 45254816069 2026-11-23T20:38:08Z ---
 2026-11-23T20:20:51.001Z LIVE mode: transactions will be submitted
 2026-11-23T20:20:51.002Z receiver rphatRpwXcPAo7CVm46dC78JAQ6kLMqb2M · issuer key loaded, deposits will be processed · defending pools bonsai + xrp · DEX quotes in bonsai
 2026-11-23T20:20:52.111Z BONSAI $0.0000007333 (thin AMM pool (1.16 XRP)) · XRP $0.9424
@@ -898,3 +896,5 @@
 2026-11-23T20:36:08.694Z bonsai/USDX pool holds only $0.3272: too small to defend, its price is meaningless and the keeper will not touch it. Re-seed it with BONSAI and USDX together.
 2026-11-23T20:36:41.605Z BONSAI $0.0000007301 (thin AMM pool (1.16 XRP) (median of 11)) · XRP $0.9383
 2026-11-23T20:36:41.605Z note: the BONSAI price comes from a thin AMM pool (1.16 XRP) (median of 11); minting at the live market price anyway.
+2026-11-23T20:37:49.182Z BONSAI $0.0000007293 (thin AMM pool (1.16 XRP) (median of 11)) · XRP $0.9373
+2026-11-23T20:37:49.182Z note: the BONSAI price comes from a thin AMM pool (1.16 XRP) (median of 11); minting at the live market price anyway.
