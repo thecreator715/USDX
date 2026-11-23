@@ -1,5 +1,3 @@
-2026-11-23T14:05:16.779Z BONSAI $0.0000007609 (thin AMM pool (1.16 XRP) (median of 11)) · XRP $0.9778
-2026-11-23T14:05:16.779Z note: the BONSAI price comes from a thin AMM pool (1.16 XRP) (median of 11); minting at the live market price anyway.
 2026-11-23T14:06:20.210Z BONSAI $0.0000007589 (thin AMM pool (1.16 XRP) (median of 11)) · XRP $0.9753
 2026-11-23T14:06:20.210Z note: the BONSAI price comes from a thin AMM pool (1.16 XRP) (median of 11); minting at the live market price anyway.
 2026-11-23T14:07:20.509Z BONSAI $0.0000007593 (thin AMM pool (1.16 XRP) (median of 11)) · XRP $0.9758
@@ -864,7 +862,7 @@
 2026-11-23T20:18:59.476Z note: the BONSAI price comes from a thin AMM pool (1.16 XRP) (median of 11); minting at the live market price anyway.
 2026-11-23T20:20:07.027Z BONSAI $0.0000007328 (thin AMM pool (1.16 XRP) (median of 11)) · XRP $0.9417
 2026-11-23T20:20:07.027Z note: the BONSAI price comes from a thin AMM pool (1.16 XRP) (median of 11); minting at the live market price anyway.
---- run 45254816069 2026-11-23T20:34:27Z ---
+--- run 45254816069 2026-11-23T20:34:59Z ---
 2026-11-23T20:20:51.001Z LIVE mode: transactions will be submitted
 2026-11-23T20:20:51.002Z receiver rphatRpwXcPAo7CVm46dC78JAQ6kLMqb2M · issuer key loaded, deposits will be processed · defending pools bonsai + xrp · DEX quotes in bonsai
 2026-11-23T20:20:52.111Z BONSAI $0.0000007333 (thin AMM pool (1.16 XRP)) · XRP $0.9424
@@ -898,3 +896,5 @@
 2026-11-23T20:32:30.427Z note: the BONSAI price comes from a thin AMM pool (1.16 XRP) (median of 11); minting at the live market price anyway.
 2026-11-23T20:33:32.071Z BONSAI $0.0000007309 (thin AMM pool (1.16 XRP) (median of 11)) · XRP $0.9393
 2026-11-23T20:33:32.071Z note: the BONSAI price comes from a thin AMM pool (1.16 XRP) (median of 11); minting at the live market price anyway.
+2026-11-23T20:34:33.538Z BONSAI $0.0000007301 (thin AMM pool (1.16 XRP) (median of 11)) · XRP $0.9383
+2026-11-23T20:34:33.538Z note: the BONSAI price comes from a thin AMM pool (1.16 XRP) (median of 11); minting at the live market price anyway.
