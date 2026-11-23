@@ -1,5 +1,3 @@
---- run 45164921846 2026-11-23T12:05:21Z ---
-2026-11-23T11:45:03.845Z LIVE mode: transactions will be submitted
 2026-11-23T11:45:03.846Z receiver rphatRpwXcPAo7CVm46dC78JAQ6kLMqb2M · issuer key loaded, deposits will be processed · defending pools bonsai + xrp · DEX quotes in bonsai
 2026-11-23T11:45:04.382Z BONSAI $0.0000007323 (thin AMM pool (1.16 XRP)) · XRP $0.9411
 2026-11-23T11:45:04.383Z note: the BONSAI price comes from a thin AMM pool (1.16 XRP); minting at the live market price anyway.
@@ -859,7 +857,7 @@
 2026-11-23T17:53:43.517Z note: the BONSAI price comes from a thin AMM pool (1.16 XRP) (median of 11); minting at the live market price anyway.
 2026-11-23T17:54:44.516Z BONSAI $0.0000007469 (thin AMM pool (1.16 XRP) (median of 11)) · XRP $0.9598
 2026-11-23T17:54:44.516Z note: the BONSAI price comes from a thin AMM pool (1.16 XRP) (median of 11); minting at the live market price anyway.
---- run 45229273481 2026-11-23T18:12:13Z ---
+--- run 45229273481 2026-11-23T18:12:45Z ---
 2026-11-23T17:55:57.732Z LIVE mode: transactions will be submitted
 2026-11-23T17:55:57.734Z receiver rphatRpwXcPAo7CVm46dC78JAQ6kLMqb2M · issuer key loaded, deposits will be processed · defending pools bonsai + xrp · DEX quotes in bonsai
 2026-11-23T17:55:58.544Z BONSAI $0.0000007467 (thin AMM pool (1.16 XRP)) · XRP $0.9596
@@ -898,3 +896,5 @@
 2026-11-23T18:11:12.524Z BONSAI $0.0000007418 (thin AMM pool (1.16 XRP) (median of 11)) · XRP $0.9533
 2026-11-23T18:11:12.524Z note: the BONSAI price comes from a thin AMM pool (1.16 XRP) (median of 11); minting at the live market price anyway.
 2026-11-23T18:11:14.186Z bonsai/USDX pool holds only $0.3289: too small to defend, its price is meaningless and the keeper will not touch it. Re-seed it with BONSAI and USDX together.
+2026-11-23T18:12:18.816Z BONSAI $0.0000007410 (thin AMM pool (1.16 XRP) (median of 11)) · XRP $0.9523
+2026-11-23T18:12:18.816Z note: the BONSAI price comes from a thin AMM pool (1.16 XRP) (median of 11); minting at the live market price anyway.
