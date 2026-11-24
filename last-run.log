@@ -1,5 +1,3 @@
-2026-11-24T13:54:06.147Z BONSAI $0.0000007154 (thin AMM pool (1.16 XRP) (median of 8)) · XRP $0.9194
-2026-11-24T13:54:06.147Z note: the BONSAI price comes from a thin AMM pool (1.16 XRP) (median of 8); minting at the live market price anyway.
 2026-11-24T13:55:07.842Z BONSAI $0.0000007152 (thin AMM pool (1.16 XRP) (median of 11)) · XRP $0.9191
 2026-11-24T13:55:07.842Z note: the BONSAI price comes from a thin AMM pool (1.16 XRP) (median of 11); minting at the live market price anyway.
 2026-11-24T13:56:08.667Z BONSAI $0.0000007146 (thin AMM pool (1.16 XRP) (median of 11)) · XRP $0.9183
@@ -853,7 +851,7 @@
 2026-11-24T20:02:12.543Z note: the BONSAI price comes from a thin AMM pool (1.16 XRP) (median of 11); minting at the live market price anyway.
 2026-11-24T20:03:14.074Z BONSAI $0.0000007129 (thin AMM pool (1.16 XRP) (median of 11)) · XRP $0.9162
 2026-11-24T20:03:14.074Z note: the BONSAI price comes from a thin AMM pool (1.16 XRP) (median of 11); minting at the live market price anyway.
---- run 45473271504 2026-11-24T20:23:14Z ---
+--- run 45473271504 2026-11-24T20:23:45Z ---
 2026-11-24T20:04:22.389Z LIVE mode: transactions will be submitted
 2026-11-24T20:04:22.390Z receiver rphatRpwXcPAo7CVm46dC78JAQ6kLMqb2M · issuer key loaded, deposits will be processed · defending pools bonsai + xrp · DEX quotes in bonsai
 2026-11-24T20:04:23.349Z BONSAI $0.0000007133 (thin AMM pool (1.16 XRP)) · XRP $0.9167
@@ -898,3 +896,5 @@
 2026-11-24T20:21:29.707Z note: the BONSAI price comes from a thin AMM pool (1.16 XRP) (median of 11); minting at the live market price anyway.
 2026-11-24T20:22:31.046Z BONSAI $0.0000007155 (thin AMM pool (1.16 XRP) (median of 11)) · XRP $0.9194
 2026-11-24T20:22:31.046Z note: the BONSAI price comes from a thin AMM pool (1.16 XRP) (median of 11); minting at the live market price anyway.
+2026-11-24T20:23:32.698Z BONSAI $0.0000007139 (thin AMM pool (1.16 XRP) (median of 10)) · XRP $0.9174
+2026-11-24T20:23:32.698Z note: the BONSAI price comes from a thin AMM pool (1.16 XRP) (median of 10); minting at the live market price anyway.
