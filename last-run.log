@@ -1,6 +1,3 @@
-2026-11-24T17:58:22.274Z note: the BONSAI price comes from a thin AMM pool (1.16 XRP) (median of 11); minting at the live market price anyway.
-2026-11-24T17:59:28.790Z BONSAI $0.0000007188 (thin AMM pool (1.16 XRP) (median of 11)) · XRP $0.9237
-2026-11-24T17:59:28.790Z note: the BONSAI price comes from a thin AMM pool (1.16 XRP) (median of 11); minting at the live market price anyway.
 --- run 45451169336 2026-11-24T18:21:10Z ---
 2026-11-24T18:01:05.074Z LIVE mode: transactions will be submitted
 2026-11-24T18:01:05.075Z receiver rphatRpwXcPAo7CVm46dC78JAQ6kLMqb2M · issuer key loaded, deposits will be processed · defending pools bonsai + xrp · DEX quotes in bonsai
@@ -820,7 +817,7 @@
 2026-11-24T23:49:09.379Z note: the BONSAI price comes from a thin AMM pool (1.15 XRP) (median of 11); minting at the live market price anyway.
 2026-11-24T23:50:09.742Z BONSAI $0.0000007074 (thin AMM pool (1.15 XRP) (median of 11)) · XRP $0.9235
 2026-11-24T23:50:09.742Z note: the BONSAI price comes from a thin AMM pool (1.15 XRP) (median of 11); minting at the live market price anyway.
---- run 45510546204 2026-11-25T00:06:15Z ---
+--- run 45510546204 2026-11-25T00:06:46Z ---
 2026-11-24T23:51:08.410Z LIVE mode: transactions will be submitted
 2026-11-24T23:51:08.412Z receiver rphatRpwXcPAo7CVm46dC78JAQ6kLMqb2M · issuer key loaded, deposits will be processed · defending pools bonsai + xrp · DEX quotes in bonsai
 2026-11-24T23:51:09.127Z BONSAI $0.0000007073 (thin AMM pool (1.15 XRP)) · XRP $0.9234
@@ -898,3 +895,6 @@
 2026-11-25T00:05:16.005Z replacing stale sell quote at 1.41733e+6
 2026-11-25T00:05:22.550Z posting sell quote 6.21 USDX @ 1.41763e+6
 2026-11-25T00:05:30.253Z buy quote skipped: not enough of the other asset
+2026-11-25T00:06:19.815Z BONSAI $0.0000007212 (thin AMM pool (1.16 XRP) (median of 9)) · XRP $0.9234
+2026-11-25T00:06:19.815Z note: the BONSAI price comes from a thin AMM pool (1.16 XRP) (median of 9); minting at the live market price anyway.
+2026-11-25T00:06:22.880Z DEX quotes skipped: receiver has 21.37 XRP, needs 21.40 XRP to hold another offer. Add XRP to the receiver.
