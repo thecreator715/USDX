@@ -1,7 +1,3 @@
-2026-11-27T18:57:05.439Z note: the BONSAI price comes from a thin AMM pool (1.18 XRP) (median of 11); minting at the live market price anyway.
-2026-11-27T18:58:12.010Z BONSAI $0.0000007402 (thin AMM pool (1.18 XRP) (median of 11)) · XRP $0.9496
-2026-11-27T18:58:12.010Z note: the BONSAI price comes from a thin AMM pool (1.18 XRP) (median of 11); minting at the live market price anyway.
-2026-11-27T18:58:14.269Z bonsai/USDX pool holds only $0.3306: too small to defend, its price is meaningless and the keeper will not touch it. Re-seed it with BONSAI and USDX together.
 2026-11-27T18:59:18.836Z BONSAI $0.0000007400 (thin AMM pool (1.18 XRP) (median of 11)) · XRP $0.9493
 2026-11-27T18:59:18.836Z note: the BONSAI price comes from a thin AMM pool (1.18 XRP) (median of 11); minting at the live market price anyway.
 2026-11-27T19:00:26.368Z BONSAI $0.0000007402 (thin AMM pool (1.18 XRP) (median of 11)) · XRP $0.9495
@@ -822,7 +818,7 @@
 2026-11-27T23:30:57.804Z replacing stale sell quote at 1.36079e+6
 2026-11-27T23:31:04.579Z posting sell quote 6.21 USDX @ 1.36036e+6
 2026-11-27T23:31:12.494Z buy quote skipped: not enough of the other asset
---- run 46081086497 2026-11-27T23:47:26Z ---
+--- run 46081086497 2026-11-27T23:47:57Z ---
 2026-11-27T23:32:24.148Z LIVE mode: transactions will be submitted
 2026-11-27T23:32:24.150Z receiver rphatRpwXcPAo7CVm46dC78JAQ6kLMqb2M · issuer key loaded, deposits will be processed · defending pools bonsai + xrp · DEX quotes in bonsai
 2026-11-27T23:32:24.740Z BONSAI $0.0000007375 (thin AMM pool (1.18 XRP)) · XRP $0.9460
@@ -898,3 +894,7 @@
 2026-11-27T23:46:26.929Z replacing stale sell quote at 1.35813e+6
 2026-11-27T23:46:32.302Z posting sell quote 6.21 USDX @ 1.35792e+6
 2026-11-27T23:46:41.054Z buy quote skipped: not enough of the other asset
+2026-11-27T23:47:31.056Z BONSAI $0.0000007387 (thin AMM pool (1.18 XRP) (median of 9)) · XRP $0.9476
+2026-11-27T23:47:31.057Z note: the BONSAI price comes from a thin AMM pool (1.18 XRP) (median of 9); minting at the live market price anyway.
+2026-11-27T23:47:43.682Z replacing stale sell quote at 1.35792e+6
+2026-11-27T23:47:51.261Z posting sell quote 6.21 USDX @ 1.35770e+6
