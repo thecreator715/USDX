@@ -1,5 +1,3 @@
-2026-11-26T23:19:16.926Z note: the BONSAI price comes from a thin AMM pool (1.18 XRP) (median of 11); minting at the live market price anyway.
-2026-11-26T23:20:17.340Z BONSAI $0.0000007334 (thin AMM pool (1.18 XRP) (median of 11)) · XRP $0.9408
 2026-11-26T23:20:17.340Z note: the BONSAI price comes from a thin AMM pool (1.18 XRP) (median of 11); minting at the live market price anyway.
 2026-11-26T23:21:20.278Z BONSAI $0.0000007339 (thin AMM pool (1.18 XRP) (median of 11)) · XRP $0.9415
 2026-11-26T23:21:20.278Z note: the BONSAI price comes from a thin AMM pool (1.18 XRP) (median of 11); minting at the live market price anyway.
@@ -853,7 +851,7 @@
 2026-11-27T05:20:11.756Z note: the BONSAI price comes from a thin AMM pool (1.18 XRP) (median of 11); minting at the live market price anyway.
 2026-11-27T05:21:19.441Z BONSAI $0.0000007513 (thin AMM pool (1.18 XRP) (median of 11)) · XRP $0.9637
 2026-11-27T05:21:19.441Z note: the BONSAI price comes from a thin AMM pool (1.18 XRP) (median of 11); minting at the live market price anyway.
---- run 45943305446 2026-11-27T05:40:27Z ---
+--- run 45943305446 2026-11-27T05:40:59Z ---
 2026-11-27T05:21:45.917Z LIVE mode: transactions will be submitted
 2026-11-27T05:21:45.918Z receiver rphatRpwXcPAo7CVm46dC78JAQ6kLMqb2M · issuer key loaded, deposits will be processed · defending pools bonsai + xrp · DEX quotes in bonsai
 2026-11-27T05:21:46.478Z BONSAI $0.0000007513 (thin AMM pool (1.18 XRP)) · XRP $0.9638
@@ -898,3 +896,5 @@
 2026-11-27T05:38:28.038Z note: the BONSAI price comes from a thin AMM pool (1.18 XRP) (median of 11); minting at the live market price anyway.
 2026-11-27T05:39:28.911Z BONSAI $0.0000007528 (thin AMM pool (1.18 XRP) (median of 11)) · XRP $0.9657
 2026-11-27T05:39:28.911Z note: the BONSAI price comes from a thin AMM pool (1.18 XRP) (median of 11); minting at the live market price anyway.
+2026-11-27T05:40:30.181Z BONSAI $0.0000007534 (thin AMM pool (1.18 XRP) (median of 11)) · XRP $0.9665
+2026-11-27T05:40:30.181Z note: the BONSAI price comes from a thin AMM pool (1.18 XRP) (median of 11); minting at the live market price anyway.
