@@ -1,5 +1,3 @@
-2026-11-27T00:26:16.779Z BONSAI $0.0000007359 (thin AMM pool (1.18 XRP) (median of 11)) · XRP $0.9440
-2026-11-27T00:26:16.780Z note: the BONSAI price comes from a thin AMM pool (1.18 XRP) (median of 11); minting at the live market price anyway.
 2026-11-27T00:27:17.251Z BONSAI $0.0000007345 (thin AMM pool (1.18 XRP) (median of 11)) · XRP $0.9423
 2026-11-27T00:27:17.251Z note: the BONSAI price comes from a thin AMM pool (1.18 XRP) (median of 11); minting at the live market price anyway.
 2026-11-27T00:28:18.583Z BONSAI $0.0000007341 (thin AMM pool (1.18 XRP) (median of 11)) · XRP $0.9417
@@ -889,7 +887,7 @@
 2026-11-27T06:42:06.589Z note: the BONSAI price comes from a thin AMM pool (1.18 XRP) (median of 11); minting at the live market price anyway.
 2026-11-27T06:43:07.362Z BONSAI $0.0000007559 (thin AMM pool (1.18 XRP) (median of 11)) · XRP $0.9696
 2026-11-27T06:43:07.362Z note: the BONSAI price comes from a thin AMM pool (1.18 XRP) (median of 11); minting at the live market price anyway.
---- run 45951549489 2026-11-27T06:46:08Z ---
+--- run 45951549489 2026-11-27T06:46:39Z ---
 2026-11-27T06:44:03.618Z LIVE mode: transactions will be submitted
 2026-11-27T06:44:03.620Z receiver rphatRpwXcPAo7CVm46dC78JAQ6kLMqb2M · issuer key loaded, deposits will be processed · defending pools bonsai + xrp · DEX quotes in bonsai
 2026-11-27T06:44:04.539Z BONSAI $0.0000007559 (thin AMM pool (1.18 XRP)) · XRP $0.9696
@@ -898,3 +896,5 @@
 2026-11-27T06:44:13.076Z DEX quotes skipped: receiver has 21.05 XRP, needs 21.40 XRP to hold another offer. Add XRP to the receiver.
 2026-11-27T06:45:10.075Z BONSAI $0.0000007557 (thin AMM pool (1.18 XRP) (median of 8)) · XRP $0.9695
 2026-11-27T06:45:10.075Z note: the BONSAI price comes from a thin AMM pool (1.18 XRP) (median of 8); minting at the live market price anyway.
+2026-11-27T06:46:13.325Z BONSAI $0.0000007555 (thin AMM pool (1.18 XRP) (median of 11)) · XRP $0.9691
+2026-11-27T06:46:13.326Z note: the BONSAI price comes from a thin AMM pool (1.18 XRP) (median of 11); minting at the live market price anyway.
