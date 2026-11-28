@@ -1,12 +1,3 @@
-2026-11-28T03:22:03.277Z note: the BONSAI price comes from a thin AMM pool (1.18 XRP) (median of 10); minting at the live market price anyway.
-2026-11-28T03:22:07.240Z replacing stale sell quote at 1.35684e+6
-2026-11-28T03:22:13.385Z posting sell quote 6.21 USDX @ 1.35698e+6
-2026-11-28T03:22:20.667Z buy quote skipped: not enough of the other asset
-2026-11-28T03:23:10.300Z BONSAI $0.0000007388 (thin AMM pool (1.18 XRP) (median of 9)) · XRP $0.9477
-2026-11-28T03:23:10.300Z note: the BONSAI price comes from a thin AMM pool (1.18 XRP) (median of 9); minting at the live market price anyway.
-2026-11-28T03:23:16.911Z replacing stale sell quote at 1.35698e+6
-2026-11-28T03:23:29.898Z posting sell quote 6.21 USDX @ 1.35763e+6
-2026-11-28T03:23:37.155Z buy quote skipped: not enough of the other asset
 2026-11-28T03:24:01.978Z bonsai/USDX pool holds only $0.3304: too small to defend, its price is meaningless and the keeper will not touch it. Re-seed it with BONSAI and USDX together.
 2026-11-28T03:24:18.508Z BONSAI $0.0000007379 (thin AMM pool (1.18 XRP) (median of 8)) · XRP $0.9466
 2026-11-28T03:24:18.508Z note: the BONSAI price comes from a thin AMM pool (1.18 XRP) (median of 8); minting at the live market price anyway.
@@ -898,3 +889,12 @@
 2026-11-28T06:22:51.392Z replacing stale sell quote at 1.34072e+6
 2026-11-28T06:23:01.051Z posting sell quote 6.21 USDX @ 1.34107e+6
 2026-11-28T06:23:07.173Z buy quote skipped: not enough of the other asset
+--- run 46114844018 2026-11-28T06:24:31Z ---
+2026-11-28T06:24:01.453Z LIVE mode: transactions will be submitted
+2026-11-28T06:24:01.454Z receiver rphatRpwXcPAo7CVm46dC78JAQ6kLMqb2M · issuer key loaded, deposits will be processed · defending pools bonsai + xrp · DEX quotes in bonsai
+2026-11-28T06:24:02.056Z BONSAI $0.0000007476 (thin AMM pool (1.19 XRP)) · XRP $0.9469
+2026-11-28T06:24:02.056Z note: the BONSAI price comes from a thin AMM pool (1.19 XRP); minting at the live market price anyway.
+2026-11-28T06:24:05.412Z bonsai/USDX pool holds only $0.3317: too small to defend, its price is meaningless and the keeper will not touch it. Re-seed it with BONSAI and USDX together.
+2026-11-28T06:24:05.899Z replacing stale sell quote at 1.34107e+6
+2026-11-28T06:24:14.686Z posting sell quote 6.21 USDX @ 1.34156e+6
+2026-11-28T06:24:22.320Z buy quote skipped: not enough of the other asset
