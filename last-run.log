@@ -1,6 +1,3 @@
-2026-11-27T20:07:26.410Z BONSAI $0.0000007395 (thin AMM pool (1.18 XRP) (median of 11)) · XRP $0.9486
-2026-11-27T20:07:26.410Z note: the BONSAI price comes from a thin AMM pool (1.18 XRP) (median of 11); minting at the live market price anyway.
-2026-11-27T20:08:33.474Z BONSAI $0.0000007394 (thin AMM pool (1.18 XRP) (median of 11)) · XRP $0.9485
 2026-11-27T20:08:33.474Z note: the BONSAI price comes from a thin AMM pool (1.18 XRP) (median of 11); minting at the live market price anyway.
 2026-11-27T20:09:41.172Z BONSAI $0.0000007393 (thin AMM pool (1.18 XRP) (median of 11)) · XRP $0.9484
 2026-11-27T20:09:41.172Z note: the BONSAI price comes from a thin AMM pool (1.18 XRP) (median of 11); minting at the live market price anyway.
@@ -858,7 +855,7 @@
 2026-11-28T00:12:12.530Z replacing stale sell quote at 1.35684e+6
 2026-11-28T00:12:18.277Z posting sell quote 6.21 USDX @ 1.35720e+6
 2026-11-28T00:12:25.037Z buy quote skipped: not enough of the other asset
---- run 46084897102 2026-11-28T00:21:03Z ---
+--- run 46084897102 2026-11-28T00:21:34Z ---
 2026-11-28T00:13:43.652Z LIVE mode: transactions will be submitted
 2026-11-28T00:13:43.653Z receiver rphatRpwXcPAo7CVm46dC78JAQ6kLMqb2M · issuer key loaded, deposits will be processed · defending pools bonsai + xrp · DEX quotes in bonsai
 2026-11-28T00:13:44.611Z BONSAI $0.0000007393 (thin AMM pool (1.18 XRP)) · XRP $0.9483
@@ -898,3 +895,6 @@
 2026-11-28T00:20:17.786Z replacing stale sell quote at 1.35670e+6
 2026-11-28T00:20:25.475Z posting sell quote 6.21 USDX @ 1.35720e+6
 2026-11-28T00:20:32.081Z buy quote skipped: not enough of the other asset
+2026-11-28T00:21:12.609Z BONSAI $0.0000007391 (thin AMM pool (1.18 XRP) (median of 9)) · XRP $0.9482
+2026-11-28T00:21:12.609Z note: the BONSAI price comes from a thin AMM pool (1.18 XRP) (median of 9); minting at the live market price anyway.
+2026-11-28T00:21:14.636Z replacing stale sell quote at 1.35720e+6
