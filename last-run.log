@@ -1,8 +1,3 @@
-2026-11-28T02:44:40.982Z posting sell quote 6.21 USDX @ 1.35498e+6
-2026-11-28T02:44:46.075Z buy quote skipped: not enough of the other asset
-2026-11-28T02:45:36.072Z BONSAI $0.0000007398 (thin AMM pool (1.18 XRP) (median of 10)) · XRP $0.9489
-2026-11-28T02:45:36.072Z note: the BONSAI price comes from a thin AMM pool (1.18 XRP) (median of 10); minting at the live market price anyway.
-2026-11-28T02:45:44.128Z replacing stale sell quote at 1.35498e+6
 2026-11-28T02:45:51.582Z posting sell quote 6.21 USDX @ 1.35584e+6
 2026-11-28T02:45:59.175Z buy quote skipped: not enough of the other asset
 2026-11-28T02:46:40.683Z BONSAI $0.0000007398 (thin AMM pool (1.18 XRP) (median of 9)) · XRP $0.9490
@@ -879,7 +874,7 @@
 2026-11-28T05:42:02.691Z replacing stale sell quote at 1.34611e+6
 2026-11-28T05:42:06.786Z posting sell quote 6.21 USDX @ 1.34583e+6
 2026-11-28T05:42:10.879Z buy quote skipped: not enough of the other asset
---- run 46111803394 2026-11-28T05:45:57Z ---
+--- run 46111803394 2026-11-28T05:46:28Z ---
 2026-11-28T05:42:50.004Z LIVE mode: transactions will be submitted
 2026-11-28T05:42:50.006Z receiver rphatRpwXcPAo7CVm46dC78JAQ6kLMqb2M · issuer key loaded, deposits will be processed · defending pools bonsai + xrp · DEX quotes in bonsai
 2026-11-28T05:42:51.056Z BONSAI $0.0000007456 (thin AMM pool (1.19 XRP)) · XRP $0.9443
@@ -898,3 +893,8 @@
 2026-11-28T05:44:59.125Z replacing stale sell quote at 1.34647e+6
 2026-11-28T05:45:05.068Z posting sell quote 6.21 USDX @ 1.34661e+6
 2026-11-28T05:45:12.091Z buy quote skipped: not enough of the other asset
+2026-11-28T05:46:01.390Z BONSAI $0.0000007444 (thin AMM pool (1.19 XRP) (median of 10)) · XRP $0.9428
+2026-11-28T05:46:01.390Z note: the BONSAI price comes from a thin AMM pool (1.19 XRP) (median of 10); minting at the live market price anyway.
+2026-11-28T05:46:03.341Z replacing stale sell quote at 1.34661e+6
+2026-11-28T05:46:11.511Z posting sell quote 6.21 USDX @ 1.34740e+6
+2026-11-28T05:46:21.787Z buy quote skipped: not enough of the other asset
