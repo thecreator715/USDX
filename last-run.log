@@ -1,12 +1,3 @@
-2026-11-28T05:05:01.743Z replacing stale sell quote at 1.34128e+6
-2026-11-28T05:05:16.238Z posting sell quote 6.21 USDX @ 1.34164e+6
-2026-11-28T05:05:24.670Z buy quote skipped: not enough of the other asset
-2026-11-28T05:06:05.661Z BONSAI $0.0000007476 (thin AMM pool (1.19 XRP) (median of 8)) · XRP $0.9468
-2026-11-28T05:06:05.661Z note: the BONSAI price comes from a thin AMM pool (1.19 XRP) (median of 8); minting at the live market price anyway.
-2026-11-28T05:06:07.508Z replacing stale sell quote at 1.34164e+6
-2026-11-28T05:06:18.924Z posting sell quote 6.21 USDX @ 1.34171e+6
-2026-11-28T05:06:27.047Z buy quote skipped: not enough of the other asset
-2026-11-28T05:06:51.715Z bonsai/USDX pool holds only $0.3316: too small to defend, its price is meaningless and the keeper will not touch it. Re-seed it with BONSAI and USDX together.
 2026-11-28T05:07:08.084Z BONSAI $0.0000007469 (thin AMM pool (1.19 XRP) (median of 9)) · XRP $0.9459
 2026-11-28T05:07:08.084Z note: the BONSAI price comes from a thin AMM pool (1.19 XRP) (median of 9); minting at the live market price anyway.
 2026-11-28T05:07:13.580Z replacing stale sell quote at 1.34171e+6
@@ -898,3 +889,12 @@
 2026-11-28T08:05:48.858Z replacing stale sell quote at 1.34826e+6
 2026-11-28T08:05:54.050Z posting sell quote 6.21 USDX @ 1.34854e+6
 2026-11-28T08:06:01.473Z buy quote skipped: not enough of the other asset
+--- run 46122731850 2026-11-28T08:07:21Z ---
+2026-11-28T08:06:51.494Z LIVE mode: transactions will be submitted
+2026-11-28T08:06:51.495Z receiver rphatRpwXcPAo7CVm46dC78JAQ6kLMqb2M · issuer key loaded, deposits will be processed · defending pools bonsai + xrp · DEX quotes in bonsai
+2026-11-28T08:06:52.238Z BONSAI $0.0000007436 (thin AMM pool (1.19 XRP)) · XRP $0.9418
+2026-11-28T08:06:52.238Z note: the BONSAI price comes from a thin AMM pool (1.19 XRP); minting at the live market price anyway.
+2026-11-28T08:06:56.449Z bonsai/USDX pool holds only $0.3311: too small to defend, its price is meaningless and the keeper will not touch it. Re-seed it with BONSAI and USDX together.
+2026-11-28T08:06:56.779Z replacing stale sell quote at 1.34854e+6
+2026-11-28T08:07:02.954Z posting sell quote 6.21 USDX @ 1.34883e+6
+2026-11-28T08:07:11.374Z buy quote skipped: not enough of the other asset
