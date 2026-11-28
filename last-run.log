@@ -1,8 +1,3 @@
-2026-11-28T03:40:34.719Z note: the BONSAI price comes from a thin AMM pool (1.18 XRP) (median of 7); minting at the live market price anyway.
-2026-11-28T03:40:36.899Z replacing stale sell quote at 1.35641e+6
-2026-11-28T03:40:43.082Z posting sell quote 6.21 USDX @ 1.35720e+6
-2026-11-28T03:40:46.998Z buy quote skipped: not enough of the other asset
-2026-11-28T03:41:36.592Z BONSAI $0.0000007389 (thin AMM pool (1.18 XRP) (median of 10)) · XRP $0.9478
 2026-11-28T03:41:36.592Z note: the BONSAI price comes from a thin AMM pool (1.18 XRP) (median of 10); minting at the live market price anyway.
 2026-11-28T03:41:39.737Z replacing stale sell quote at 1.35720e+6
 2026-11-28T03:41:48.165Z posting sell quote 6.21 USDX @ 1.35749e+6
@@ -806,7 +801,7 @@
 2026-11-28T06:22:51.392Z replacing stale sell quote at 1.34072e+6
 2026-11-28T06:23:01.051Z posting sell quote 6.21 USDX @ 1.34107e+6
 2026-11-28T06:23:07.173Z buy quote skipped: not enough of the other asset
---- run 46114844018 2026-11-28T06:42:11Z ---
+--- run 46114844018 2026-11-28T06:42:42Z ---
 2026-11-28T06:24:01.453Z LIVE mode: transactions will be submitted
 2026-11-28T06:24:01.454Z receiver rphatRpwXcPAo7CVm46dC78JAQ6kLMqb2M · issuer key loaded, deposits will be processed · defending pools bonsai + xrp · DEX quotes in bonsai
 2026-11-28T06:24:02.056Z BONSAI $0.0000007476 (thin AMM pool (1.19 XRP)) · XRP $0.9469
@@ -898,3 +893,8 @@
 2026-11-28T06:41:17.064Z replacing stale sell quote at 1.34086e+6
 2026-11-28T06:41:22.350Z posting sell quote 6.21 USDX @ 1.34121e+6
 2026-11-28T06:41:29.945Z buy quote skipped: not enough of the other asset
+2026-11-28T06:42:20.031Z BONSAI $0.0000007481 (thin AMM pool (1.19 XRP) (median of 9)) · XRP $0.9475
+2026-11-28T06:42:20.031Z note: the BONSAI price comes from a thin AMM pool (1.19 XRP) (median of 9); minting at the live market price anyway.
+2026-11-28T06:42:23.368Z replacing stale sell quote at 1.34121e+6
+2026-11-28T06:42:29.901Z posting sell quote 6.21 USDX @ 1.34079e+6
+2026-11-28T06:42:39.218Z buy quote skipped: not enough of the other asset
