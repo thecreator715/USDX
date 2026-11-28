@@ -1,9 +1,3 @@
-2026-11-28T03:37:52.046Z buy quote skipped: not enough of the other asset
-2026-11-28T03:38:33.289Z BONSAI $0.0000007395 (thin AMM pool (1.18 XRP) (median of 9)) · XRP $0.9486
-2026-11-28T03:38:33.289Z note: the BONSAI price comes from a thin AMM pool (1.18 XRP) (median of 9); minting at the live market price anyway.
-2026-11-28T03:38:35.369Z replacing stale sell quote at 1.35677e+6
-2026-11-28T03:38:39.269Z posting sell quote 6.21 USDX @ 1.35634e+6
-2026-11-28T03:38:43.178Z buy quote skipped: not enough of the other asset
 --- run 46102246709 2026-11-28T03:59:45Z ---
 2026-11-28T03:39:26.604Z LIVE mode: transactions will be submitted
 2026-11-28T03:39:26.606Z receiver rphatRpwXcPAo7CVm46dC78JAQ6kLMqb2M · issuer key loaded, deposits will be processed · defending pools bonsai + xrp · DEX quotes in bonsai
@@ -822,7 +816,7 @@
 2026-11-28T06:22:51.392Z replacing stale sell quote at 1.34072e+6
 2026-11-28T06:23:01.051Z posting sell quote 6.21 USDX @ 1.34107e+6
 2026-11-28T06:23:07.173Z buy quote skipped: not enough of the other asset
---- run 46114844018 2026-11-28T06:39:04Z ---
+--- run 46114844018 2026-11-28T06:39:35Z ---
 2026-11-28T06:24:01.453Z LIVE mode: transactions will be submitted
 2026-11-28T06:24:01.454Z receiver rphatRpwXcPAo7CVm46dC78JAQ6kLMqb2M · issuer key loaded, deposits will be processed · defending pools bonsai + xrp · DEX quotes in bonsai
 2026-11-28T06:24:02.056Z BONSAI $0.0000007476 (thin AMM pool (1.19 XRP)) · XRP $0.9469
@@ -898,3 +892,9 @@
 2026-11-28T06:38:01.702Z replacing stale sell quote at 1.34057e+6
 2026-11-28T06:38:08.183Z posting sell quote 6.21 USDX @ 1.34079e+6
 2026-11-28T06:38:15.906Z buy quote skipped: not enough of the other asset
+2026-11-28T06:39:05.811Z BONSAI $0.0000007484 (thin AMM pool (1.19 XRP) (median of 9)) · XRP $0.9478
+2026-11-28T06:39:05.811Z note: the BONSAI price comes from a thin AMM pool (1.19 XRP) (median of 9); minting at the live market price anyway.
+2026-11-28T06:39:09.333Z replacing stale sell quote at 1.34079e+6
+2026-11-28T06:39:14.648Z posting sell quote 6.21 USDX @ 1.34022e+6
+2026-11-28T06:39:22.274Z buy quote skipped: not enough of the other asset
+2026-11-28T06:39:30.589Z bonsai/USDX pool holds only $0.3318: too small to defend, its price is meaningless and the keeper will not touch it. Re-seed it with BONSAI and USDX together.
