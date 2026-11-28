@@ -1,5 +1,3 @@
-2026-11-28T07:56:25.007Z posting sell quote 6.21 USDX @ 1.34654e+6
-2026-11-28T07:56:32.358Z buy quote skipped: not enough of the other asset
 2026-11-28T07:56:40.567Z bonsai/USDX pool holds only $0.3313: too small to defend, its price is meaningless and the keeper will not touch it. Re-seed it with BONSAI and USDX together.
 2026-11-28T07:57:13.950Z BONSAI $0.0000007448 (thin AMM pool (1.19 XRP) (median of 9)) · XRP $0.9434
 2026-11-28T07:57:13.950Z note: the BONSAI price comes from a thin AMM pool (1.19 XRP) (median of 9); minting at the live market price anyway.
@@ -889,7 +887,7 @@
 2026-11-28T13:14:22.106Z note: the BONSAI price comes from a thin AMM pool (1.19 XRP) (median of 11); minting at the live market price anyway.
 2026-11-28T13:15:22.451Z BONSAI $0.0000007474 (thin AMM pool (1.19 XRP) (median of 11)) · XRP $0.9385
 2026-11-28T13:15:22.451Z note: the BONSAI price comes from a thin AMM pool (1.19 XRP) (median of 11); minting at the live market price anyway.
---- run 46147084471 2026-11-28T13:18:53Z ---
+--- run 46147084471 2026-11-28T13:19:24Z ---
 2026-11-28T13:16:50.284Z LIVE mode: transactions will be submitted
 2026-11-28T13:16:50.285Z receiver rphatRpwXcPAo7CVm46dC78JAQ6kLMqb2M · issuer key loaded, deposits will be processed · defending pools bonsai + xrp · DEX quotes in bonsai
 2026-11-28T13:16:50.850Z BONSAI $0.0000007472 (thin AMM pool (1.19 XRP)) · XRP $0.9383
@@ -898,3 +896,5 @@
 2026-11-28T13:16:55.030Z DEX quotes skipped: receiver has 21.40 XRP, needs 21.40 XRP to hold another offer. Add XRP to the receiver.
 2026-11-28T13:17:53.470Z BONSAI $0.0000007466 (thin AMM pool (1.19 XRP) (median of 8)) · XRP $0.9375
 2026-11-28T13:17:53.470Z note: the BONSAI price comes from a thin AMM pool (1.19 XRP) (median of 8); minting at the live market price anyway.
+2026-11-28T13:18:54.747Z BONSAI $0.0000007466 (thin AMM pool (1.19 XRP) (median of 11)) · XRP $0.9375
+2026-11-28T13:18:54.748Z note: the BONSAI price comes from a thin AMM pool (1.19 XRP) (median of 11); minting at the live market price anyway.
