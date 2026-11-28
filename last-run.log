@@ -1,8 +1,3 @@
-2026-11-27T22:24:24.514Z posting sell quote 6.21 USDX @ 1.36563e+6
-2026-11-27T22:24:32.898Z buy quote skipped: not enough of the other asset
-2026-11-27T22:24:49.432Z bonsai/USDX pool holds only $0.3297: too small to defend, its price is meaningless and the keeper will not touch it. Re-seed it with BONSAI and USDX together.
-2026-11-27T22:25:22.688Z BONSAI $0.0000007340 (thin AMM pool (1.18 XRP) (median of 9)) · XRP $0.9415
-2026-11-27T22:25:22.688Z note: the BONSAI price comes from a thin AMM pool (1.18 XRP) (median of 9); minting at the live market price anyway.
 2026-11-27T22:25:25.996Z replacing stale sell quote at 1.36563e+6
 2026-11-27T22:25:31.026Z posting sell quote 6.21 USDX @ 1.36650e+6
 2026-11-27T22:25:38.697Z buy quote skipped: not enough of the other asset
@@ -837,7 +832,7 @@
 2026-11-28T01:14:32.833Z replacing stale sell quote at 1.35370e+6
 2026-11-28T01:14:39.250Z posting sell quote 6.21 USDX @ 1.35278e+6
 2026-11-28T01:14:46.877Z buy quote skipped: not enough of the other asset
---- run 46090424532 2026-11-28T01:27:29Z ---
+--- run 46090424532 2026-11-28T01:28:00Z ---
 2026-11-28T01:15:30.640Z LIVE mode: transactions will be submitted
 2026-11-28T01:15:30.641Z receiver rphatRpwXcPAo7CVm46dC78JAQ6kLMqb2M · issuer key loaded, deposits will be processed · defending pools bonsai + xrp · DEX quotes in bonsai
 2026-11-28T01:15:31.502Z BONSAI $0.0000007410 (thin AMM pool (1.18 XRP)) · XRP $0.9505
@@ -898,3 +893,8 @@
 2026-11-28T01:26:36.469Z replacing stale sell quote at 1.34972e+6
 2026-11-28T01:26:42.617Z posting sell quote 6.21 USDX @ 1.35079e+6
 2026-11-28T01:26:50.194Z buy quote skipped: not enough of the other asset
+2026-11-28T01:27:40.505Z BONSAI $0.0000007424 (thin AMM pool (1.18 XRP) (median of 9)) · XRP $0.9523
+2026-11-28T01:27:40.505Z note: the BONSAI price comes from a thin AMM pool (1.18 XRP) (median of 9); minting at the live market price anyway.
+2026-11-28T01:27:44.997Z replacing stale sell quote at 1.35079e+6
+2026-11-28T01:27:48.906Z posting sell quote 6.21 USDX @ 1.35107e+6
+2026-11-28T01:27:52.812Z buy quote skipped: not enough of the other asset
