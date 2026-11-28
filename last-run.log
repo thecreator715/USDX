@@ -1,7 +1,3 @@
-2026-11-28T05:32:06.136Z note: the BONSAI price comes from a thin AMM pool (1.19 XRP) (median of 9); minting at the live market price anyway.
-2026-11-28T05:32:09.334Z replacing stale sell quote at 1.34391e+6
-2026-11-28T05:32:14.628Z posting sell quote 6.21 USDX @ 1.34476e+6
-2026-11-28T05:32:23.398Z buy quote skipped: not enough of the other asset
 2026-11-28T05:32:31.688Z bonsai/USDX pool holds only $0.3313: too small to defend, its price is meaningless and the keeper will not touch it. Re-seed it with BONSAI and USDX together.
 2026-11-28T05:33:13.408Z BONSAI $0.0000007455 (thin AMM pool (1.19 XRP) (median of 9)) · XRP $0.9442
 2026-11-28T05:33:13.408Z note: the BONSAI price comes from a thin AMM pool (1.19 XRP) (median of 9); minting at the live market price anyway.
@@ -863,7 +859,7 @@
 2026-11-28T08:26:10.193Z replacing stale sell quote at 1.34983e+6
 2026-11-28T08:26:15.260Z posting sell quote 6.21 USDX @ 1.34998e+6
 2026-11-28T08:26:23.770Z buy quote skipped: not enough of the other asset
---- run 46124281036 2026-11-28T08:33:38Z ---
+--- run 46124281036 2026-11-28T08:34:09Z ---
 2026-11-28T08:27:24.726Z LIVE mode: transactions will be submitted
 2026-11-28T08:27:24.728Z receiver rphatRpwXcPAo7CVm46dC78JAQ6kLMqb2M · issuer key loaded, deposits will be processed · defending pools bonsai + xrp · DEX quotes in bonsai
 2026-11-28T08:27:25.282Z BONSAI $0.0000007432 (thin AMM pool (1.19 XRP)) · XRP $0.9413
@@ -898,3 +894,7 @@
 2026-11-28T08:32:56.839Z replacing stale sell quote at 1.35148e+6
 2026-11-28T08:33:04.470Z posting sell quote 6.21 USDX @ 1.35163e+6
 2026-11-28T08:33:12.129Z buy quote skipped: not enough of the other asset
+2026-11-28T08:33:53.821Z BONSAI $0.0000007421 (thin AMM pool (1.19 XRP) (median of 9)) · XRP $0.9398
+2026-11-28T08:33:53.822Z note: the BONSAI price comes from a thin AMM pool (1.19 XRP) (median of 9); minting at the live market price anyway.
+2026-11-28T08:33:56.776Z replacing stale sell quote at 1.35163e+6
+2026-11-28T08:34:02.111Z posting sell quote 6.21 USDX @ 1.35163e+6
